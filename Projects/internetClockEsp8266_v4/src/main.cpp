@@ -9,8 +9,12 @@ const char *password = "rgw7ucm3GT";
 #define brilhoMax 255
 #define brilhoMin 5
 
-#define luxMax 6
-#define luxMin 5
+#define luxMax 4
+#define luxMin 2
+
+#define delayClock 10//120
+#define delayTemp 5//30
+#define delayHumi 5//30
 
 #include <NTPClient.h>
 const long utcOffsetInSeconds =  -10800;
@@ -29,12 +33,73 @@ BH1750 lightMeter;
 
 long pixelHue;
 byte dezenaH ,unidadeH,dezenaM ,unidadeM;
+byte dezenaT, unidadeT, dezenaHu, unidadeHu;
 
+void getNTP();
+void piscaPonto();
+void getAHT10();
+void wifiConn();
+bool luxRead();
+void piscaPonto();
+void display();
+void limpaPixels();
+
+
+void display(byte mode){
+  byte displayConfig[12][7]= {{0,0,1,2,4,5,6},  //Digito 0
+                              {0,0,0,0,0,0,4},  //Digito 1
+                              {0,0,0,1,3,5,6},  //Digito 2
+                              {0,0,0,1,3,4,5},  //Digito 3
+                              {0,0,0,0,2,3,4},  //Digito 4
+                              {1,1,1,2,3,4,5},  //Digito 5
+                              {1,1,2,3,4,5,6},  //Digito 6
+                              {0,0,0,0,0,1,4},  //Digito 7
+                              {0,1,2,3,4,5,6},  //Digito 8
+                              {0,0,1,2,3,4,5},  //Digito 9
+                              {0,0,0,0,1,2,3},  //Grau
+                              {0,0,0,0,0,3,6}}; //Umidade;
+
+  switch(mode){
+    case 0:
+      for (int ID = 0; ID < 7; ID++){
+        pixels.setPixelColor((displayConfig[unidadeM][ID]), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS UNIDADE DE Minuto
+        pixels.setPixelColor((displayConfig[dezenaM][ID]+7), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS DEZENA DE Minuto
+        pixels.setPixelColor((displayConfig[unidadeH][ID]+15), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS UNIDADE DE Hora
+        if(dezenaH > 0){
+          pixels.setPixelColor((displayConfig[dezenaH][ID]+22), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS DEZENA DE Hora
+        }else{
+          pixels.setPixelColor((displayConfig[dezenaH][ID]+22), pixels.Color(0, 0, 0)); //LEDS DEZENA DE Hora
+        }
+        pixels.show();
+      }
+    break;
+    
+    case 1:
+      for (int ID = 0; ID < 7; ID++){
+        pixels.setPixelColor((displayConfig[10][ID]), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS grau
+        pixels.setPixelColor((displayConfig[unidadeT][ID]+7), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS DEZENA DE Minuto
+        pixels.setPixelColor((displayConfig[dezenaT][ID]+15), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS UNIDADE DE Hora
+        pixels.show();
+      }
+    break;
+
+    case 2:
+      for (int ID = 0; ID < 7; ID++){
+        pixels.setPixelColor((displayConfig[11][ID]), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS grau
+        pixels.setPixelColor((displayConfig[unidadeHu][ID]+7), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS DEZENA DE Minuto
+        pixels.setPixelColor((displayConfig[dezenaHu][ID]+15), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS UNIDADE DE Hora
+        pixels.show();
+      }
+    break;
+  }
+}
+//end display
+
+int newMinuto;  
 void getNTP(){
   timeClient.update();
   int Hora = (timeClient.getHours());
   int Minuto = (timeClient.getMinutes());
-  static int newMinuto;  
   delay(10);
 
   if(newMinuto != Minuto){
@@ -49,7 +114,12 @@ void getNTP(){
     unidadeM = dezenaM;
     dezenaM = dezenaM/10;
     unidadeM = unidadeM % 10;
-  }
+
+    limpaPixels();
+    delay(1);
+    pixels.clear();
+    //display(0);
+  }//if new minuto
 }
 //end get NTP
 
@@ -57,8 +127,21 @@ void getAHT10(){
   sensors_event_t humidity, temp;
   aht.getEvent(&humidity, &temp);
   delay(1);
-  Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.println(" degrees C");
-  Serial.print("Humidity: "); Serial.print(humidity.relative_humidity); Serial.println("% rH");
+
+  byte Temp = temp.temperature;
+  byte Humi = humidity.relative_humidity;
+  if(Temp > 60) Temp = 60;
+  if(Humi > 90) Humi = 90;
+
+  dezenaT = Temp;
+  unidadeT = dezenaT;
+  dezenaT = dezenaT/10;
+  unidadeT = unidadeT % 10;
+
+  dezenaHu = Humi;
+  unidadeHu = dezenaHu;
+  dezenaHu = dezenaHu/10;
+  unidadeHu = unidadeHu % 10;
 }
 //end get AHT
 
@@ -69,8 +152,8 @@ void wifiConn(){
     pixels.clear();
     delay(300);
 
-    for(byte i = millis()/1000; i>0;i--){
-      pixels.setPixelColor(i, pixels.Color(255, 0, 0));
+    for(byte i = 24; i>0;i--){
+      pixels.setPixelColor(i, pixels.Color(255, 0, 255));
       pixels.show();
       delay(100);
     }
@@ -79,60 +162,52 @@ void wifiConn(){
 }
 //end wifi
 
-void luxRead(){
+bool luxRead(){
   bool lux_flag;
   int lux;
   lux = lightMeter.readLightLevel();
   if(lux >= luxMax){
     pixels.setBrightness(brilhoMax);
-    //pixelHue = millis();
     lux_flag = true;
   }//END IF LUX MAX
 
   if(lux <= luxMin){
     pixels.setBrightness(brilhoMin);
-    //pixelHue = 0;
     lux_flag = false;
-  }//END IF LUX MIN
-  if(lux_flag){
-    pixelHue = millis();
-  }else{
-    pixelHue = 0;
-  }//END ELSE LUX FLAG
+  }
+  return lux_flag;
+
+  // if(lux_flag){
+  //   //pixelHue = millis();
+  //   return true;
+  // }else{
+  //   //pixelHue = 0;
+  //   return false;
+  // }//END ELSE LUX FLAG
 
 }
 //end lux read
 
-void display(){
-  byte displayConfig[12][7]= {{0,0,1,2,4,5,6},  //Digito 0
-                              {0,0,0,0,0,0,4},  //Digito 1
-                              {0,0,0,1,3,5,6},  //Digito 2
-                              {0,0,0,1,3,4,5},  //Digito 3
-                              {0,0,0,0,2,3,4},  //Digito 4
-                              {1,1,1,2,3,4,5},  //Digito 5
-                              {1,1,2,3,4,5,6},  //Digito 6
-                              {0,0,0,0,0,1,4},  //Digito 7
-                              {0,1,2,3,4,5,6},  //Digito 8
-                              {0,0,1,2,3,4,5},  //Digito 9
-                              {0,0,0,0,1,2,3},  //Grau
-                              {0,0,0,0,0,3,6}}; //Umidade;
-
-  for (int ID = 0; ID < 7; ID++){
-      pixels.setPixelColor((displayConfig[unidadeM][ID]), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS UNIDADE DE Minuto
-      pixels.setPixelColor((displayConfig[dezenaM][ID]+7), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS DEZENA DE Minuto
-      pixels.setPixelColor((displayConfig[unidadeH][ID]+15), pixels.gamma32(pixels.ColorHSV(pixelHue)));//LEDS UNIDADE DE Hora
-      if(dezenaH > 0){
-        pixels.setPixelColor((displayConfig[dezenaH][ID]+22), pixels.gamma32(pixels.ColorHSV(pixelHue))); //LEDS DEZENA DE Hora
-      }else{
-        pixels.setPixelColor((displayConfig[dezenaH][ID]+22), pixels.Color(0, 0, 0)); //LEDS DEZENA DE Hora
-      }
-      pixels.show();
-    }
+void piscaPonto(){
+  if((millis()/1000)%2){
+    pixels.setPixelColor(14, pixels.gamma32(pixels.ColorHSV(pixelHue)));
+    pixels.show();
+  }else{
+    pixels.setPixelColor(14, pixels.Color(0, 0, 0));
+    pixels.show();
+  }
 }
-//end display
+//end pisca pontos
+
+void limpaPixels(){
+  for (byte i=24; i>0; i--){
+    pixels.setPixelColor(i, pixels.Color(0, 0, 0));
+    pixels.show();
+    delay(30);
+  }
+}
 
 void setup() {
-  Serial.begin(115200);
   Wire.pins(0, 2);
   Wire.begin(0, 2);
   pixels.begin();
@@ -142,35 +217,100 @@ void setup() {
 
   wifiConn();//
 
-  if (! aht.begin()) {
+  if(! aht.begin()) {
     delay(100);
     setup();
+  }else{
+    for(byte i=0; i<24;i++){
+      pixels.setPixelColor(i, pixels.Color(0, 255, 0));
+      pixels.show();
+      delay(50);
+    }
   }
 
-  if (! lightMeter.begin()) {
+  if(! lightMeter.begin()) {
     delay(100);
     setup();
+  }else{
+    for(byte i=0; i<24;i++){
+      pixels.setPixelColor(i, pixels.Color(0, 0, 255));
+      pixels.show();
+      delay(50);
+    }
   }
   timeClient.begin();
-
-  
-
+  getAHT10();
+  getNTP();
 }
 //end setup
 
-void loop() {
-  static bool t;
-  if((millis()/1000)%2){
-    if(t){
-      t = false;
-      getNTP();
-      getAHT10();
-      luxRead();
-    }
-  }else{
-    t = true;
-  }
+bool Trigger, Lux;
+int modeDisplay;
+int IntervaloC, IntervaloT, IntervaloH;
 
-  delay(10);
+void loop() {
+  if(WiFi.status() == WL_CONNECTED) {
+
+    if(modeDisplay == 0){
+      if((millis()/1000)%2){
+        if(Trigger){
+          Trigger = false;
+
+          // if(IntervaloC <= delayClock){
+          //   IntervaloC++;
+          // }else{
+          //   IntervaloC = 0;
+          //   modeDisplay = 1;
+          // limpaPixels();
+          // delay(1);
+          // pixels.clear();
+          // }
+
+          Lux = luxRead();
+          getNTP();
+          getAHT10();
+        }
+      }else Trigger = true;
+
+      piscaPonto();//
+      if(Lux) pixelHue = millis();
+      else pixelHue = 0;
+      display(0);
+      delay(5);
+
+    }//mode display 0
+
+    if(modeDisplay == 1){
+      if((millis()/1000)%2){
+        if(Trigger){
+          Trigger = false;
+
+          if(IntervaloT <= delayTemp){
+            IntervaloT++;
+          }else{
+            IntervaloT = 0;
+            modeDisplay = 0;
+            limpaPixels();
+            delay(1);
+            pixels.clear();
+          }
+
+          Lux = luxRead();
+          //getNTP();
+          getAHT10();
+        }
+      }else Trigger = true;
+
+      if(Lux) pixelHue = millis();
+      else pixelHue = 0;
+      display(1);
+      delay(5);
+
+    }//mode display 1
+
+
+  }else setup();
+  //end while wifi
+  delay(1);
 }
 //end loop
