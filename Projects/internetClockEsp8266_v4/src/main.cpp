@@ -6,7 +6,7 @@
 const char *ssid     = "VIVOFIBRA-9501";
 const char *password = "rgw7ucm3GT";
 
-#define brilhoMax 255
+#define brilhoMax 230
 #define brilhoMin 5
 
 #define luxMax 4
@@ -249,10 +249,6 @@ void limpaPixels(){
 //end limpa pixels
 
 void setup() {
-
-  pinMode(1,OUTPUT);
-  digitalWrite(1,LOW);
-
   Wire.pins(0, 2);
   Wire.begin(0, 2);
   pixels.begin();
@@ -282,9 +278,9 @@ void setup() {
 void loop() {
 
   while(modeDisplay == 0){//display clock
-    if((millis()/1000)%60){//wifi check
-      if(WiFi.status() != WL_CONNECTED) wifiConn();
-    }
+    // if((millis()/1000)%60){//wifi check
+    //   if(WiFi.status() != WL_CONNECTED) wifiConn();
+    // }
     if((millis()/1000)%2){//second check
       if(Trigger){
         Trigger = false;
@@ -313,7 +309,7 @@ void loop() {
     
     piscaPonto();//
     display();
-    delay(5);
+    delay(100);
 
   }//mode display 0
 
@@ -342,10 +338,10 @@ void loop() {
     if(Lux) nextRainbowColor();//pixelHue = millis();
     // else pixelHue = 0;
     displayTemp();
-    delay(5);
+    delay(100);
 
   }//mode display 1
 
-  delay(5);
+  delay(100);
 }
 //end loop

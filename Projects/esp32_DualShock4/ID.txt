@@ -1,8 +1,7 @@
 48:fd:a3:19:75:67
 
-
-1C:66:6D:76:84:1B
-
 ps4-- "48:fd:a3:19:75:67" d8:68:a0:54:3f:b5
 
 ps3-- 08:a9:5a:0b:1f:10
+
+Name: Wireless Controller, Address: 1c:66:6d:76:84:1b, cod: 9480, rssi: -52
