@@ -165,6 +165,7 @@ void getAHT10(){
 void wifiConn(){
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  WiFi.setSleep(false);//
   while (WiFi.status() != WL_CONNECTED) {
     pixels.clear();
     delay(20);

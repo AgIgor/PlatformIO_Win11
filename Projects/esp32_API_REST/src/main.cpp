@@ -23,25 +23,44 @@ void setup() {
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi...");
+    Serial.print(".");
   }
 
-  Serial.println("Connected to WiFi");
-  // IPAddress ip(192, 168, 15, 123);
-  // IPAddress gateway(192, 168, 15, 1);
-  // IPAddress subnet(255, 255, 255, 0);
-  // IPAddress dns(8, 8, 8, 8);
-  // WiFi.config(ip, gateway, subnet, dns);
+  Serial.println("\nConnected to WiFi");
+  IPAddress ip(192, 168, 15, 123);
+  IPAddress gateway(192, 168, 15, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  IPAddress dns(8, 8, 8, 8);
+  WiFi.config(ip, gateway, subnet, dns);
 
   if(!MDNS.begin("esp32")) {
      Serial.println("Error starting mDNS");
      return;
-  }
+  } 
   
+  int chipId;
+  for(int i=0; i<17; i=i+8) {
+	  chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+	}
+	Serial.printf("ESP32 Chip model = %s Rev %d\n", ESP.getChipModel(), ESP.getChipRevision());
+	Serial.printf("This chip has %d cores\n", ESP.getChipCores());
+  Serial.print("Chip ID: "); Serial.println(chipId);
+  
+  Serial.println(WiFi.getHostname());
   Serial.println(WiFi.localIP());
+  Serial.println(WiFi.macAddress());
+  Serial.println(WiFi.getStatusBits());
+  Serial.println(WiFi.getTxPower());
+  delay(100);  
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send(200, "text/plain", "Hello, ESP32 API!");
+  
+    String m = "Hello, ESP32 API! \nTxPower: "; 
+    m += String(WiFi.getTxPower()); 
+    m += "\nStatusBits: ";
+    m += String(WiFi.getStatusBits());
+    
+    request->send(200, "text/plain", m);
   });
 
   server.on("/api/sensor", HTTP_GET, [](AsyncWebServerRequest *request){
