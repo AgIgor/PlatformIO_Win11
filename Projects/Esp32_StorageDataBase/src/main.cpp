@@ -21,6 +21,20 @@ bool taskCompleted = false;
 
 void setup(){
     Serial.begin(115200);
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS initialization failed!");
+        return;
+    }
+    Serial.println("SPIFFS mounted successfully!");
+    // File root = SPIFFS.open("/");
+    // File file = root.openNextFile();
+
+    // while (file) {
+    //     Serial.print("File Name: ");
+    //     Serial.print(file.name());Serial.println(file.size());
+    //     file = root.openNextFile();
+    // }
+    
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     Serial.print("Connecting to Wi-Fi");
     unsigned long ms = millis();
@@ -41,7 +55,7 @@ void setup(){
     Firebase.reconnectWiFi(true);
     
     config.fcs.upload_buffer_size = 512;
-    SD_Card_Mounting();
+    //SD_Card_Mounting();
 }
 
 void fcsUploadCallback(FCS_UploadStatusInfo info){
@@ -84,7 +98,62 @@ void loop(){
         fbdo.fileList()->items.clear();
         
         Serial.println("\nUpload file...\n");
-        if (!Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID, "data/media.mp4", mem_storage_type_sd, "media.mp4", "video/mp4", fcsUploadCallback))
-            Serial.println(fbdo.errorReason());
+        
+        File file = SPIFFS.open("/media.mp4", "r");
+        
+        if (!file) {
+            Serial.println("Failed to open file for reading");
+            return;
+        }      
+        
+        size_t fileSize = file.size();
+        uint8_t* buffer = (uint8_t*)malloc(fileSize);
+        
+        if (!buffer) {
+            Serial.println("Failed to allocate memory");
+            file.close();
+            return;
+        }
+        size_t bytesRead = file.read(buffer, fileSize);
+        Serial.println(bytesRead);
+        if (bytesRead != fileSize) {
+            Serial.println("Error reading file");
+        }else {
+            Serial.println(bytesRead);
+        }
+        file.close();
+        free(buffer);
+        
+        
+        
+        
+        // File root = SPIFFS.open("/");
+        // File file = root.openNextFile();
+        // while (file) {
+        //     size_t fileSize = file.size();
+        //     uint8_t* buffer = (uint8_t*)malloc(fileSize);
+        //     size_t bytesRead = file.read(buffer, fileSize);
+            
+        //     if (bytesRead != fileSize) {
+        //         Serial.println("Error reading file");
+        //       } else {
+        //         Serial.println(bytesRead);
+        //       }
+              
+        //     file.close();
+        //     free(buffer);
+            
+            // char formattedString[20];
+            // sprintf(formattedString, "File Name: %s Size: %s Bytes: %s", file.name(), file.size(), file.());
+            // Serial.println(formattedString);
+
+
+            //if (!Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID, "../data/media.mp4", mem_storage_type_flash, "media.mp4", "video/mp4", fcsUploadCallback))
+            // if (!Firebase.Storage.upload(&fbdo, STORAGE_BUCKET_ID, test_data /* byte array from ram or flash */, 256, "test.dat", "application/octet-stream", fcsUploadCallback ))
+            //     Serial.println(fbdo.errorReason());
+                
+            //file = root.openNextFile();
+        //} 
+        
     }
 }
