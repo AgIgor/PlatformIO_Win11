@@ -3,37 +3,30 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ESP8266mDNS.h>
-//#include <Servo.h>
-#include "root.h"
-#define pwmOut 2
-//const char* ssid = "VIVOFIBRA-9501";
-//const char* password = "rgw7ucm3GT";
-byte pwm;
+#include <FS.h>
+//#include "root.h"
 
+#define pwmOut 2
+
+byte pwm;
+WiFiManager wifiManager;
 ESP8266WebServer server(80);
-//Servo myservo;
 
 void handleRead();
 void handleRoot();
 void handleMove();
 void handleNotFound();
+void getImg();
 
 void setup() {
-  WiFiManager wifiManager;
-  //myservo.attach(2);  // Conecte o servo ao pino GPIO2 (D4
   pinMode(pwmOut, OUTPUT);
+  analogWriteFreq(5000);
   analogWrite(pwmOut, 0);
   delay(10);
   if (!wifiManager.autoConnect("ESP8266-Config")) {
     delay(3000);
     ESP.restart();
   }
-
-//  WiFi.begin(ssid, password);
-//  while (WiFi.status() != WL_CONNECTED) {
-//    delay(500);
-//    Serial.print(".");
-//  }
 
  IPAddress ip(192, 168, 15, 123);
  IPAddress gateway(192, 168, 15, 1);
@@ -44,8 +37,13 @@ void setup() {
   if (!MDNS.begin("esp8266")) {
     while (1) { delay(1000); }
   }
+  
+  if (!SPIFFS.begin()) {
+    while (1) { delay(1000); }
+  }
 
   server.on("/", HTTP_GET, handleRoot);
+  server.on("/fan", HTTP_GET, getImg);
   server.on("/move", HTTP_GET, handleMove);
   server.on("/read", HTTP_GET, handleRead);
   server.onNotFound(handleNotFound);
@@ -59,30 +57,50 @@ void loop() {
   delay(5);
 }
 
+String readFile(const char *path) {
+  File file = SPIFFS.open(path, "r");
+  if (!file) {
+    return "";
+  }
+
+  String content = "";
+  while (file.available()) {
+    content += (char)file.read();
+  }
+  file.close();
+  return content;
+}
+
+void getImg(){
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Max-Age", "10000");
+  server.send(200, "image/png", readFile("/fan.png"));
+}
+
 void handleRead() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Max-Age", "10000");
-  server.send(200, "text/plain", String(pwm));//String(myservo.read()));
+  server.send(200, "text/plain", String(pwm));
 }
 
 void handleRoot() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Max-Age", "10000");
-  server.send(200, "text/html", root);
+  server.send(200, "text/html", readFile("/ServoEsp01.html"));
+  // server.send(200, "text/html", root);
 }
 
 void handleMove() {
-  String angleValue = server.arg("angle");
-  int angle = angleValue.toInt();
-  if (angle >= 0 && angle <= 255) {
-    //myservo.write(angle);
-    pwm = angle;
+  int range = server.arg("range").toInt();
+  if (range >= 0 && range <= 255) {
+    pwm = range;
     analogWrite(pwmOut, pwm);
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.sendHeader("Access-Control-Max-Age", "10000");
-    server.send(200, "text/html", root);
+    server.send(200, "text/html", readFile("/ServoEsp01.html"));
+    // server.send(200, "text/html", root);
   } else {
-    server.send(400, "text/plain", "Ângulo inválido");
+    server.send(400, "text/plain", "Erro");
   }
 }
 

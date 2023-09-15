@@ -1,3 +1,4 @@
+const char root[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
     <title>Pwm 0</title>
+    <link id="icon" rel="icon" type="image/x-icon" href="/fan.png"></link>    
     <style>
     
         body{
@@ -17,7 +19,7 @@
         h1{
             text-align: center;
         }
-        
+          
         .range-container {
             width: 320px;
             margin: 0px auto;
@@ -93,14 +95,14 @@
     
     <div class="range-container">
         <form action='/move' method='get'>
-            <label for="pi_input"><h1>PWM: <output id="value"></output></h1></label>
+            <label for="pi_input"><h1>Cooler: <output id="value">%</output></h1></label>
             <input id="pi_input" type="range" min="0" max="255" step="1" />
         </form>
     </div>
     
 </body>
 <script>
-    
+
     const rgbTitle = document.querySelector("#rgbCode");
     const colorPicker = new iro.ColorPicker('#picker');
     colorPicker.on('color:change', function(color) {
@@ -121,8 +123,10 @@
                                     //.then(result => console.log(result))
                                   .then(result =>{
                                         input.value = result;
-                                        value.textContent = result;
-                                        title.textContent = `Pwm ${value.textContent}`;
+                                        const percent = parseInt((parseInt(result) - 0)*(100 - 0)/(255 - 0))
+                                        //(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+                                        title.textContent = `Pwm ${percent}%`;
+                                        value.textContent = `${percent}%`;
                                     })
                                   .catch(error => console.log('error', error));  
         }
@@ -135,14 +139,19 @@
     
     input.addEventListener("input", (event) => {
         value.textContent = event.target.value;
-        title.textContent = `Pwm ${value.textContent}`;
+        const percent = parseInt((parseInt(event.target.value) - 0)*(100 - 0)/(255 - 0))
+        //(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+        title.textContent = `Pwm ${percent}%`;
+        value.textContent = `${percent}%`;
         input.style.setProperty("--thumb-rotate", `${(input.value/200) * 360}deg`);
-        sendPos();
+        sendPos(event.target.value);
     });
         
-    const sendPos = async()=>{
+    const sendPos = async(e)=>{
+        console.log(e)
+    
         try{
-            const response = await fetch(`http://esp8266.local/move?angle=${value.textContent}`);
+            const response = await fetch(`http://esp8266.local/move?angle=${e}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -154,9 +163,10 @@
         }
     }
     
-    // setInterval(async() => {
-    //    await read();
-    // }, 2000);
+    setInterval(async() => {
+       await read();
+    }, 2000);
     
 </script>
 </html>
+)=====";
