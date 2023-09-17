@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
     <title>Pwm 0</title>
-    <link id="icon" rel="icon" type="image/x-icon" href="/fan"></link>    
+    <link id="icon" rel="icon" type="image/x-icon" href="http://esp8266.local/fan"></link>    
     <style>
     
         body{
@@ -50,7 +50,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("/fan");
+            background-image: url("http://esp8266.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
              
@@ -65,7 +65,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("/fan");
+            background-image: url("http://esp8266.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
         }
@@ -136,6 +136,10 @@
     
     read()
     
+    let interval = setInterval(async() => {
+       await read();
+    }, 1000);
+    
     input.addEventListener("input", (event) => {
         value.textContent = event.target.value;
         const percent = parseInt((parseInt(event.target.value) - 0)*(100 - 0)/(255 - 0))
@@ -143,28 +147,41 @@
         title.textContent = `Pwm ${percent}%`;
         value.textContent = `${percent}%`;
         input.style.setProperty("--thumb-rotate", `${(input.value/200) * 360}deg`);
-        sendPos(event.target.value);
     });
-        
-    const sendPos = async(e)=>{
-        // console.log(e)
     
+    input.ontouchstart = (e) => {
+        clearInterval(interval);
+    };
+    
+    input.ontouchend = (event) => {
+        sendPos(event.target.value);
+        interval = setInterval(async() => {
+           await read();
+        }, 1000);
+    };
+    
+    input.onmousedown = (e)=>{
+        clearInterval(interval);
+    };
+    
+    input.onmouseup = (e)=>{
+        sendPos(event.target.value);
+        interval = setInterval(async() => {
+           await read();
+        }, 1000);
+    };
+    
+    const sendPos = async(e)=>{
         try{
             const response = await fetch(`http://esp8266.local/move?range=${e}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            // const data = await response;
-            // console.log(data); // Do something with the data
         }
         catch (error) {
             console.error('Error:', error);
         }
     }
-    
-    setInterval(async() => {
-       await read();
-    }, 500);
     
 </script>
 </html>

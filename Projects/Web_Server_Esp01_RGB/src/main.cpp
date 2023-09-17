@@ -19,6 +19,8 @@ void handleNotFound();
 void getImg();
 
 void setup() {
+  Serial.begin(115200);
+
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
   analogWrite(pwmOut, 0);
@@ -54,6 +56,7 @@ void setup() {
 void loop() {
   MDNS.update();
   server.handleClient();
+  //Serial.println(server.addHandler());
   delay(5);
 }
 
