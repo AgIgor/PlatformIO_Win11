@@ -3,7 +3,6 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ESP8266mDNS.h>
-#include <EEPROM.h>
 #include <FS.h>
 // #include <WiFiClient.h>
 //#include "root.h"
@@ -11,7 +10,7 @@
 #define pwmOut 2
 #define addrPwm 155
 
-int pwm;
+byte pwm;
 WiFiManager wifiManager;
 ESP8266WebServer server(80);
 
@@ -20,6 +19,8 @@ void handleRoot();
 void handleMove();
 void handleNotFound();
 void getImg();
+// void saveFile(const char *path);
+String readFile(const char *path);
 
 // void handleSSEdata();
 // void serverSentEventHeader(WiFiClient client);
@@ -27,7 +28,6 @@ void getImg();
 
 void setup() {
   Serial.begin(115200);
-  EEPROM.begin(512);
   
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
@@ -43,17 +43,11 @@ void setup() {
  IPAddress dns(8, 8, 8, 8);
  WiFi.config(ip, gateway, subnet, dns);
 
-  if (!MDNS.begin("esp8266")) {
-    while (1) { delay(1000); }
-  }
-  
-  if (!SPIFFS.begin()) {
-    while (1) { delay(1000); }
-  }
+  if (!MDNS.begin("esp8266")) while (1) { delay(1000);}
+  if (!SPIFFS.begin()) while (1) { delay(1000);}
   
   delay(50);
-  pwm = EEPROM.read(addrPwm);
-  Serial.println(pwm);
+  Serial.println(pwm);   
   analogWrite(pwmOut, pwm);
 
   // server.on("/ssedata", handleSSEdata);
@@ -65,13 +59,26 @@ void setup() {
   server.onNotFound(handleNotFound);
   server.begin();
   MDNS.addService("http", "tcp", 80);
-}
   
+  //pwm = readFile("/pwm.txt");
+}
+
 void loop() {
   MDNS.update();
   server.handleClient();
   delay(5);
 }
+
+// void saveFile(const char *path, byte pwm){
+//   File file = SPIFFS.open(path, "w");
+//   if (!file) {
+//     return "";
+//   }
+//   else{
+//   file.print(pwm);
+//   file.close();
+//   }
+// }
 
 String readFile(const char *path) {
   File file = SPIFFS.open(path, "r");
@@ -112,8 +119,7 @@ void handleMove() {
   if (range >= 0 && range <= 255) {
     pwm = range;
     analogWrite(pwmOut, pwm);
-    EEPROM.write(addrPwm, pwm);
-    Serial.println(EEPROM.read(addrPwm));
+    //saveFile("pwm.txt", pwm);
     
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.sendHeader("Access-Control-Max-Age", "10000");
