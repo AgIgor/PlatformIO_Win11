@@ -3,12 +3,9 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ESP8266mDNS.h>
-#include <FS.h>
-// #include <WiFiClient.h>
-//#include "root.h"
+#include "FS.h"
 
 #define pwmOut 2
-#define addrPwm 155
 
 byte pwm;
 WiFiManager wifiManager;
@@ -19,18 +16,29 @@ void handleRoot();
 void handleMove();
 void handleNotFound();
 void getImg();
-// void saveFile(const char *path);
-String readFile(const char *path);
+String readFile(fs::FS &fs, const char * path);
 
-// void handleSSEdata();
-// void serverSentEventHeader(WiFiClient client);
-// void serverSentEvent(WiFiClient client);
+String readFile(fs::FS &fs, const char * path){
+  Serial.printf("Reading file: %s\n", path);
+
+  File file = fs.open(path, "r");
+  if(!file || file.isDirectory()){
+      return "";
+  }
+  String content = "";
+  while (file.available()) {
+    content += (char)file.read();
+  }
+  file.close();
+  return content;
+}
 
 void setup() {
   Serial.begin(115200);
   
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
+  analogWrite(pwmOut, pwm);
   delay(10);
   if (!wifiManager.autoConnect("ESP8266-Config")) {
     delay(3000);
@@ -44,13 +52,7 @@ void setup() {
  WiFi.config(ip, gateway, subnet, dns);
 
   if (!MDNS.begin("esp8266")) while (1) { delay(1000);}
-  if (!SPIFFS.begin()) while (1) { delay(1000);}
-  
-  delay(50);
-  Serial.println(pwm);   
-  analogWrite(pwmOut, pwm);
-
-  // server.on("/ssedata", handleSSEdata);
+  if(!SPIFFS.begin()) while (1) { delay(1000);}
   
   server.on("/", HTTP_GET, handleRoot);
   server.on("/fan", HTTP_GET, getImg);
@@ -60,7 +62,6 @@ void setup() {
   server.begin();
   MDNS.addService("http", "tcp", 80);
   
-  //pwm = readFile("/pwm.txt");
 }
 
 void loop() {
@@ -69,35 +70,10 @@ void loop() {
   delay(5);
 }
 
-// void saveFile(const char *path, byte pwm){
-//   File file = SPIFFS.open(path, "w");
-//   if (!file) {
-//     return "";
-//   }
-//   else{
-//   file.print(pwm);
-//   file.close();
-//   }
-// }
-
-String readFile(const char *path) {
-  File file = SPIFFS.open(path, "r");
-  if (!file) {
-    return "";
-  }
-
-  String content = "";
-  while (file.available()) {
-    content += (char)file.read();
-  }
-  file.close();
-  return content;
-}
-
 void getImg(){
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Max-Age", "10000");
-  server.send(200, "image/png", readFile("/fan.png"));
+  server.send(200, "image/png", readFile(SPIFFS, "/fan.png"));
 }
 
 void handleRead() {
@@ -109,9 +85,7 @@ void handleRead() {
 void handleRoot() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.sendHeader("Access-Control-Max-Age", "10000");
-  // server.sendHeader("Cache-Control", "no-cache");
-  server.send(200, "text/html", readFile("/ServoEsp01.html"));
-  // server.send(200, "text/html", root);
+  server.send(200, "text/html", readFile(SPIFFS, "/ServoEsp01.html"));
 }
 
 void handleMove() {
@@ -119,12 +93,9 @@ void handleMove() {
   if (range >= 0 && range <= 255) {
     pwm = range;
     analogWrite(pwmOut, pwm);
-    //saveFile("pwm.txt", pwm);
-    
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.sendHeader("Access-Control-Max-Age", "10000");
-    server.send(200, "text/html", readFile("/ServoEsp01.html"));
-    // server.send(200, "text/html", root);
+    server.send(200, "text/html", readFile(SPIFFS, "/ServoEsp01.html"));
   } else {
     server.send(400, "text/plain", "Erro");
   }
