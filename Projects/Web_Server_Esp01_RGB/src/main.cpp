@@ -11,12 +11,23 @@ byte pwm;
 WiFiManager wifiManager;
 ESP8266WebServer server(80);
 
+String getTemp(){
+  long Resistance;
+  double Temp;
+  int RawADC = analogRead(A0);
+  Resistance=((10240000/RawADC) - 10000);
+  Temp = log(Resistance);
+  Temp = 1 / (0.001129148 + (0.000234125 * Temp) + (0.0000000876741 * Temp * Temp * Temp));
+  Temp = Temp - 273.15;
+  return String(Temp);
+}
+
 void handleRead();
 void handleRoot();
 void handleMove();
 void handleNotFound();
 void getImg();
-String readFile(fs::FS &fs, const char * path);
+void handleAnalog();
 
 String readFile(fs::FS &fs, const char * path){
   Serial.printf("Reading file: %s\n", path);
@@ -35,6 +46,8 @@ String readFile(fs::FS &fs, const char * path){
 
 void setup() {
   Serial.begin(115200);
+  
+  pinMode(A0, INPUT);
   
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
@@ -55,6 +68,7 @@ void setup() {
   if(!SPIFFS.begin()) while (1) { delay(1000);}
   
   server.on("/", HTTP_GET, handleRoot);
+  server.on("/analog", HTTP_GET, handleAnalog);
   server.on("/fan", HTTP_GET, getImg);
   server.on("/move", HTTP_GET, handleMove);
   server.on("/read", HTTP_GET, handleRead);
@@ -93,6 +107,7 @@ void handleMove() {
   if (range >= 0 && range <= 255) {
     pwm = range;
     analogWrite(pwmOut, pwm);
+    Serial.println(pwm);
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.sendHeader("Access-Control-Max-Age", "10000");
     server.send(200, "text/html", readFile(SPIFFS, "/ServoEsp01.html"));
@@ -107,50 +122,9 @@ void handleNotFound() {
   server.send(404, "text/plain", "Not Found");
 }
 
-/*
-void handleSSEdata(){
-  WiFiClient client = server.client();
-  
-  if (client) {
-    Serial.println("new client");
-    serverSentEventHeader(client);
-    if (client.connected()) {
-      serverSentEvent(client);
-      delay(1000); // round about 60 messages per second
-    }
-    else{
-
-      // give the web browser time to receive the data
-      delay(1);
-      // close the connection:
-      client.stop();
-      Serial.println("client disconnected");
-    }
-  }
+void handleAnalog() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Max-Age", "10000");
+  server.send(200, "text/plain", String(analogRead(A0)));
+  Serial.println(getTemp());
 }
-
-void serverSentEventHeader(WiFiClient client) {
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/event-stream;charset=UTF-8");
-  client.println("Connection: close");  // the connection will be closed after completion of the response
-  client.println("Access-Control-Allow-Origin: *");  // allow any connection. We don't want Arduino to host all of the website ;-)
-  client.println("Cache-Control: no-cache");  // refresh the page automatically every 5 sec
-  client.println();
-  client.flush();
-}
-
-void serverSentEvent(WiFiClient client) {
-  client.println("event: esp8266"); // this name could be anything, really.
-  client.print("data: {");
-  client.print("\"A0\": ");
-  client.print(millis());
-  client.print(", \"in5\": ");
-  client.print(123);
-  client.print(", \"in6\": ");
-  client.print(456);
-  client.print(", \"text\": ESP8266");    // added just to show how you can add your own parameters
-  client.println("}");
-  client.println();
-  client.flush();
-}
-*/
