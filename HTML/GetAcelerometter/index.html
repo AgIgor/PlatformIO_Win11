@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exemplo de Uso do Acelerômetro</title>
+</head>
+<body>
+    <h1>Leitura do Acelerômetro</h1>
+    <p id="acceleration">Aceleração: </p>
+
+    <script>
+        const acl = new                     
+		Accelerometer({ frequency: 10 });
+		acl.addEventListener("reading", () => {
+		  console.log(`Acceleration along the X-axis ${acl.x}`);
+		  console.log(`Acceleration along the Y-axis ${acl.y}`);
+		  console.log(`Acceleration along the Z-axis ${acl.z}`);
+		});
+		acl.start();
+
+
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', function(event) {
+                var acceleration = event.acceleration;
+                var accelerationIncludingGravity = event.accelerationIncludingGravity;
+
+                var output = "Aceleração X: " + acl.x + "<br>" +
+                             "Aceleração Y: " + acl.y + "<br>" +
+                             "Aceleração Z: " + acl.z + "<br><br>" +
+                             "Aceleração com Gravidade X: " + accelerationIncludingGravity.x + "<br>" +
+                             "Aceleração com Gravidade Y: " + accelerationIncludingGravity.y + "<br>" +
+                             "Aceleração com Gravidade Z: " + accelerationIncludingGravity.z;
+
+                document.getElementById("acceleration").innerHTML = output;
+            });
+        } else {
+            document.getElementById("acceleration").innerHTML = "Seu dispositivo não suporta o Acelerômetro.";
+        }
+    </script>
+</body>
+</html>

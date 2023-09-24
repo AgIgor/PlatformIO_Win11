@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Exemplo de Uso do Acelerômetro</title>
+</head>
+<body>
+    <h1>Leitura do Acelerômetro</h1>
+    <p id="acceleration">Aceleração: </p>
+
+    <script>
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', function(event) {
+                var acceleration = event.acceleration;
+                var accelerationIncludingGravity = event.accelerationIncludingGravity;
+
+                var output = "Aceleração X: " + acceleration.x + "<br>" +
+                             "Aceleração Y: " + acceleration.y + "<br>" +
+                             "Aceleração Z: " + acceleration.z + "<br><br>" +
+                             "Aceleração com Gravidade X: " + accelerationIncludingGravity.x + "<br>" +
+                             "Aceleração com Gravidade Y: " + accelerationIncludingGravity.y + "<br>" +
+                             "Aceleração com Gravidade Z: " + accelerationIncludingGravity.z;
+
+                document.getElementById("acceleration").innerHTML = output;
+            });
+        } else {
+            document.getElementById("acceleration").innerHTML = "Seu dispositivo não suporta o Acelerômetro.";
+        }
+    </script>
+</body>
+</html>

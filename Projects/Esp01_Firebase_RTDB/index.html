@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+    
+</head>
+<body>
+
+    <div class="container">
+        <p id="data"></p>
+        <hr>
+        <p id="userAtual">Entre!</p>
+        <hr>
+
+        <input class="" id="inNome" type="text" placeholder="Nome"></input>
+        <input id="inEmail" type="email" placeholder="Email"></input>
+        <input id="inPass" type="password" placeholder="Pass"></input>
+        <hr>
+        <button class="btn btn-success mb-2" onclick="" >Entrar</button>
+        <button class="btn btn-danger mb-2" onclick="" >Sair</button>
+        <button class="btn btn-primary mb-2" onclick="" >Criar</button>
+        <button class="btn btn-warning mb-2" onclick="" >Atualizar</button>
+        <button class="btn btn-danger mb-2" onclick="" >Remover</button>
+        <button class="btn btn-success mb-2" onclick="" >Recuperar</button>
+        <button class="btn btn-info mb-2" onclick="" >User Atual</button>
+    </div>
+
+    <hr>
+
+    <div class="container">
+        <p id="saidaAuth"></p>
+    </div>
+    <div class="container">
+        <button id="on" class="btn btn-success mb-2">On</button>
+        <button id="off" class="btn btn-danger mb-2">Off</button>
+    </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-auth-compat.js"></script>
+
+<script >
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNzcnbwIxFIT4zQHpCTWNVEjMlcOyedAE",
+      authDomain: "teste-b1ceb.firebaseapp.com",
+      databaseURL: "https://teste-b1ceb-default-rtdb.firebaseio.com",
+      projectId: "teste-b1ceb",
+      storageBucket: "teste-b1ceb.appspot.com",
+      messagingSenderId: "902399064152",
+      appId: "1:902399064152:web:7a5f223380ba6a2b02f22d"
+    };
+    
+    firebase.initializeApp(firebaseConfig)
+    const dbBase = firebase.database()
+     
+    firebase.auth().signInWithEmailAndPassword('agigor@outlook.com', '1207rogi').then((e)=>{
+        console.log(e)
+      })
+      .catch(function(error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log(errorCode);
+        console.log(errorMessage);
+      }); 
+
+    
+
+    
+    const btnOn = document.querySelector("#on");
+    const btnOff = document.querySelector("#off");
+    
+    btnOn.onclick = ()=>{
+        ledToggle(true)
+    }
+    btnOff.onclick = ()=>{
+        ledToggle(false)
+    }
+    
+    function ledToggle(flag){
+        dbBase.ref("/test/stream/data/ledPin2").set(flag)
+    //     dbBase.ref("/test/stream/data/ledPin2").update({
+    //         ledPin2: flag
+    //   })
+      .then(() => {
+        console.log("Salvo!");
+      })
+      .catch((error) => {
+        console.error("Error: ", error);
+      });
+  }
+    
+    dbBase.ref("/test/stream/data/ledPin2").on('value', (snapshot) => {
+        const data = snapshot.val()
+        //console.log(data)
+        if(data){
+            btnOn.setAttribute('style', 'background-color:#ccc;');
+            btnOn.setAttribute('disabled', 'disabled');
+            btnOff.removeAttribute('disabled');
+            btnOff.setAttribute('style', 'background-color:red;');
+        }else{
+            btnOff.setAttribute('style', 'background-color:#ccc;');
+            btnOff.setAttribute('disabled', 'disabled');
+            btnOn.removeAttribute('disabled');
+            btnOn.setAttribute('style', 'background-color:green;');
+            
+        }
+  });
+
+</script>
+</html>
