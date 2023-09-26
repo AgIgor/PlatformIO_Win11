@@ -93,7 +93,7 @@
             <h3>Html</h3>
         </div>
         
-        <!-- <div class="box" id="range3" style="--i:50%;--clr:#0de5a8">
+        <div class="box" id="range3" style="--i:50%;--clr:#0de5a8">
             <div class="circle">
                 <h2>58<small>%</small></h2>
             </div>
@@ -105,33 +105,61 @@
                 <h2>30<small>%</small></h2>
             </div>
             <h3>Html</h3>
-        </div> -->
+        </div>
     </div>
     
     <script>
     
+        
         let val = 0;
         let flag = true;
+        setInterval(() =>{
+        
+            if (flag) val < 100 ? val++ : flag = false; 
+            else val > 0 ? val-- : flag = true;
+            
+            range1.childNodes[1].childNodes[1].innerHTML = `${val}<small>%</small>`; 
+            range1.style.cssText = `--i: ${val}%; --clr: #fd0100;`           
+            
+        },20);
+        
+        let val2 = 0;
+        let flag2 = true;
         
         setInterval(() =>{
         
-            if (flag){
-                val < 100 ? val++ : flag = false;
-                // console.log(val);
-            }else{
-                val > 0 ? val-- : flag = true;
-                // console.log(val);
-                
-            }
-            range1.childNodes[1].childNodes[1].innerHTML = `${val}<small>%</small>`;
-            range2.childNodes[1].childNodes[1].innerHTML = `${val}<small>%</small>`;
-            range1.style.cssText = `--i: ${val}%; --clr: #fd0100;`
-            range2.style.cssText = `--i: ${val}%; --clr:#ffbc11;`
-            
-            
-        },50);
+            if (flag2) val2 < 100 ? val2++ : flag2 = false;
+            else val2 > 0 ? val2-- : flag2 = true;    
         
-        console.log(range1.childNodes[1].childNodes[1].innerHTML)
+            range2.childNodes[1].childNodes[1].innerHTML = `${val2}<small>%</small>`;
+            range2.style.cssText = `--i: ${val2}%; --clr:#ffbc11;`
+        },100);
+        
+        let val3 = 0;
+        let flag3 = true;
+        
+        setInterval(() =>{
+        
+            if (flag3) val3 < 100 ? val3++ : flag3 = false;
+            else val3 > 0 ? val3-- : flag3 = true;    
+        
+            range3.childNodes[1].childNodes[1].innerHTML = `${val3}<small>%</small>`;
+            range3.style.cssText = `--i: ${val3}%; --clr:#0de5a8;`
+        },200);
+        
+        let val4 = 0;
+        let flag4 = true;
+        
+        setInterval(() =>{
+        
+            if (flag4) val4 < 100 ? val4++ : flag43 = false;
+            else val4 > 0 ? val4-- : flag4 = true;    
+        
+            range4.childNodes[1].childNodes[1].innerHTML = `${val4}<small>%</small>`;
+            range4.style.cssText = `--i: ${val4}%; --clr:#0de528;`
+        },300);
+        
+        //console.log(range1.childNodes[1].childNodes[1].innerHTML)
 
 
         
