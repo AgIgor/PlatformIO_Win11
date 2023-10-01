@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+
+:root {
+  color-scheme: dark; 
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+body{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+#box{
+  background-color: goldenrod;
+  width: 200px;
+  height: 350px;
+  border-radius: 25px;
+  border-top: rgb(230, 73, 73) 7px solid;
+  animation-duration: 1s all linear;
+}
+div{
+  margin: 50px;
+}
