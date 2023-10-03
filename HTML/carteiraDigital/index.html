@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Carteira Digital</title>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>ID#12387</h1>
+    <p>user#12387#igor</p>
+
+    <label class="ui-switch">
+      <input type="checkbox" onclick="toggleTheme(this)" id="switchTheme">
+      <div class="slider">
+        <div class="circle"></div>
+      </div>
+    </label>
+
+
+  </header>
+  <main>
+
+    <div class="card">
+      <div class="tools">
+        <div class="circle">
+          <span class="red box"></span>
+        </div>
+        <div class="circle">
+          <span class="yellow box"></span>
+        </div>
+        <div class="circle">
+          <span class="green box"></span>
+        </div>
+      </div>
+      <div class="card__content">
+        <div class="device">
+            <h2>Luz da Sala</h2>
+            <label class="switch">
+              <input type="checkbox" id="1" onclick="toggleBtn(this)">
+              <span class="slider"></span>
+            </label>
+
+            <h6>Ultima ação:</h6>
+            <h6 id="logOut">Seg, 2 out 2023, 21:08:44</h6>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tools">
+        <div class="circle">
+          <span class="red box"></span>
+        </div>
+        <div class="circle">
+          <span class="yellow box"></span>
+        </div>
+        <div class="circle">
+          <span class="green box"></span>
+        </div>
+      </div>
+      <div class="card__content">
+        <div class="device">
+            <h2>Luz do Quarto</h2>
+            <label class="switch">
+              <input type="checkbox" id="2" onclick="toggleBtn(this)">
+              <span class="slider"></span>
+            </label>
+            <h6>Ultima ação:</h6>
+            <h6>Seg, 2 out 2023, 21:08:44</h6>
+  
+        </div>
+      </div>
+    </div>
+    
+  </main>
+  <footer>
+
+  </footer>
+  
+</body>
+<script src="index.js"></script>
+</html>
