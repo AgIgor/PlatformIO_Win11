@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+
+:root{
+  color-scheme: dark;
+
+  --theme-color-dark: #212121;
+  --theme-color-light: #bebebe25;
+  
+  --color1: #363447;
+  --color2: #4A4556;
+  --color3: #D9D9D9;
+  
+  --color4: linear-gradient(122deg, #DF9780 0%, #A66DE9 100%);
+  --color5: linear-gradient(180deg, #90F7EC 0%, #32CCBC 100%);
+  --color6: linear-gradient(180deg, #81FBB8 0%, #28C76F 100%);
+  --color7: linear-gradient(122deg, #CE9FFC 0%, #7367F0 100%);
+  --color8: linear-gradient(122deg, #DF9780 0%, #A66DE9 100%);
+  --color9: linear-gradient(180deg, #EA5455 0%, #FEB692 100%);
+  
+  --color10: #1E1E1E;
+  --color11: #292738;
+  --color12: #81FBB8;
+
+
+  --main-color: rgb(255, 255, 255);
+  --submain-color: #78858F;
+  --bg-color: #292738;
+  
+}
+body{
+
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  /* justify-content: center; */
+  align-items: center;
+  font-family: 'Poppins',sans-serif;
+  background-color: var(--color11);
+
+  padding: 20px;
+
+}
+.componente{
+  /* border: 1px solid red; */
+  background-color: var(--color1);
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px;
+  min-height: 150px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.componente small{
+  margin-top: 15px;
+}
+
+.componente button{
+  width: 100px;
+  height: 50px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+
+
+
+
+
+
+
+
+
+/* The switch - the box around the slider */
+.componente .switch {
+ font-size: 17px;
+ position: relative;
+ display: inline-block;
+ width: 3.5em;
+ height: 1.5em;
+}
+/* Hide default HTML checkbox */
+.componente .switch  input {
+ opacity: 0;
+ width: 0;
+ height: 0;
+}
+/* The slider */
+.componente .switch .slider {
+ position: absolute;
+ cursor: pointer;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background-color: #ccc;
+ transition: .4s;
+ border-radius: 1rem 0rem 1rem;
+}
+
+.slider:before {
+ position: absolute;
+ content: "";
+ height: 1.5em;
+ width: 1.4em;
+ left: 0em;
+ bottom: 0em;
+ background-color: white;
+ transition: .4s;
+ border-radius: 1rem 0rem 1rem;
+ border: 3px solid white;
+}
+
+input:checked + .slider {
+ background-color: #72eb67;
+}
+
+input:focus + .slider {
+ box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+ transform: translateX(2.2em);
+ background-color: green;
+ box-shadow: 0px 0px 40px 5px #72eb67;
+ border: 3px solid white;
+}
+
+input:checked + .slider::after {
+ content: "|";
+ color: white;
+ position: absolute;
+ right: 0.3rem;
+ transform: rotate(45deg);
+}
+
+
+
+
+
+
+
+
+.group {
+ position: relative;
+ margin-bottom: 25PX;
+}
+
+.input {
+ font-size: 16px;
+ padding: 10px 10px 10px 5px;
+ display: block;
+ width: 200px;
+ border: none;
+ border-bottom: 1px solid #515151;
+ background: transparent;
+}
+
+.input:focus {
+ outline: none;
+}
+
+#label {
+ color: #999;
+ font-size: 18px;
+ font-weight: normal;
+ position: absolute;
+ pointer-events: none;
+ left: 5px;
+ top: 10px;
+ transition: 0.2s ease all;
+ -moz-transition: 0.2s ease all;
+ -webkit-transition: 0.2s ease all;
+}
+
+.input:focus ~ #label, .input:valid ~ #label {
+ top: -20px;
+ font-size: 14px;
+ color: #5264AE;
+}
+
+.bar {
+ position: relative;
+ display: block;
+ width: 200px;
+}
+
+.bar:before, .bar:after {
+ content: '';
+ height: 2px;
+ width: 0;
+ bottom: 1px;
+ position: absolute;
+ background: #5264AE;
+ transition: 0.2s ease all;
+ -moz-transition: 0.2s ease all;
+ -webkit-transition: 0.2s ease all;
+}
+
+.bar:before {
+ left: 50%;
+}
+
+.bar:after {
+ right: 50%;
+}
+
+.input:focus ~ .bar:before, .input:focus ~ .bar:after {
+ width: 50%;
+}
+
+.highlight {
+ position: absolute;
+ height: 60%;
+ width: 100px;
+ top: 25%;
+ left: 0;
+ pointer-events: none;
+ opacity: 0.5;
+}
+
+.input:focus ~ .highlight {
+ animation: inputHighlighter 0.3s ease;
+}
+
+@keyframes inputHighlighter {
+ from {
+  background: #5264AE;
+ }
+
+ to {
+  width: 0;
+  background: transparent;
+ }
+}

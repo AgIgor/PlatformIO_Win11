@@ -5,6 +5,22 @@
 
   --theme-color-dark: #212121;
   --theme-color-light: #bebebe25;
+  
+  --color1: #363447;
+  --color2: #4A4556;
+  --color3: #D9D9D9;
+  
+  --color4: linear-gradient(122deg, #DF9780 0%, #A66DE9 100%);
+  --color5: linear-gradient(180deg, #90F7EC 0%, #32CCBC 100%);
+  --color6: linear-gradient(180deg, #81FBB8 0%, #28C76F 100%);
+  --color7: linear-gradient(122deg, #CE9FFC 0%, #7367F0 100%);
+  --color8: linear-gradient(122deg, #DF9780 0%, #A66DE9 100%);
+  --color9: linear-gradient(180deg, #EA5455 0%, #FEB692 100%);
+  
+  --color10: #1E1E1E;
+  --color11: #292738;
+  --color12: #81FBB8;
+  
 }
 
 *{
@@ -15,21 +31,33 @@
 }
 body{
   /* background-color: var(--theme-color-light); */
+  height: 100vh;
 }
 
 header{
   display: flex;
   justify-content: space-between;
   align-items: center;
-
+  padding: 5px 20px;
+  border-bottom: 1px solid var(--theme-color-light);
 }
 main{
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
-  /* border: 1px solid red; */
-  min-height: 100vh;
-  flex-direction: column;
+  min-height: 85vh;
+  /* flex-direction: column; */
+  flex-grow: 5;
+  flex-basis: 500;
+  /* max-width: 500px; */
+}
+
+footer{
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center; 
 }
 
 
@@ -123,12 +151,12 @@ main{
 
 .card {
   width: 190px;
-  height: 254px;
+  min-height: 300px;
   margin: 0 auto;
   background-color: #023252;
   border-radius: 10px;
   z-index: 1;
-  margin: 20px;
+  margin: 10px;
 }
 
 .tools {
@@ -247,4 +275,3 @@ main{
   width: 0;
   height: 0;
 }
-
