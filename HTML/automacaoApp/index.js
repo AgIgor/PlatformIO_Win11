@@ -1,12 +1,29 @@
+window.onload = function() {
+  
+  if(localStorage.getItem("pageConfig") == null){
+    // let pageConfig = ["SALA", "COZINHA", "QUARTO"];
+    localStorage.setItem("pageConfig", []);//
+    console.log('Salvo!')
+  }else{
+    let pageConfig = localStorage.getItem("pageConfig").split(',');
+    console.log('Valor Guardado:',pageConfig);
+  
+    //cria os componentes
+    
+    pageConfig.forEach(element => {
+      addButton(element);
+    }); 
+  }
 
-
-if(localStorage.getItem("theme") == 'dark'){
+  if(localStorage.getItem("theme") == 'dark'){
     switchTheme.checked = true;
     document.documentElement.style.setProperty("color-scheme", 'dark');
-}else{
+  }else{
     switchTheme.checked = false;
     document.documentElement.style.setProperty("color-scheme", 'light');
-}
+  }
+  
+}//end window onload
 
 function toggleTheme(t){
     
@@ -18,22 +35,21 @@ function toggleTheme(t){
     document.documentElement.style.setProperty("color-scheme", 'light');
     localStorage.setItem("theme", "light");
   }
-}
-
+}//toggleTheme
 
 function toggleBtn(id){
   console.log(id.id, id.checked);
-}
-
+}//toggleBtn
 
 let componenteStruct = (itenName)=>{
 
-  let itenId = document.getElementsByClassName('card').length
+  let itenId = document.getElementsByClassName('card').length; 
+  
   return [`
   <div class="card">
   <div class="tools">
     <div class="circle">
-      <span class="red box"></span>
+      <span class="red box" onclick="removeIten(${ ++itenId })"></span>
     </div>
     <div class="circle">
       <span class="yellow box"></span>
@@ -46,7 +62,7 @@ let componenteStruct = (itenName)=>{
     <div class="device">
         <h2>${ itenName }</h2>
         <label class="switch">
-          <input type="checkbox" id="${ ++itenId }" onclick="toggleBtn(this)">
+          <input type="checkbox" id="${ itenId }" onclick="toggleBtn(this)">
           <span class="slider"></span>
         </label>
         <small>ID#${ itenId }</small>
@@ -56,29 +72,33 @@ let componenteStruct = (itenName)=>{
     </div>
   </div>
 </div>`, itenId, itenName];
-}
+
+}//componenteStruct
 
 function addButton(value){
   if(value != ''){
     value = value.toUpperCase()
     const page = componenteStruct(value);
     main.innerHTML += page[0];
-    console.log(page[1], page[2])
-    newName.value = '';
-    
-    //localStorage.setItem('pageConfig', JSON.stringify());
-    let pageConfig = JSON;
-    
-    // const cards = document.getElementsByClassName('card');
-    if(page[1] > 0){
-      for (let i=0; i<page[1]; i++) {
-        // console.log(cards[i])
-        // console.log(pageConfig)
-        //salvar um json com configs de ids e nomes dos componentes
-      }
-    }
-    
+    //console.log(page[1], page[2])
   }else{
     return
   }
-}
+}//addButton
+
+function removeIten(id){
+  console.log(`Removendo ID:${id}`);
+}//removeIten
+
+btnSave.onclick = ()=> {
+  if(newName.value) {
+    addButton(newName.value)
+    let pageConfig = localStorage.getItem("pageConfig").split(',');
+    pageConfig[pageConfig.length] = newName.value;
+    
+    console.log(pageConfig);
+    
+    localStorage.setItem("pageConfig", pageConfig);
+  }
+  newName.value = '';    
+}//saveLocal
