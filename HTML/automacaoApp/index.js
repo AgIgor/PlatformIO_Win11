@@ -1,8 +1,8 @@
 window.onload = function() {
   
   if(localStorage.getItem("pageConfig") == null){
-    let pageConfig = JSON.stringify({0:'Luz Sala', 1:'Luz Quarto', 2:'Luz Garagem'});
-    // let pageConfig = JSON.stringify({});
+    // let pageConfig = JSON.stringify({0:'Luz Sala', 1:'Luz Quarto', 2:'Luz Garagem'});
+    let pageConfig = JSON.stringify({});
     localStorage.setItem("pageConfig", pageConfig);//
     console.log('Salvo!')
   }else{
