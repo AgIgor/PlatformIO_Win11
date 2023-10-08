@@ -60,6 +60,36 @@ footer{
   align-items: center; 
 }
 
+.newComponente{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+footer input[type="text"]{
+  height: 40px;
+  border-radius: 5px 0 0 5px;
+  border: none;
+  background-color: #023252;
+  padding: 10px;
+}
+
+footer input[type="text"]:focus{
+  outline: none;
+}
+
+
+footer .newComponente button{
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  width: 50px;
+  height: 40px;
+  border: none;
+  background-color: #023252;
+  cursor: pointer;
+}
+
+
 
 .device {
     /* background-color: #333; */
@@ -150,13 +180,13 @@ footer{
 
 
 .card {
-  width: 190px;
-  min-height: 300px;
-  margin: 0 auto;
+  width: 180px;
+  min-height: 350px;
+  /* margin: 0 auto; */
   background-color: #023252;
   border-radius: 10px;
   z-index: 1;
-  margin: 10px;
+  margin: 2px;
 }
 
 .tools {

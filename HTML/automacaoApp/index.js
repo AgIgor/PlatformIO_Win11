@@ -42,6 +42,8 @@ function toggleTheme(t){
 
 function toggleBtn(id){
   console.log(id.id, id.checked);
+  let log = document.getElementById(`log${id.id}`);
+  log.innerText = new Date().toString();
 }//toggleBtn
 
 let componenteStruct = (itenName, index)=>{
@@ -70,7 +72,7 @@ let componenteStruct = (itenName, index)=>{
         </label>
         <small>ID#${ index }</small>
         <h6>Ultima ação:</h6>
-        <h6 id="log">Seg, 2 out 2023, 21:08:44</h6>
+        <h6 id="log${ index}"></h6>
 
     </div>
   </div>
@@ -92,19 +94,23 @@ function addButton(value, index){
 function removeIten(id, name){
   let pageConfig = JSON.parse(localStorage.getItem("pageConfig"));
   console.log('Removendo ID:',id,pageConfig[id]);
-  delete pageConfig[id];
   
-  console.log(pageConfig);
-  localStorage.setItem("pageConfig", JSON.stringify(pageConfig));
-  location.reload();
-  
+  if(confirm(`Remover ID: ${id} ${pageConfig[id]}`) == true){ 
+    delete pageConfig[id];
+    localStorage.setItem("pageConfig", JSON.stringify(pageConfig));
+    location.reload();
+  }
+  else{
+    return
+  }
+ 
 }//removeIten
 
 btnSave.onclick = ()=> {
   if(newName.value) {
     let pageConfig = JSON.parse(localStorage.getItem("pageConfig"));
     let tamanho = Object.entries(pageConfig).length
-    pageConfig[tamanho] = newName.value.toUpperCase();
+    pageConfig[++tamanho] = newName.value.toUpperCase();
     console.log(pageConfig)
     
     // Object.entries(arr).forEach(([k,v])=> {
@@ -116,3 +122,10 @@ btnSave.onclick = ()=> {
   }
   newName.value = '';    
 }//saveLocal
+
+newName.onkeypress = function(event) {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    document.getElementById("btnSave").click();
+  }
+}
