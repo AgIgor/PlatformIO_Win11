@@ -3,17 +3,20 @@ window.onload = function() {
   if(localStorage.getItem("pageConfig") == null){
     // let pageConfig = JSON.stringify({0:'Luz Sala', 1:'Luz Quarto', 2:'Luz Garagem'});
     let pageConfig = JSON.stringify({});
+    let logJson = JSON.stringify({});
     localStorage.setItem("pageConfig", pageConfig);//
+    localStorage.setItem("logJson", logJson);//
     console.log('Salvo!')
   }else{
     let pageConfig = JSON.parse(localStorage.getItem("pageConfig"));
-    console.log('Valor Guardado:',pageConfig);
+    let logJson = JSON.parse(localStorage.getItem("logJson"));
+    console.log('Valor Guardado:',pageConfig,'\n', logJson);
     
     //cria os componentes
     
     Object.entries(pageConfig).forEach(([key, value]) => {
         // console.log(`${key} ${value}`);
-        addButton(value, key); 
+        addButton(value, key, logJson[key]);
     });
      
   }
@@ -40,13 +43,42 @@ function toggleTheme(t){
   }
 }//toggleTheme
 
-function toggleBtn(id){
-  console.log(id.id, id.checked);
+function toggleBtn(id,name){
+// console.clear()
+
   let log = document.getElementById(`log${id.id}`);
-  log.innerText = new Date().toString();
+  var meses = [
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez"
+  ];
+  var days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  let d = new Date();
+  console.log(days[d.getUTCDay()],d.getUTCDate(),meses[d.getMonth()],d.getFullYear());
+  
+  let logStr = `${days[d.getUTCDay()]} ${d.getUTCDate()} ${meses[d.getMonth()]} ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`
+  
+  // logStr = logStr.replace('GMT-0300 (Horário Padrão de Brasília)', '');
+  
+  log.innerText = logStr;
+  // console.log(id.id, id.checked, name, logStr);
+  
+  let logJson = JSON.parse(localStorage.getItem("logJson"));
+  logJson[id.id] = logStr;
+  localStorage.setItem("logJson", JSON.stringify(logJson));
+
 }//toggleBtn
 
-let componenteStruct = (itenName, index)=>{
+let componenteStruct = (itenName, index, logJson)=>{
 
   let itenId = document.getElementsByClassName('card').length; 
   
@@ -67,12 +99,12 @@ let componenteStruct = (itenName, index)=>{
     <div class="device">
         <h2>${ itenName }</h2>
         <label class="switch">
-          <input type="checkbox" id="${ index }" onclick="toggleBtn(this)">
+          <input type="checkbox" id="${ index }" onclick="toggleBtn(this,'${ itenName }')">
           <span class="slider"></span>
         </label>
         <small>ID#${ index }</small>
         <h6>Ultima ação:</h6>
-        <h6 id="log${ index}"></h6>
+        <h6 id="log${ index}">${logJson}</h6>
 
     </div>
   </div>
@@ -80,12 +112,16 @@ let componenteStruct = (itenName, index)=>{
 
 }//componenteStruct
 
-function addButton(value, index){
+function addButton(value, index, logJson){
   if(value != ''){
     value = value.toUpperCase()
-    const page = componenteStruct(value, index);
+    logJson = (logJson  === undefined ? 'Sem Dados!': logJson);
+    const page = componenteStruct(value, index, logJson);
     main.innerHTML += page;
-    //console.log(page[1], page[2])
+    
+    let lJson = JSON.parse(localStorage.getItem("logJson"));
+    lJson[index] = logJson;
+    localStorage.setItem("logJson", JSON.stringify(lJson));
   }else{
     return
   }
@@ -93,11 +129,14 @@ function addButton(value, index){
 
 function removeIten(id, name){
   let pageConfig = JSON.parse(localStorage.getItem("pageConfig"));
+  let logJson = JSON.parse(localStorage.getItem("logJson"));
   console.log('Removendo ID:',id,pageConfig[id]);
   
   if(confirm(`Remover ID: ${id} ${pageConfig[id]}`) == true){ 
     delete pageConfig[id];
+    delete logJson[id];
     localStorage.setItem("pageConfig", JSON.stringify(pageConfig));
+    localStorage.setItem("logJson", JSON.stringify(logJson));
     location.reload();
   }
   else{
