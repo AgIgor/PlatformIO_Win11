@@ -10,7 +10,7 @@ window.onload = function() {
   }else{
     let pageConfig = JSON.parse(localStorage.getItem("pageConfig"));
     let logJson = JSON.parse(localStorage.getItem("logJson"));
-    console.log('Valor Guardado:',pageConfig,'\n', logJson);
+    // console.log('Valor Guardado:',pageConfig,'\n', logJson);
     
     //cria os componentes
     
