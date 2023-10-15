@@ -1,4 +1,14 @@
 window.onload = function() {
+
+  document.requestStorageAccess().then(
+    () => {
+      console.log("access granted");
+    },
+    () => {
+      console.log("access denied");
+    },
+  );
+  
   
   if(localStorage.getItem("pageConfig") == null){
     // let pageConfig = JSON.stringify({0:'Luz Sala', 1:'Luz Quarto', 2:'Luz Garagem'});
@@ -28,6 +38,8 @@ window.onload = function() {
     switchTheme.checked = false;
     document.documentElement.style.setProperty("color-scheme", 'light');
   }
+  
+
   
 }//end window onload
 
@@ -63,14 +75,13 @@ function toggleBtn(id,name){
   ];
   var days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   let d = new Date();
-  console.log(days[d.getUTCDay()],d.getUTCDate(),meses[d.getMonth()],d.getFullYear());
+  //console.log(days[d.getUTCDay()],d.getUTCDate(),meses[d.getMonth()],d.getFullYear());
   
   let logStr = `${days[d.getUTCDay()]} ${d.getUTCDate()} ${meses[d.getMonth()]} ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`
   
-  // logStr = logStr.replace('GMT-0300 (Horário Padrão de Brasília)', '');
   
   log.innerText = logStr;
-  // console.log(id.id, id.checked, name, logStr);
+  console.log(id.id, id.checked, name, logStr);
   
   let logJson = JSON.parse(localStorage.getItem("logJson"));
   logJson[id.id] = logStr;
@@ -79,9 +90,8 @@ function toggleBtn(id,name){
 }//toggleBtn
 
 let componenteStruct = (itenName, index, logJson)=>{
-
-  let itenId = document.getElementsByClassName('card').length; 
   
+  let itenId = document.getElementsByClassName('card').length;
   return `
   <div class="card">
   <div class="tools">
@@ -104,12 +114,31 @@ let componenteStruct = (itenName, index, logJson)=>{
         </label>
         <small>ID#${ index }</small>
         <h6>Ultima ação:</h6>
-        <h6 id="log${ index}">${logJson}</h6>
-
+        <h6 id="log${ index}">${logJson}</h6> 
     </div>
+    
+    <div class="device">
+          <h5>  
+            <label for="timeOn${ index }">Ligar:</label>
+            <input  type="datetime-local" 
+                      id="timeOn${ index }" 
+                      name="timeOn${ index }" 
+                      value=""
+                      onchange="setTime('${ index }','on', this)">
+          </h5>
+          <h5>
+            <label for="timeOff${ index }">Desligar:</label>
+            <input  type="datetime-local" 
+              id="timeOff${ index }" 
+              name="timeOff${ index }" 
+              value=""
+              onchange="setTime('${ index }','off', this)">
+          </h5>
+    </div>
+      
+      
   </div>
 </div>`;
-
 }//componenteStruct
 
 function addButton(value, index, logJson){
@@ -167,4 +196,8 @@ newName.onkeypress = function(event) {
     event.preventDefault();
     document.getElementById("btnSave").click();
   }
+}
+
+function setTime(index, state, c){
+  console.log(index,state,(c.value).replace("T", " "));
 }

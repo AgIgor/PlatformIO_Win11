@@ -21,6 +21,8 @@
   --color11: #292738;
   --color12: #81FBB8;
   
+  --card-color : #023252;
+  
 }
 
 *{
@@ -101,6 +103,20 @@ footer .newComponente button{
     margin: 7px;
     color: #ccc;
     font-weight: bold;
+    box-shadow: 0px 0px 31px 0px rgba(0,0,0,0.42);
+}
+
+.device input[type="datetime-local"]{
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  font-size: smaller;
+  font-weight: bold;
+  color: #ccc;
+}
+
+.device input[type="datetime-local"]:focus{
+  
 }
 
 .device h2 {
@@ -183,7 +199,7 @@ footer .newComponente button{
   width: 180px;
   min-height: 350px;
   /* margin: 0 auto; */
-  background-color: #023252;
+  background-color: var(--card-color);
   border-radius: 10px;
   z-index: 1;
   margin: 2px;
