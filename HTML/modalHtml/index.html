@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        
+        .notification {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 16px;
+            position: fixed;
+            top: 0;
+            right: 0;
+            display: block;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+    </style>
+</head>
+<body>
+    <button onclick="showNotification()">Mostrar Notificação</button>
+
+    <!-- Elemento HTML para a notificação -->
+    <div class="notification" id="myNotification">
+        Essa é uma notificação de exemplo!
+    </div>
+
+    <script>
+       
+        function showNotification() {
+            var notification = document.getElementById('myNotification');
+            notification.style.opacity = 1;
+
+            
+            setTimeout(function() {
+                notification.style.opacity = 0;
+                
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
