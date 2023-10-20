@@ -68,7 +68,7 @@ async function showNotification(type) {
      
 }
 function closeBtn(iten){
-      console.log(iten);
+      //console.log(iten);
       var notification = document.getElementById('myNotification');
       notification.style.top = '-99px';
       clearTimeout(delay);
@@ -90,7 +90,19 @@ Object.keys(btnList).forEach((e)=>{
         // saida.innerText = btnId;
         await showNotification(btnId) 
         
+        const NOTIFICATION_TITLE = 'Title'
+        const NOTIFICATION_BODY = 'Notification from the Renderer process. Click to log to console.'
+        const CLICK_MESSAGE = 'Notification clicked!'
+        
+        new window.Notification(NOTIFICATION_TITLE, { body: NOTIFICATION_BODY })
+          .onclick = () => { 
+              document.getElementById('saida').innerText = CLICK_MESSAGE
+              closeBtn(btnId)
+          }
+        
     })
 })
+
+
   
     

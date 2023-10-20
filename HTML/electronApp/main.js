@@ -17,16 +17,22 @@ function createWindow () {
   win.loadFile('index.html')
 }
 
-const NOTIFICATION_TITLE = 'Basic Notification'
-const NOTIFICATION_BODY = 'Notification from the Main process'
+// const NOTIFICATION_TITLE = 'Basic Notification'
+// const NOTIFICATION_BODY = 'Notification from the Main process'
 
-function showNotification (t) {
-    new Notification({ title: t, body: NOTIFICATION_BODY }).show()
-}
+// function showNotification (t) {
+//     new Notification({
+    
+//         title: t,
+//         body: NOTIFICATION_BODY ,
+//         timeoutType: 'timeout',
+        
+//     }).show()
+// }
 
 ipcMain.handle('notfy:alert', (obj, btnId, value) => {
 
-    showNotification(btnId);
+    //showNotification(btnId);
     return `${btnId}, ${value}`
     
 })
