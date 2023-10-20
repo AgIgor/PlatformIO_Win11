@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Open Modal</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+        
+        :root{
+        /* color-scheme: dark; */
+        }
+        *{
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body{
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #ccc;
+            /* border: 5px solid yellow; */
+        
+        }
+        header{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* border: 5px solid green; */
+            height: 10%;
+            width: 100%;
+        }
+        main{
+        display: flex;display: flex;
+        justify-content: center;
+        align-items: center;
+        /* border: 5px solid red; */
+        height: 100%;
+        
+        }      
+        .notification {
+            position: fixed;
+            opacity: 1;
+            display: block;
+            transition: all 0.9s ease;
+            top: '-999px';
+        }  
+        button{
+            width: 100px;
+            height: 50px;
+        }
+        button#success{
+            background-color: #84D65A;
+        }
+        button#info{
+            background-color: #509AF8;
+        }
+        button#warning{
+            background-color: #F7C752;
+        }
+        button#error{
+            background-color: #EF665B;
+        }
+        
+        
+        
+        
+        .success {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            width: 320px;
+            padding: 12px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: start;
+            background: #84D65A;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px -3px #111;
+            margin-top: 10px;
+        }     
+        .success__icon {
+        width: 20px;
+        height: 20px;
+        transform: translateY(-2px);
+        margin-right: 8px;
+        }     
+        .success__icon path {
+        fill: #393A37;
+        }      
+        .success__title {
+        font-weight: 500;
+        font-size: 14px;
+        color: #393A37;
+        }     
+        .success__close {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-left: auto;
+        }
+        .success__close path {
+        fill: #393A37;
+        } 
+        .info {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            width: 320px;
+            padding: 12px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: start;
+            background: #509AF8;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px -3px #111;
+            margin-top: 10px;
+        }   
+        .info__icon {
+            width: 20px;
+            height: 20px;
+            transform: translateY(-2px);
+            margin-right: 8px;
+        }    
+        .info__icon path {
+            fill: #fff;
+        }    
+        .info__title {
+            font-weight: 500;
+            font-size: 14px;
+            color: #fff;
+        }     
+        .info__close {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            margin-left: auto;
+        }     
+        .info__close path {
+            fill: #fff;
+        }
+        .error {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            width: 320px;
+            padding: 12px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: start;
+            background: #EF665B;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px -3px #111;
+            margin-top: 10px;
+        } 
+        .error__icon {
+        width: 20px;
+        height: 20px;
+        transform: translateY(-2px);
+        margin-right: 8px;
+        }
+        .error__icon path {
+        fill: #fff;
+        } 
+        .error__title {
+        font-weight: 500;
+        font-size: 14px;
+        color: #fff;
+        } 
+        .error__close {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-left: auto;
+        }
+        .error__close path {
+        fill: #fff;
+        }
+        .warning {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            width: 320px;
+            padding: 12px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: start;
+            background: #F7C752;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px -3px #111;
+            margin-top: 10px;
+        }
+        .warning__icon {
+            width: 20px;
+            height: 20px;
+            transform: translateY(-2px);
+            margin-right: 8px;
+        }  
+        .warning__icon path {
+            fill: #393A37;
+        }  
+        .warning__title {
+            font-weight: 500;
+            font-size: 14px;
+            color: #393A37;
+        }  
+        .warning__close {
+            width: 20px;
+            height: 20px;
+            margin-left: auto;
+            cursor: pointer;
+        }   
+        .warning__close path {
+            fill: #393A37;
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="notification" id="myNotification" style="top: -99px;"></div>
+    </header>
+    <main>
+    
+        <button class="notfy" id='success'>Mostrar Success</button>
+        <button class="notfy" id='info'>Mostrar Info</button>
+        <button class="notfy" id='warning'>Mostrar warning</button>
+        <button class="notfy" id='error'>Mostrar Error</button>
+        
+        
+    </main>
+    
+    <p id="saida"></p>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>
