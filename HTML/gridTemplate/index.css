@@ -1,45 +1,69 @@
+@import url('https://fonts.cdnfonts.com/css/helios-antique');
+
 *{
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body{
+  font-family: 'Helios Antique', sans-serif;
   height: 100vh;
-  width: 100vw;
   overflow: hidden;
   display: grid;
   grid-template:
-  "header header header" auto
-  "nav article aside" .9fr
-  "footer footer footer" auto/
-  auto .7fr auto;
+  "header header header" .1fr
+  "nav article aside" auto
+  "footer footer footer" .1fr
+  / 20% auto 15%;
 
-  background-color: #ccc;
+  background: #212121;
+  padding: 5px;
+}
+body header, article, aside, nav, footer{
+  padding: 10px;
+  transition: .4s ease-in-out;
 
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  background-color: #171717;
+
+  /* border-radius: 15px 15px 15px 15px;
+  -moz-border-radius: 15px 15px 15px 15px;
+  -webkit-border-radius: 15px 15px 15px 15px;
+  border: 0px solid #000000; */
+  margin: 10px;
+}
+header:hover, article:hover, aside:hover, nav:hover, footer:hover{
+  transform: scale(1.05);
+  border: 1px solid black;
 }
 
 header{
   grid-area: header;
-  background-color: green;
+  /* background-color: green; */
+  text-align: center;
+  padding: 5px;
 }
 article{
   grid-area: article;
-  background-color: blue;
-
+  /* background-color: blue; */
+  text-align: center;
+  padding: 5px;
 }
 aside{
   grid-area: aside;
-  background-color: red;
-
+  /* background-color: red; */
+  text-align: left;
+  padding: 5px;
 }
 nav{
   grid-area: nav;
-  background-color: orange;
-
+  /* background-color: orange; */
+  text-align: left;
+  padding: 5px;
 }
 footer{
   grid-area: footer;
-  background-color: violet;
-
+  /* background-color: violet; */
+  text-align: center;
+  padding: 5px;
 }
