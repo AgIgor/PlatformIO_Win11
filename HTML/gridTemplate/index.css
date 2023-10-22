@@ -1,0 +1,45 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: grid;
+  grid-template:
+  "header header header" auto
+  "nav article aside" .9fr
+  "footer footer footer" auto/
+  auto .7fr auto;
+
+  background-color: #ccc;
+
+}
+
+header{
+  grid-area: header;
+  background-color: green;
+}
+article{
+  grid-area: article;
+  background-color: blue;
+
+}
+aside{
+  grid-area: aside;
+  background-color: red;
+
+}
+nav{
+  grid-area: nav;
+  background-color: orange;
+
+}
+footer{
+  grid-area: footer;
+  background-color: violet;
+
+}
