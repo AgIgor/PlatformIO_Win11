@@ -1,0 +1,32 @@
+:root{
+  color-scheme: dark;
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body{
+  height: 100vh;
+  display: grid;
+  justify-content: center;
+}
+
+table,
+td {
+  border: 1px solid black;
+  width: 250px;
+  height: 70px;
+  padding: 10px;
+  background-color: #333;
+
+}
+
+thead,
+tfoot {
+  background-color: rgb(0, 0, 0);
+  color: #fff;
+  height: 70px;
+
+}
