@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
     <title>Pwm 0</title>
-    <link id="icon" rel="icon" type="image/x-icon" href="http://esp8266.local/fan"></link>    
+    <link id="icon" rel="icon" type="image/x-icon" href="http://xbox.local/fan"></link>    
     <style>
+        @import url('https://fonts.cdnfonts.com/css/space-mono');
+        @import url('https://fonts.cdnfonts.com/css/poppins');
+        *{
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          /* font-family: 'Space Mono', sans-serif; */
+          font-family: 'Poppins', sans-serif;
+                                                
+        }
     
         html, body {
         margin: 0;
@@ -77,7 +87,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("http://esp8266.local/fan");
+            background-image: url("http://xbox.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
              
@@ -92,7 +102,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("http://esp8266.local/fan");
+            background-image: url("http://xbox.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
         }
@@ -126,7 +136,7 @@
         <div class="range-container">
             <form action='/move' method='get'>
                 <label for="pi_input"><h1>Cooler: <output id="value">%</output></h1></label>
-                <input id="pi_input" type="range" min="0" max="255" step="1" />
+                <input id="pi_input" type="range" min="0" max="100" step="1" />
             </form>
         </div>
         
@@ -169,17 +179,21 @@
     const input = document.querySelector("#pi_input");
     const title = document.querySelector("title");
     
+    let scale = 0;
+    const minPercent = 25;
+    
     async function read(){
         try{
-            const read = await fetch("http://esp8266.local/read")
+            const read = await fetch("http://xbox.local/read")
                                   .then(response => response.text())
-                                    //.then(result => console.log(result))
+                                    // .then(result => console.log(result))
                                   .then(result =>{
                                         input.value = result;
-                                        const percent = parseInt((parseInt(result) - 0)*(100 - 0)/(255 - 0))
+                                        //const percent = parseInt((parseInt(result) - 0)*(100 - 0)/(255 - 0))
                                         //(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-                                        title.textContent = `Pwm ${percent}%`;
-                                        value.textContent = `${percent}%`;
+                                        title.textContent = `Pwm ${input.value}%`;
+                                        value.textContent = `${input.value}%`;
+                                        scale = Number(input.value);
                                     })
                                   .catch(error => console.log('error', error));  
         }
@@ -196,12 +210,44 @@
     
     input.oninput = (event) => {
         value.textContent = event.target.value;
-        const percent = parseInt((parseInt(event.target.value) - 0)*(100 - 0)/(255 - 0))
+        //const percent = parseInt((parseInt(event.target.value) - 0)*(100 - 0)/(255 - 0))
         //(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-        title.textContent = `Pwm ${percent}%`;
-        value.textContent = `${percent}%`;
+        title.textContent = `Pwm ${event.target.value}%`;
+        value.textContent = `${event.target.value}%`;
         input.style.setProperty("--thumb-rotate", `${(input.value/200) * 360}deg`);
     };
+    
+    let scrolling = false;
+    
+    input.addEventListener("mousewheel", (e) => {
+        scrolling = true;
+        
+        if (scrolling) {
+            clearInterval(interval);
+        
+            scale += e.deltaY * -0.05;
+            scale < 0 ? scale = 0 : scale = scale;
+            scale > 100 ? scale = 100 : scale = scale;
+            input.value = scale
+            
+            title.textContent = `Pwm ${event.target.value}%`;
+            value.textContent = `${event.target.value}%`;
+            input.style.setProperty("--thumb-rotate", `${(input.value/200) * 360}deg`);
+        
+        }
+        
+        clearTimeout(input.scrollEndTimer);
+        input.scrollEndTimer = setTimeout(() => {
+            scrolling = false;
+            sendPos(scale);
+            
+            interval = setInterval(async() => {
+               await read();
+                console.log('read time');
+            }, 1000);
+            
+        }, 300);
+    });    
     
     input.ontouchstart = (e) => {
         clearInterval(interval);
@@ -226,8 +272,14 @@
     };
     
     const sendPos = async(e)=>{
+    
+        if(e < minPercent){
+            console.log('Valor baixo');
+            e = minPercent;   
+        }
+        
         try{
-            const response = await fetch(`http://esp8266.local/move?range=${e}`);
+            const response = await fetch(`http://xbox.local/move?range=${e}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

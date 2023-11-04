@@ -4,11 +4,11 @@
 #include <WiFiManager.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
-// #include <LittleFS.h>
+#include <LittleFS.h>
 
 #define pwmOut 2
 
-byte pwm;
+byte pwm = 50;
 WiFiManager wifiManager;
 ESP8266WebServer server(80);
 
@@ -50,7 +50,7 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
-  analogWrite(pwmOut, pwm);
+  analogWrite(pwmOut, map(pwm, 0, 100, 0, 255));
   delay(10);
   if (!wifiManager.autoConnect("ESP8266-Config")) {
     delay(3000);
@@ -63,7 +63,7 @@ void setup() {
  IPAddress dns(8, 8, 8, 8);
  WiFi.config(ip, gateway, subnet, dns);
 
-  if (!MDNS.begin("esp8266")) while (1) { delay(1000);}
+  if (!MDNS.begin("xbox")) while (1) { delay(1000);}
   if(!SPIFFS.begin()) while (1) { delay(1000);}
   
   server.on("/", HTTP_GET, handleRoot);
@@ -103,10 +103,10 @@ void handleRoot() {
 
 void handleMove() {
   int range = server.arg("range").toInt();
-  if (range >= 0 && range <= 255) {
+  if (range >= 0 && range <= 100) {
     pwm = range;
-    analogWrite(pwmOut, pwm);
-    Serial.println(pwm);
+    analogWrite(pwmOut, map(range, 0, 100, 0, 255));
+    Serial.println(map(range, 0, 100, 0, 255));
     server.sendHeader("Access-Control-Allow-Origin", "*");
     server.sendHeader("Access-Control-Max-Age", "10000");
     server.send(200, "text/html", readFile(SPIFFS, "/ServoEsp01.html"));
