@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=JetBrains+Mono:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  color-scheme: dark;
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  
+}
+body{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.font1{
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.font2{
+  font-family: 'Space Mono', monospace;
+}
+
+.font3{
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+h1{
+  color: blue;
+  font-size: 100px;
+}
+h1 :first-child{
+  color: red;
+  cursor: pointer;
+}
+h1 :last-child{
+  color: green;
+  cursor: pointer;
+}

@@ -50,20 +50,21 @@ void setup() {
   pinMode(A0, INPUT);
   pinMode(pwmOut, OUTPUT);
   analogWriteFreq(5000);
-  analogWrite(pwmOut, map(pwm, 0, 100, 0, 255));
+  analogWrite(pwmOut, 127);
   delay(10);
+
+  if (!MDNS.begin("esp8266")) while (1) { delay(1000);}
+  IPAddress ip(192, 168, 15, 222);
+  IPAddress gateway(192, 168, 15, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  IPAddress dns(8, 8, 8, 8);
+  WiFi.config(ip, gateway, subnet, dns);
+  
   if (!wifiManager.autoConnect("ESP8266-Config")) {
     delay(3000);
     ESP.restart();
   }
 
- IPAddress ip(192, 168, 15, 123);
- IPAddress gateway(192, 168, 15, 1);
- IPAddress subnet(255, 255, 255, 0);
- IPAddress dns(8, 8, 8, 8);
- WiFi.config(ip, gateway, subnet, dns);
-
-  if (!MDNS.begin("xbox")) while (1) { delay(1000);}
   if(!SPIFFS.begin()) while (1) { delay(1000);}
   
   server.on("/", HTTP_GET, handleRoot);

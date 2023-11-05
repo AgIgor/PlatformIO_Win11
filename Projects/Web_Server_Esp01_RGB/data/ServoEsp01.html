@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
     <title>Pwm 0</title>
-    <link id="icon" rel="icon" type="image/x-icon" href="http://xbox.local/fan"></link>    
+    <link id="icon" rel="icon" type="image/x-icon" href="http://esp8266.local/fan"></link>    
     <style>
         @import url('https://fonts.cdnfonts.com/css/space-mono');
         @import url('https://fonts.cdnfonts.com/css/poppins');
@@ -87,7 +87,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("http://xbox.local/fan");
+            background-image: url("http://esp8266.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
              
@@ -102,7 +102,7 @@
             background: #3498db;
             cursor: pointer;
             transition: 0.1s all;
-            background-image: url("http://xbox.local/fan");
+            background-image: url("http://esp8266.local/fan");
             background-size: cover;
             transform: rotateZ(var(--thumb-rotate, 0deg));
         }
@@ -184,7 +184,7 @@
     
     async function read(){
         try{
-            const read = await fetch("http://xbox.local/read")
+            const read = await fetch("http://esp8266.local/read")
                                   .then(response => response.text())
                                     // .then(result => console.log(result))
                                   .then(result =>{
@@ -279,7 +279,7 @@
         }
         
         try{
-            const response = await fetch(`http://xbox.local/move?range=${e}`);
+            const response = await fetch(`http://esp8266.local/move?range=${e}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
