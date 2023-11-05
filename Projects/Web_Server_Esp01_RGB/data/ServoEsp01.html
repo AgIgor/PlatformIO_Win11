@@ -136,7 +136,7 @@
         <div class="range-container">
             <form action='/move' method='get'>
                 <label for="pi_input"><h1>Cooler: <output id="value">%</output></h1></label>
-                <input id="pi_input" type="range" min="0" max="100" step="1" />
+                <input id="pi_input" type="range" min="0" max="100" step="5" />
             </form>
         </div>
         
@@ -195,7 +195,10 @@
                                         value.textContent = `${input.value}%`;
                                         scale = Number(input.value);
                                     })
-                                  .catch(error => console.log('error', error));  
+                                  .catch(error => {
+                                    console.log('error', error)
+                                    window.location.reload();
+                                  });  
         }
         catch(error){
             console.error('Error:', error);
