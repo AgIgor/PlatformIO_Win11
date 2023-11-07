@@ -78,33 +78,33 @@
     </head>
     <body>
         <div class="container">
-            <div class="box" id="range1" style="--i:0%;--clr:#fd0a54">
+            <div class="box" id="range1" >
                 <div class="circle">
                     <h2>0<small>%</small></h2>
                 </div>
                 <h3>Html</h3>
             </div>
             
-            <div class="box" id="range2" style="--i:0%;--clr:#ffbc11">
+            <div class="box" id="range2" >
                 <div class="circle">
                     <h2>0<small>%</small></h2>
                 </div>
                 <h3>Html</h3>
             </div>
             
-            <div class="box" id="range3" style="--i:0%;--clr:#0de5a8">
+            <div class="box" id="range3" >
                 <div class="circle">
                     <h2>0<small>%</small></h2>
                 </div>
                 <h3>Html</h3>
             </div>
             
-            <!-- <div class="box" id="range4" style="--i:30%;--clr:#0de528">
+            <div class="box" id="range4" >
                 <div class="circle">
                     <h2>30<small>%</small></h2>
                 </div>
                 <h3>Html</h3>
-            </div> -->
+            </div>
         </div>
     </body>
     
@@ -129,27 +129,27 @@
             //  document.getElementById("temp").innerHTML = e.data;
              
                 range1.childNodes[1].childNodes[1].innerHTML = `${e.data}<small>%</small>`; 
-                range1.style.cssText = `--i: ${e.data}%; --clr: #fd0100;`
+                range1.style.cssText = `--i: ${e.data}%; --color: #fd0100;`
                 
             }, false);
             
-            source.addEventListener('humidity', function(e) {
-                console.log("humidity", e.data);
-                // document.getElementById("hum").innerHTML = e.data;
+            // source.addEventListener('humidity', function(e) {
+            //     console.log("humidity", e.data);
+            //     // document.getElementById("hum").innerHTML = e.data;
                 
-                range2.childNodes[1].childNodes[1].innerHTML = `${e.data}<small>%</small>`;
-                range2.style.cssText = `--i: ${e.data}%; --clr:#ffbc11;`
+            //     range2.childNodes[1].childNodes[1].innerHTML = `${e.data}<small>%</small>`;
+            //     range2.style.cssText = `--i: ${e.data}%; --color:#ffbc11;`
                 
-            }, false);
+            // }, false);
             
-            source.addEventListener('pressure', function(e) {
-                console.log("pressure", e.data);
-                // document.getElementById("pres").innerHTML = e.data;
+            // source.addEventListener('pressure', function(e) {
+            //     console.log("pressure", e.data);
+            //     // document.getElementById("pres").innerHTML = e.data;
                 
-                range3.childNodes[1].childNodes[1].innerHTML = `${e.data}<small>%</small>`;
-                range3.style.cssText = `--i: ${e.data}%; --clr:#0de5a8;`
+            //     range3.childNodes[1].childNodes[1].innerHTML = `${e.data}<small>%</small>`;
+            //     range3.style.cssText = `--i: ${e.data}%; --color:#0de5a8;`
                 
-            }, false);
+            // }, false);
         }
     </script>
 </html>

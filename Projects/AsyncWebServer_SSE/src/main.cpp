@@ -7,23 +7,18 @@
 #include <ESPAsyncTCP.h>
 #endif
 #include <ESPAsyncWebServer.h>
+#include <LittleFS.h>
 
-#include "page.h"
+// #include "page.h"
 
-// Replace with your network credentials
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
 
-// Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
-
-// Create an Event Source on /events
 AsyncEventSource events("/events");
 
-// Timer variables
 unsigned long lastTime = 0;  
 unsigned long timerDelay = 5000;
-
 
 float temperature;
 float humidity;
@@ -34,8 +29,6 @@ void getSensorReadings(){
   humidity < 100 ? humidity++ : humidity = 0;
   pressure < 100 ? pressure++ : pressure = 0;
 }
-
-// Initialize WiFi
 void initWiFi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -62,15 +55,38 @@ String processor(const String& var){
   return String();
 }
 
+String readFile(const char *path) {
+  Serial.printf("Reading file: %s\n", path);
 
+  File file = LittleFS.open(path, "r");
+  if (!file) {
+    Serial.println("Failed to open file for reading");
+    return "";
+  }
+
+  String content = "";
+  while (file.available()) {
+    content += (char)file.read();
+    delayMicroseconds(1);
+  }
+  file.close();
+  Serial.println(content);
+  return content;
+}
 
 void setup() {
   Serial.begin(115200);  
   initWiFi();
+  
+  if (!LittleFS.begin()) {
+    Serial.println("Falha ao inicializar o sistema de arquivos LittleFS.");
+    while (1);
+  }
 
   // Handle Web Server
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
+    String payload = readFile("/index.html");
+    request->send_P(200, "text/html", payload.c_str(), processor);
   });
 
   // Handle Web Server Events
@@ -85,7 +101,6 @@ void setup() {
   server.addHandler(&events);
   server.begin();
 }
-
 void loop() {
   if ((millis() - lastTime) > timerDelay) {
     getSensorReadings();
