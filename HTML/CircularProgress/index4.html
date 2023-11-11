@@ -7,9 +7,9 @@
     <style>
     
       :root{
-        --var1: 0;
-        --var2: 0;
-        --var3: 0;
+        --var1: 90;
+        --var2: 50;
+        --var3: 20;
       }
 
       body, .container .card, .container .percent .number {
@@ -21,20 +21,21 @@
       	 margin: 0;
       	 padding: 0;
       	 font-family: 'Poppins', 'Roboto', sans-serif;
+      	 box-sizing: border-box;
       }
        body {
         display: flex;
-      	 justify-content: center;
-      	 align-items: center;
-      	 min-height: 100vh;
-      	 background: linear-gradient(45deg, #333, #5a5454);
+    	  justify-content: center;
+    	  align-items: center;
+    	  min-height: 100vh;
+    	  background: linear-gradient(45deg, #333, #5a5454);
       }
        .container {
       	 position: relative;
       	 width: 960px;
       	 display: flex;
       	 justify-content: space-around;
-      	 flex-direction: column;
+      	 /* flex-direction: column; */
       	 gap: 15px;
       	 justify-content: center;
       	 align-items: center;
@@ -162,7 +163,7 @@
                 <h2 id="g1" >90<span>%</span></h2>
               </div>
               <h3>HTML</h3>
-              <input type="range" name="" id="range">
+              <input type="range" name="" id="range1" min="0" max="100">
               
             </div>
           </div>
@@ -178,6 +179,7 @@
                 <h2 id="g2" >40<span>%</span></h2>
               </div>
               <h3>CSS</h3>
+              <input type="range" name="" id="range2" min="0" max="100">
             </div>
           </div>
         </div>
@@ -192,6 +194,7 @@
                 <h2 id="g3" >60<span>%</span></h2>
               </div>
               <h3>JavaScript</h3>
+              <input type="range" name="" id="range3" min="0" max="100">
             </div>
           </div>
         </div>
@@ -199,24 +202,48 @@
       
 </body>
 <script>
-  const r = document.querySelector(':root')
+  const r = document.querySelector(':root');
+  const rs = getComputedStyle(r);
   
-  let regras = document.styleSheets[0].cssRules[0].style.cssText
-  regras = regras.split(';')
-  // regras = regras.JSON.parse(`[${regras}]`);
-
+  const var1 = rs.getPropertyValue('--var1')
+  const var2 = rs.getPropertyValue('--var2')
+  const var3 = rs.getPropertyValue('--var3')
   
-  // g1.innerText = regras[0];
-  console.log(regras)
+  console.log();
   
-  range.oninput = ()=>{
-    r.style.setProperty('--var1', range.value)
-    r.setAttribute('Cleared','True')
+  g1.innerText = var1 + '%'
+  g2.innerText = var2 + '%'
+  g3.innerText = var3 + '%'
+  
+  range1.value = var1
+  range2.value = var2
+  range3.value = var3
+  
+  range1.oninput = ()=>{
+    r.style.setProperty('--var1', range1.value)
+    g1.innerText = range1.value + '%'
   }
   
+  range2.oninput = ()=>{
+    r.style.setProperty('--var2', range2.value)
+    g2.innerText = range2.value + '%'
+  }
+  
+  range3.oninput = ()=>{
+    r.style.setProperty('--var3', range3.value)
+    g3.innerText = range3.value + '%'
+  }
+  
+  
+  
+  
+
   setInterval(()=>{
-    console.log('ok')
+    // r.style.setProperty('--var1', Math.floor(Math.random()*100))
+    // r.style.setProperty('--var2', Math.floor(Math.random()*100))
+    r.style.setProperty('--var3', Math.floor(Math.random()*100))
   },1000);
+  
   
   
   

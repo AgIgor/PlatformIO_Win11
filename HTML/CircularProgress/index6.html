@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Slider</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+
+        :root{
+            color-scheme: dark;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            display: flex;
+            /* flex-direction: column; */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container{
+            height: 200px;
+            width: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .back {
+            height: 200px;
+            width: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: end;
+            background-color: #1b1b1b;
+            border-radius: 10px;
+        }
+        .back .slider {
+            width: 100px;
+            height: 0px;
+            border-radius: 10px;
+            background-color: rgba(211, 211, 211, 0.219); 
+            /* min-height: 10px; */
+        }     
+        input[type="range"]#range {
+            cursor: pointer;
+            rotate: -90deg;
+            appearance: none;
+            width: 200px;
+            height: 100px;
+            border-radius: 10px;
+            background-color: transparent;
+            /* background-color: #1b1b1b; */
+            position: absolute;
+        }
+        input[type="range"]#range::-webkit-slider-thumb {
+            appearance: none;
+            background-color: #cccccca9;
+            border-radius: 10px;
+            height: 75px;
+            width: 3px;   
+        }   
+        
+       
+        
+        
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="back">
+            <div class="slider" id="slider"></div>
+        </div>
+        <input type="range" id="range" style="margin-top: 20px;" max="200" min="0" value="0">
+    </div>
+    
+    
+</body>
+<script>
+    
+    range.oninput = (e)=>{
+        // console.log(e.target.value);
+        slider.style.height = e.target.value + 'px'
+    }
+    
+    range.ontouch = (e)=>{
+        console.log(e.target.value);
+    }
+    
+</script>
+<!-- <script>
+    dragElement(document.getElementById("slider"));
+    
+    function dragElement(elmnt) {
+      var pos2 = 0, pos4 = 0, y = 0;
+      if (document.getElementById("slidertrack")) {
+        document.getElementById("slidertrack").onmousedown = dragMouseDown;
+      } else {
+        elmnt.onmousedown = dragMouseDown;
+      }
+    
+      function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+      }
+      
+      function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos2 = pos4 - e.clientY;
+        pos4 = e.clientY;
+        if(pos2 < 0) y--;
+        if(y > 100) y = 100;
+        if(pos2 > 0) y++;
+        if(y < 0) y = 0;
+        console.log(y);
+        elmnt.style.height = y + "%";
+      }
+    
+      function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+      }
+}
+    
+    
+</script> -->
+</html>
