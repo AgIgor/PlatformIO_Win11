@@ -18,55 +18,63 @@
         }
         body {
             display: flex;
-            /* flex-direction: column; */
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
         }
         .container{
-            height: 200px;
-            width: 100px;
+            /* height: 200px;
+            width: 100px; */
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
-        .back {
+        /* .back {
             height: 200px;
             width: 100px;
             display: flex;
             justify-content: center;
             align-items: end;
             background-color: #1b1b1b;
-            border-radius: 10px;
-        }
-        .back .slider {
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+   
+        } */
+        /* .back .slider {
             width: 100px;
             height: 0px;
-            border-radius: 10px;
-            background-color: rgba(211, 211, 211, 0.219); 
-            /* min-height: 10px; */
-        }     
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            background-color: rgba(211, 211, 211, 0.219);    
+        } */
         input[type="range"]#range {
             cursor: pointer;
             rotate: -90deg;
             appearance: none;
-            width: 200px;
+            -webkit-appearance: none;
+            outline: none;
+            width: 300px;
             height: 100px;
             border-radius: 10px;
-            background-color: transparent;
-            /* background-color: #1b1b1b; */
-            position: absolute;
+            /* /* background-color: transparent; */
+            background-color: #1b1b1b; */
+            /* position: absolute; */
+            /* background: linear-gradient(to right, #f50 50%, #ccc 50%); */
         }
         input[type="range"]#range::-webkit-slider-thumb {
+            -webkit-appearance: none;
             appearance: none;
             background-color: #cccccca9;
             border-radius: 10px;
             height: 75px;
-            width: 3px;   
-        }   
+            width: 5px;
+        }
         
        
-        
         
     </style>
 </head>
@@ -74,23 +82,26 @@
     
     <div class="container">
         <div class="back">
-            <div class="slider" id="slider"></div>
+            <!-- <div class="slider" id="slider"></div> -->
         </div>
-        <input type="range" id="range" style="margin-top: 20px;" max="200" min="0" value="0">
-    </div>
+        <input type="range" id="range" style="margin-top: 20px;" max="100" min="0" value="0">
+    </div>  
     
     
 </body>
 <script>
     
     range.oninput = (e)=>{
-        // console.log(e.target.value);
-        slider.style.height = e.target.value + 'px'
+        console.log(e.target.value);
+        const progress = (e.target.value / range.max) * 100;
+        range.style.background = `linear-gradient(90deg, rgba(255, 255, 255, 0.2) ${progress}%, rgba(255, 255, 255, 0.05) ${progress}%)`;
     }
     
-    range.ontouch = (e)=>{
-        console.log(e.target.value);
-    }
+    // range.ontouchmove  = (e)=>{
+    //     console.log(e.target.value);
+    //     slider.style.height = e.target.value + 'px'
+        
+    // }
     
 </script>
 <!-- <script>
