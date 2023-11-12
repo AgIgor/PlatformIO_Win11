@@ -24,33 +24,12 @@
             overflow: hidden;
         }
         .container{
-            /* height: 200px;
-            width: 100px; */
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            left: 0px;
         }
-        /* .back {
-            height: 200px;
-            width: 100px;
-            display: flex;
-            justify-content: center;
-            align-items: end;
-            background-color: #1b1b1b;
-            border-radius: 15px;
-            border-bottom-left-radius: 5px;
-            border-bottom-right-radius: 5px;
-   
-        } */
-        /* .back .slider {
-            width: 100px;
-            height: 0px;
-            border-radius: 15px;
-            border-bottom-left-radius: 5px;
-            border-bottom-right-radius: 5px;
-            background-color: rgba(211, 211, 211, 0.219);    
-        } */
         input[type="range"]#range {
             cursor: pointer;
             rotate: -90deg;
@@ -60,10 +39,7 @@
             width: 300px;
             height: 100px;
             border-radius: 10px;
-            /* /* background-color: transparent; */
-            background-color: #1b1b1b; */
-            /* position: absolute; */
-            /* background: linear-gradient(to right, #f50 50%, #ccc 50%); */
+            background-color: #1b1b1b;
         }
         input[type="range"]#range::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -73,9 +49,14 @@
             height: 75px;
             width: 5px;
         }
-        
-       
-        
+
+        #log {
+        height: 200px;
+        width: 600px;
+        overflow: scroll;
+        }
+
+   
     </style>
 </head>
 <body>
@@ -85,63 +66,48 @@
             <!-- <div class="slider" id="slider"></div> -->
         </div>
         <input type="range" id="range" style="margin-top: 20px;" max="100" min="0" value="0">
-    </div>  
+    </div>        
     
     
 </body>
 <script>
     
     range.oninput = (e)=>{
-        console.log(e.target.value);
+        // console.log(e);
         const progress = (e.target.value / range.max) * 100;
         range.style.background = `linear-gradient(90deg, rgba(255, 255, 255, 0.2) ${progress}%, rgba(255, 255, 255, 0.05) ${progress}%)`;
     }
     
-    // range.ontouchmove  = (e)=>{
-    //     console.log(e.target.value);
-    //     slider.style.height = e.target.value + 'px'
+    range.ontouchmove  = (e)=>{
+        // console.log(e);
+        const progress = (e.target.value / range.max) * 100;
+        range.style.background = `linear-gradient(90deg, rgba(255, 255, 255, 0.2) ${progress}%, rgba(255, 255, 255, 0.05) ${progress}%)`;
+    }
+    // const container = document.getElementsByClassName('container')[0]
+    range.ontouchstart = (e)=>{ 
+        // console.log(e.changedTouches.item(0));
+        // container.style = 'left: 10px;'
         
+        
+        console.log(window.TouchList[0]);
+
+    }
+    range.ontouchend = (e)=>{
+        // container.style = 'left: 0px;'
+    }
+
+    // range.addEventListener("touchmove", rotate);
+    // function rotate(e) {
+    //     const touch = e.changedTouches.item(0);
+    //     // e.preventDefault();
+    //     console.log(`${touch.radiusX * 2}px`,
+    //         `${touch.radiusY * 2}px`,
+    //         `rotate(${touch.rotationAngle}deg)`)
+
+    //     const progress = (e.target.value / range.max) * 100;
+    //     range.style.background = `linear-gradient(90deg, rgba(255, 255, 255, 0.2) ${progress}%, rgba(255, 255, 255, 0.05) ${progress}%)`;
     // }
-    
+
+
 </script>
-<!-- <script>
-    dragElement(document.getElementById("slider"));
-    
-    function dragElement(elmnt) {
-      var pos2 = 0, pos4 = 0, y = 0;
-      if (document.getElementById("slidertrack")) {
-        document.getElementById("slidertrack").onmousedown = dragMouseDown;
-      } else {
-        elmnt.onmousedown = dragMouseDown;
-      }
-    
-      function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-      }
-      
-      function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        pos2 = pos4 - e.clientY;
-        pos4 = e.clientY;
-        if(pos2 < 0) y--;
-        if(y > 100) y = 100;
-        if(pos2 > 0) y++;
-        if(y < 0) y = 0;
-        console.log(y);
-        elmnt.style.height = y + "%";
-      }
-    
-      function closeDragElement() {
-        document.onmouseup = null;
-        document.onmousemove = null;
-      }
-}
-    
-    
-</script> -->
 </html>
