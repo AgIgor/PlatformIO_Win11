@@ -163,6 +163,12 @@ void getAHT10(){
 //end get AHT
 
 void wifiConn(){
+  IPAddress ip(192, 168, 15, 7);
+  IPAddress gateway(192, 168, 15, 1);
+  IPAddress subnet(255, 255, 255, 0);
+  IPAddress dns(8, 8, 8, 8);
+  WiFi.config(ip, gateway, subnet, dns);
+  WiFi.setHostname("InternetClock");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   WiFi.setSleep(false);//
