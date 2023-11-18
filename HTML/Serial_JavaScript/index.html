@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Serial</title>
+    <style>
+        :root{
+            color-scheme: dark;
+        }
+        button{
+            color: black;
+            width: 100px;
+            height: 70px;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste</h1>
+    <button id="openBtn">Open</button>
+    <button id="closeBtn">Close</button>
+</body>
+<script>
+    // console.log(navigator.serial)
+    
+
+    // navigator.serial.requestPort()
+    //                 .then((e)=>{
+    //                     console.log(e)
+    //                 })
+    //                 .catch((e)=>{
+    //                     console.log(e)
+    //                 })
+    
+
+    
+    
+    // navigator.serial.addEventListener("connect", (e) => {
+    //     console.log('Conectado em: ', e.target)
+    //     console.log(navigator.serial)
+
+    // });
+    // navigator.serial.addEventListener("disconnect", (e) => {
+    //     console.log('Desconectado em: ', e.target)
+    //     console.log(navigator.serial)
+
+    // });
+
+    // console.log(window.prompt("Baud Rate"))
+    // console.log(confirm('teste'))
+
+    // async function connectSerial() {
+    //     try {
+    //         const port = await navigator.serial.requestPort();
+    //         await port.open({ baudRate: window.prompt("Baud Rate", 9600) });
+    //         const reader = port.readable.getReader();
+    //         async function readLoop() {
+    //             while (true) {
+    //                 const { value, done } = await reader.read();
+    //                 if (done) {
+    //                     console.log("Stream encerrado");
+    //                     reader.releaseLock();
+    //                     break;
+    //                 }
+    //                 console.log("Recebido:", new TextDecoder().decode(value));
+    //             }
+    //         }
+    //         readLoop(); // Inicia o loop de leitura
+    //     }
+    //     catch (err) {
+    //         console.error("Erro ao conectar à porta serial:", err);
+    //     }
+    // }
+
+    // async function disconnectSerial() {
+    //     const port = await navigator.serial.requestPort()
+    //     console.log(port.getInfo());
+    //     await port.releaseLock()
+    //     await port.close()
+    // }
+    
+
+
+    // if ('serial' in navigator) {
+        
+    //     const connectButton = document.createElement('button');
+    //     connectButton.textContent = 'Conectar à porta serial';
+    //     connectButton.addEventListener('click', connectSerial);
+    //     document.body.appendChild(connectButton);
+
+    //     const disconnectButton = document.createElement('button');
+    //     disconnectButton.textContent = 'Desconectar à porta serial';
+    //     disconnectButton.addEventListener('click', disconnectSerial);
+    //     document.body.appendChild(disconnectButton);
+
+    // } else {
+    //     console.error('Web Serial API não suportada pelo navegador.');
+    // }
+
+    
+    // async function getPorts(){
+    //    return await navigator.serial.requestPort()
+    // }
+
+    // navigator.serial.getPorts().then((ports) => {
+    //     console.log(ports);
+    // });
+
+
+    const SerialMonitor = {
+        port : null,
+        
+
+        async begin(){
+
+            port = await navigator.serial.requestPort()
+
+            try{
+                await port.open({ baudRate : window.prompt("Baud Rate", 9600) });
+                const reader = port.readable.getReader();
+                async function readLoop() {
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) {
+                            console.log("Stream encerrado");
+                            reader.releaseLock();
+                            break;
+                        }
+                        console.log("Recebido:", new TextDecoder().decode(value));   
+                    }
+                }
+                readLoop();
+            }
+            catch(err) {console.log(err);}
+        },
+        async discon(){
+            port.releaseLock().then(()=>{console.log("ok")})
+        }
+
+    }//
+
+    
+
+    if ('serial' in navigator) {
+        openBtn.onclick =()=>{
+            SerialMonitor.begin()
+        }
+        closeBtn.onclick =()=>{
+            SerialMonitor.discon()
+        }
+    }
+
+    
+
+</script>
+</html>
