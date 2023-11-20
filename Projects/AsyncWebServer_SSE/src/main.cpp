@@ -9,11 +9,6 @@
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 
-// #ifdef CORS_DEBUG
-//     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
-//     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
-// #endif
-
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
 
@@ -21,7 +16,7 @@ AsyncWebServer server(80);
 AsyncEventSource events("/events");
 
 unsigned long lastTime = 0;  
-unsigned long timerDelay = 1000;
+unsigned long timerDelay = 5000;
 
 float temperature;
 float humidity;
@@ -92,7 +87,9 @@ void setup() {
   }
 
   // Habilitando CORS
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  // DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
   // Handle Web Server
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     String payload = readFile("/index.html");
