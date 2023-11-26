@@ -6,6 +6,24 @@ byte r = 255;
 byte g = 0;
 byte b = 0;
 
+const char* PINS[][2] = {
+  {"frente"    , "15"},
+  {"tras"      , "2"},
+  {"esquerda"  , "4"},
+  {"direita"   , "5"},
+  {"sobe"      , "18"},
+  {"desce"     , "19"},
+};
+byte getPin(char* name){
+  byte tam = sizeof (PINS) / sizeof (PINS[0]);
+  for(byte i=0; i< tam; i++){
+    if(String(PINS[i][0]).indexOf(name) != -1){
+      return String(PINS[i][1]).toInt();
+    }
+  }
+  return 0;
+}
+
 void nextRainbowColor() {
   if (r > 0 && b == 0) {
     r--;
@@ -21,18 +39,54 @@ void nextRainbowColor() {
   }
 }//end nextRainbowColor 
 
+int initialLX = 0; 
+int initialLY = 0; 
+int initialRX = 0; 
+int initialRY = 0; 
+
 void setup() {
   Serial.begin(115200);
+  byte tam = sizeof (PINS) / sizeof (PINS[0]);
+  for(byte i=0; i< tam; i++){
+    pinMode(String(PINS[i][1]).toInt(), OUTPUT);
+  }
+
   while(!PS4.isConnected()){
     PS4.begin("48:fd:a3:19:75:67");
     Serial.print(".");
 	delay(500);
   }
   Serial.println("Ready.");
+
+  delay(100);
+  if (PS4.isConnected()) {
+    initialLX = PS4.LStickX();
+    delay(1);
+    initialLY = PS4.LStickY();
+    delay(1);
+    initialRX = PS4.RStickX();
+    delay(1);
+    initialRY = PS4.RStickY();
+    delay(1);
+  }
+  delay(100);
+
+
 }//end setup
 
+bool flag = true;
 void loop() {
-  // Below has all accessible outputs from the controller
+
+  if((millis()/100)%2){
+    if(flag){
+      flag = false;
+      //Serial.println(millis());
+    }
+    else{
+      flag = true;
+    }
+  }
+
   if (PS4.isConnected()) {
     if (PS4.Right()) Serial.println("Right Button");
     if (PS4.Down()) Serial.println("Down Button");
@@ -67,29 +121,37 @@ void loop() {
       Serial.printf("R2 button at %d\n", PS4.R2Value());
     }
 
-    if (PS4.LStickX()) {
+
+    // int val = map(analogRead(A1), 0, 1023, -128, 128);
+
+    //((PS4.LStickX() - (initialLX))*0.002 < -0.02 or (PS4.LStickX() - (initialLX))*0.002 > 0.02);
+    
+
+
+    if ((PS4.LStickX() - (initialLX))*0.002 < -0.02 or (PS4.LStickX() - (initialLX))*0.002 > 0.02) {
       Serial.printf("Left Stick x at %d\n", PS4.LStickX());
     }
-    if (PS4.LStickY()) {
+    if ((PS4.LStickY() - (initialLY))*0.002 < -0.02 or (PS4.LStickY() - (initialLY))*0.002 > 0.02) {
       Serial.printf("Left Stick y at %d\n", PS4.LStickY());
     }
-    if (PS4.RStickX()) {
+    if ((PS4.RStickX() - (initialRX))*0.002 < -0.02 or (PS4.RStickX() - (initialRX))*0.002 > 0.02) {
       Serial.printf("Right Stick x at %d\n", PS4.RStickX());
     }
-    if (PS4.RStickY()) {
+    if ((PS4.RStickY() - (initialRY))*0.002 < -0.02 or (PS4.RStickY() - (initialRY))*0.002 > 0.02) {
       Serial.printf("Right Stick y at %d\n", PS4.RStickY());
     }
 
+    /*
     if (PS4.Charging()) Serial.println("The controller is charging");
     if (PS4.Audio()) Serial.println("The controller has headphones attached");
     if (PS4.Mic()) Serial.println("The controller has a mic attached");
 
     Serial.printf("Battery Level : %d\n", PS4.Battery());
-
+    */
     // Serial.println()
     // This delay is to make the output more human readable
     // Remove it when you're not trying to see the output
-    delay(300);
+    delay(100);
     PS4.setLed(r, g, b);
     nextRainbowColor();
 
@@ -105,5 +167,6 @@ void loop() {
 
     // Sends data set in the above three instructions to the controller
     PS4.sendToController();
-  }
+  } 
+
 }//end loop
