@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Jogo com Controle Analógico</title>
+    <style>
+        :root{
+          /* color-scheme: dark; */
+        }
+        *{
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body{
+          display: block;
+          text-align: center;
+          justify-content: center;
+        }
+        canvas {
+          border: 1px solid black;
+          display: block;
+          margin: 0 auto;
+          border-radius: 50%;
+          margin-bottom: 20px;
+        }
+        .container{
+          display: block;
+          text-align: center;
+          border: 1px solid red;
+        }
+        button{
+          width: 100px;
+          height: 200px;
+        }
+      </style>
+</head>
+<body>
+    <div class="container">
+      <canvas id="gameCanvas" width="200" height="200"></canvas>
+    </div>
+    <p id="saida" style="color: red;">0,0</p>
+    <button id="btn">ok</button>
+
+    <script>
+        window.onload = function() {
+          const canvas = document.getElementById('gameCanvas');
+          const ctx = canvas.getContext('2d');
+    
+          // Posição inicial do joystick
+          let joystickX = canvas.width / 2;
+          let joystickY = canvas.height / 2;
+          const joystickRadius = 30;
+    
+          function draw() {
+            // Limpa o canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+            // Desenha o joystick
+            ctx.beginPath();
+            ctx.arc(joystickX, joystickY, joystickRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+            ctx.closePath();
+          }
+    
+          function handleJoystick(e) {
+            // Atualiza a posição do joystick baseado no input do mouse/touch
+            if (e.clientX && e.clientY) {
+              saida.innerText = `${e.clientX}, ${e.clientY}`
+
+              joystickX = e.clientX - canvas.getBoundingClientRect().left;
+              joystickY = e.clientY - canvas.getBoundingClientRect().top;
+            } else if (e.touches && e.touches.length > 0) {
+              joystickX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+              joystickY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+
+              saida.innerText = `${joystickX}, ${joystickY}`
+            }
+    
+            // Garante que o joystick não ultrapasse os limites do canvas
+            if (joystickX < joystickRadius) {
+              joystickX = joystickRadius;
+            }
+            if (joystickX > canvas.width - joystickRadius) {
+              joystickX = canvas.width - joystickRadius;
+            }
+            if (joystickY < joystickRadius) {
+              joystickY = joystickRadius;
+            }
+            if (joystickY > canvas.height - joystickRadius) {
+              joystickY = canvas.height - joystickRadius;
+            }
+    
+            // Redesenha o jogo com a nova posição do joystick
+            draw();
+          }
+          
+          function resetJoystick(){
+            // Posição inicial do joystick
+            let joystickX = canvas.width / 2;
+            let joystickY = canvas.height / 2;
+            const joystickRadius = 30;
+            // Limpa o canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+            // Desenha o joystick
+            ctx.beginPath();
+            ctx.arc(joystickX, joystickY, joystickRadius, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+            ctx.closePath();
+
+          }
+          // Adiciona eventos de mouse e touch para controlar o joystick
+          canvas.addEventListener('mousemove', handleJoystick);
+          canvas.addEventListener('mouseleave', resetJoystick);
+          canvas.addEventListener('touchmove', handleJoystick);
+          canvas.addEventListener('touchend', resetJoystick);
+
+          btn.addEventListener('mousedown', ()=> saida.style.color = 'red');
+          btn.addEventListener('mouseup', ()=> saida.style.color = 'blue');
+    
+          // Inicia o jogo
+          draw();
+        };
+      </script>
+</body>
+</html>

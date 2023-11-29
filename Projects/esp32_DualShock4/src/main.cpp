@@ -6,6 +6,11 @@ byte r = 255;
 byte g = 0;
 byte b = 0;
 
+int initialLX = 0; 
+int initialLY = 0; 
+int initialRX = 0; 
+int initialRY = 0; 
+
 const char* PINS[][2] = {
   {"frente"    , "13"},
   {"tras"      , "12"},
@@ -16,6 +21,7 @@ const char* PINS[][2] = {
   {"farol"     , "22"},
   {"lanterna"  , "23"},
 };
+
 byte getPin(char* name){
   byte tam = sizeof (PINS) / sizeof (PINS[0]);
   for(byte i=0; i< tam; i++){
@@ -41,11 +47,6 @@ void nextRainbowColor() {
   }
 }//end nextRainbowColor 
 
-int initialLX = 0; 
-int initialLY = 0; 
-int initialRX = 0; 
-int initialRY = 0; 
-
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -55,7 +56,8 @@ void setup() {
   }
 
   while(!PS4.isConnected()){
-    PS4.begin("48:fd:a3:19:75:67");
+    // PS4.begin("1c:66:6d:76:84:1b");//
+    PS4.begin("48:fd:a3:19:75:67");//
     Serial.print(".");
 	delay(500);
   }
@@ -74,21 +76,63 @@ void setup() {
   }
   delay(100);
 
+  Serial.println(ESP_MAC_BT);
+
 
 }//end setup
-
+/* 
+byte valPress = 0;
 bool flag = true;
-void loop() {
+bool estadoBotao;
+unsigned long tempoPressionado;
+unsigned long tempoAtual;
+unsigned long tempoPressionado;
+unsigned long tempoAtual;
+int val;
+void longPress(bool btn){
+    bool btn = digitalRead(BOT_PIN);
+  static bool lastBtn;
 
-  // if((millis()/100)%2){
-  //   if(flag){
-  //     flag = false;
-  //     //Serial.println(millis());
-  //   }
-  //   else{
-  //     flag = true;
-  //   }
-  // }
+  if(btn){
+     if(lastBtn) {
+      val++;
+      Serial.println(val);
+      lastBtn = false;
+    }
+    tempoAtual = millis();
+  }else{
+
+      if(millis() - tempoAtual > 3000){
+        Serial.println("Long");
+        tempoAtual = millis();
+        lastBtn = true;
+        btn = false;
+      }
+      else if(!lastBtn) {
+        Serial.println("Down");
+        lastBtn = true;
+      }
+        
+  }
+
+  if((millis()/500)%2){
+    if(flag){
+      flag = false;
+      valPress++;
+      //Serial.println(millis());
+    }
+    else{
+      flag = true;
+      Serial.println(valPress);
+      valPress = 0;
+      return;
+
+    }
+  }
+
+}
+ */
+void loop() {
 
   if (PS4.isConnected()) {
 
@@ -100,7 +144,9 @@ void loop() {
     if (PS4.Square()) Serial.println("Square Button");
     if (PS4.Cross()) Serial.println("Cross Button");
     if (PS4.Circle()) Serial.println("Circle Button");
+
     if (PS4.Triangle()) Serial.println("Triangle Button");
+    //longPress(PS4.Triangle());
 
     if (PS4.UpRight()) Serial.println("Up Right");
     if (PS4.DownRight()) Serial.println("Down Right");
@@ -120,7 +166,7 @@ void loop() {
     if (PS4.Touchpad()) digitalWrite(LED_BUILTIN, HIGH);
     else digitalWrite(LED_BUILTIN, LOW);
 
-    if (PS4.L2()) {
+/*     if (PS4.L2()) {
       Serial.printf("L2 button at %d\n", PS4.L2Value());
       if(PS4.L2Value() > 150) digitalWrite(getPin("tras"), HIGH);
     }
@@ -130,16 +176,17 @@ void loop() {
       Serial.printf("R2 button at %d\n", PS4.R2Value());
       if(PS4.R2Value() > 150) digitalWrite(getPin("frente"), HIGH);
     }
-    else digitalWrite(getPin("frente"), LOW);
+    else digitalWrite(getPin("frente"), LOW); 
+*/
 
-/*
+
     if ((PS4.LStickX() - (initialLX))*0.002 < -0.02 or (PS4.LStickX() - (initialLX))*0.002 > 0.02) {
       Serial.printf("Left Stick x at %d\n", PS4.LStickX());
     }
     if ((PS4.LStickY() - (initialLY))*0.002 < -0.02 or (PS4.LStickY() - (initialLY))*0.002 > 0.02) {
       Serial.printf("Left Stick y at %d\n", PS4.LStickY());
     }
-*/
+
     if ((PS4.RStickX() - (initialRX))*0.002 < -0.02 or (PS4.RStickX() - (initialRX))*0.002 > 0.02) {
       //Serial.printf("Right Stick x at %d\n", PS4.RStickX());
 
