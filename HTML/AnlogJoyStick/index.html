@@ -17,31 +17,88 @@
           display: block;
           text-align: center;
           justify-content: center;
+          overflow: hidden;;
         }
         canvas {
           border: 1px solid black;
           display: block;
           margin: 0 auto;
           border-radius: 50%;
-          margin-bottom: 20px;
+          background-color: #171717;
         }
         .container{
-          display: block;
-          text-align: center;
+          display: flex;
+          flex-direction: column;
+          /* gap: 0px; */
+          justify-content: space-evenly;
+          align-items: center;
           border: 1px solid red;
+          height: 100vh;
         }
-        button{
-          width: 100px;
-          height: 200px;
+        #containerGameBtn{
+          display: grid;
+          grid-template-columns: auto auto auto;
+          grid-template-rows: auto auto auto;
+          justify-content: center;
+          align-content: center;
+          border: 1px solid black;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background-color: #171717;
+        }
+        #containerGameBtn button{
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          /* padding: 15px 25px; */
+          font-size: 24px;
+          text-align: center;
+          cursor: pointer;
+          outline: none;
+          color: #fff;
+          background-color: #04AA6D;
+          border: none;
+          box-shadow: 0 9px #999;
+        }
+        #containerGameBtn button:active {
+          box-shadow: 0 5px #666;
+          transform: translateY(4px);
+        }
+        #Y{
+          grid-column: 2;
+          grid-row: 1;
+        }
+        #A{
+          grid-column: 2;
+          grid-row: 3;
+        }
+        #X{
+          grid-column: 1;
+          grid-row: 2;
+        }
+        #B{
+          grid-column: 3;
+          grid-row: 2;
         }
       </style>
 </head>
 <body>
     <div class="container">
-      <canvas id="gameCanvas" width="200" height="200"></canvas>
+      <p id="saida" style="margin: 0;">---</p>
+      <canvas id="gameCanvas" width="300" height="300"></canvas>
+
+      <div id="containerGameBtn" class="grid-container">
+
+        <button id="Y" style="background-color: orange;">Y</button>
+        <button id="X" style="background-color: lightskyblue;">X</button>
+        <button id="A" style="background-color: #3e8e41;">A</button>
+        <button id="B" style="background-color: lightcoral;">B</button>
+
+      </div>
+      <p id="saida2" style="margin: 0;">---</p>
+
     </div>
-    <p id="saida" style="color: red;">0,0</p>
-    <button id="btn">ok</button>
 
     <script>
         window.onload = function() {
@@ -52,6 +109,8 @@
           let joystickX = canvas.width / 2;
           let joystickY = canvas.height / 2;
           const joystickRadius = 30;
+
+          console.log(joystickX, joystickY);
     
           function draw() {
             // Limpa o canvas
@@ -60,47 +119,65 @@
             // Desenha o joystick
             ctx.beginPath();
             ctx.arc(joystickX, joystickY, joystickRadius, 0, Math.PI * 2);
-            ctx.fillStyle = 'blue';
+            ctx.fillStyle = 'red';
             ctx.fill();
             ctx.closePath();
           }
     
           function handleJoystick(e) {
-            // Atualiza a posição do joystick baseado no input do mouse/touch
+            e.preventDefault();
             if (e.clientX && e.clientY) {
-              saida.innerText = `${e.clientX}, ${e.clientY}`
+              // console.log(`${e.clientX}, ${e.clientY}`) 
+              //frente esquerda = 240, 300
+              //frente direita = 330, 300
+              //traseira esquerda = 240, 400
+              //traseira direita = 330, 400
+
+              if(e.clientX > 300) sendData('Direita')
+              if(e.clientX < 260) sendData('Esquerda')
+              if(e.clientY > 260) sendData('Tras')
+              if(e.clientY < 220) sendData('Frente')
 
               joystickX = e.clientX - canvas.getBoundingClientRect().left;
               joystickY = e.clientY - canvas.getBoundingClientRect().top;
-            } else if (e.touches && e.touches.length > 0) {
+
+            }
+            else if (e.touches && e.touches.length > 0) {
+
               joystickX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
               joystickY = e.touches[0].clientY - canvas.getBoundingClientRect().top;
+              
+              //frente esquerda = 55, 56
+              //frente direita = 155, 56
+              //traseira esquerda = 50, 150
+              //traseira direita = 150, 150
 
-              saida.innerText = `${joystickX}, ${joystickY}`
+              const mx = 150 + 20, mn = 150 - 20;
+              if(joystickX > mx) sendData('Direita')
+              if(joystickX < mn) sendData('Esquerda')
+              if(joystickY > mx) sendData('Tras')
+              if(joystickY < mn) sendData('Frente')
+
+              // console.log(`${joystickX}, ${joystickY}`)
+
             }
     
             // Garante que o joystick não ultrapasse os limites do canvas
-            if (joystickX < joystickRadius) {
-              joystickX = joystickRadius;
-            }
-            if (joystickX > canvas.width - joystickRadius) {
-              joystickX = canvas.width - joystickRadius;
-            }
-            if (joystickY < joystickRadius) {
-              joystickY = joystickRadius;
-            }
-            if (joystickY > canvas.height - joystickRadius) {
-              joystickY = canvas.height - joystickRadius;
-            }
+            if (joystickX < joystickRadius) joystickX = joystickRadius;
+            if (joystickX > canvas.width - joystickRadius) joystickX = canvas.width - joystickRadius;
+            if (joystickY < joystickRadius) joystickY = joystickRadius;
+            if (joystickY > canvas.height - joystickRadius) joystickY = canvas.height - joystickRadius;
     
             // Redesenha o jogo com a nova posição do joystick
             draw();
           }
           
           function resetJoystick(){
+
             // Posição inicial do joystick
             let joystickX = canvas.width / 2;
             let joystickY = canvas.height / 2;
+            console.log(joystickX, joystickY);
             const joystickRadius = 30;
             // Limpa o canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -108,23 +185,36 @@
             // Desenha o joystick
             ctx.beginPath();
             ctx.arc(joystickX, joystickY, joystickRadius, 0, Math.PI * 2);
-            ctx.fillStyle = 'blue';
+            ctx.fillStyle = 'green';
             ctx.fill();
             ctx.closePath();
 
           }
+          
           // Adiciona eventos de mouse e touch para controlar o joystick
-          canvas.addEventListener('mousemove', handleJoystick);
-          canvas.addEventListener('mouseleave', resetJoystick);
+          // canvas.addEventListener('mousemove', handleJoystick);
+          // canvas.addEventListener('mouseleave', resetJoystick);
           canvas.addEventListener('touchmove', handleJoystick);
           canvas.addEventListener('touchend', resetJoystick);
 
-          btn.addEventListener('mousedown', ()=> saida.style.color = 'red');
-          btn.addEventListener('mouseup', ()=> saida.style.color = 'blue');
-    
+          const elements = document.querySelectorAll('.grid-container');
+          elements.forEach(element => {
+            element.addEventListener('touchstart', function(event) {
+              event.preventDefault();
+              const elementId = event.target.id;
+              console.log(`Elemento tocado: ${elementId}`);
+              saida2.innerText = `Elemento tocado: ${elementId}`
+            });
+          });
+          
           // Inicia o jogo
           draw();
-        };
+
+          function sendData(cmd) {
+            console.log(cmd);
+            saida.innerText = cmd;
+          }
+        }
       </script>
 </body>
 </html>
