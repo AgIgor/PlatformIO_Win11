@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Jogo com Controle Analógico</title>
     <style>
-        :root{
-          /* color-scheme: dark; */
-        }
         *{
           margin: 0;
           padding: 0;
@@ -17,7 +14,10 @@
           display: block;
           text-align: center;
           justify-content: center;
-          overflow: hidden;;
+          overflow: hidden;
+          background-color: #171717;
+          color: white;
+          height: 500px;
         }
         canvas {
           border: 1px solid black;
@@ -29,11 +29,10 @@
         .container{
           display: flex;
           flex-direction: column;
-          /* gap: 0px; */
-          justify-content: space-evenly;
+          /* justify-content: space-around; */
           align-items: center;
-          border: 1px solid red;
           height: 100vh;
+          gap: 50px;
         }
         #containerGameBtn{
           display: grid;
@@ -46,13 +45,15 @@
           height: 300px;
           border-radius: 50%;
           background-color: #171717;
+          /* border: 1px solid red; */
         }
         #containerGameBtn button{
-          width: 60px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
           /* padding: 15px 25px; */
-          font-size: 24px;
+          font-size: 30px;
+          font-weight: bold;
           text-align: center;
           cursor: pointer;
           outline: none;
@@ -81,26 +82,71 @@
           grid-column: 3;
           grid-row: 2;
         }
+        .rotated {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+        }
       </style>
 </head>
 <body>
-    <div class="container">
-      <p id="saida" style="margin: 0;">---</p>
-      <canvas id="gameCanvas" width="300" height="300"></canvas>
+  <!-- <div class="">
+    <span id="saida">---</span>
+    <span id="saida2">---</span>
+  </div> -->
 
-      <div id="containerGameBtn" class="grid-container">
-
-        <button id="Y" style="background-color: orange;">Y</button>
-        <button id="X" style="background-color: lightskyblue;">X</button>
-        <button id="A" style="background-color: #3e8e41;">A</button>
-        <button id="B" style="background-color: lightcoral;">B</button>
-
-      </div>
-      <p id="saida2" style="margin: 0;">---</p>
-
+  <div class="container" id="container">
+    <div id="joy1Div" style="width:300px;height:300px;margin:0px"></div>
+    <!-- <canvas id="gameCanvas" width="300" height="300"></canvas> -->
+    <div id="containerGameBtn" class="grid-container">
+      <button id="Y" style="background-color: orange;">Y</button>
+      <button id="X" style="background-color: lightskyblue;">X</button>
+      <button id="A" style="background-color: #3e8e41;">A</button>
+      <button id="B" style="background-color: lightcoral;">B</button>
     </div>
+  </div>
+
+    <script src="joy.js"></script>
 
     <script>
+      window.onload = function() {
+        window.addEventListener('orientationchange', function(){
+          if(window.innerHeight > window.innerWidth) 
+            container.className = 'container rotated'
+          else container.className = 'container'
+        });
+      }
+    </script>
+
+    <script>
+      var Joy1 = new JoyStick('joy1Div', {}, function(stickData) {
+        // saida.innerText = stickData.xPosition;
+        // joy1InputPosY.value = stickData.yPosition;
+        // saida.innerText = stickData.cardinalDirection;
+        // joy1X.value = stickData.x;
+        // joy1Y.value = stickData.y;
+        // console.log(stickData.cardinalDirection);
+        sendData(stickData.cardinalDirection);
+      });
+    </script>
+
+    <script>
+      const elements = document.querySelectorAll('.grid-container');
+          elements.forEach(element => {
+            element.addEventListener('touchstart', function(event) {
+              event.preventDefault();
+              const elementId = event.target.id;
+              if(elementId != 'containerGameBtn'){
+                // console.log(`Elemento tocado: ${elementId}`);
+                // saida2.innerText = `${elementId}`
+                sendData(elementId)
+              }
+            });
+          });
+    </script>
+
+    <!-- <script>
         window.onload = function() {
           const canvas = document.getElementById('gameCanvas');
           const ctx = canvas.getContext('2d');
@@ -197,24 +243,18 @@
           canvas.addEventListener('touchmove', handleJoystick);
           canvas.addEventListener('touchend', resetJoystick);
 
-          const elements = document.querySelectorAll('.grid-container');
-          elements.forEach(element => {
-            element.addEventListener('touchstart', function(event) {
-              event.preventDefault();
-              const elementId = event.target.id;
-              console.log(`Elemento tocado: ${elementId}`);
-              saida2.innerText = `Elemento tocado: ${elementId}`
-            });
-          });
+          
           
           // Inicia o jogo
-          draw();
-
-          function sendData(cmd) {
-            console.log(cmd);
-            saida.innerText = cmd;
-          }
+          draw(); 
         }
-      </script>
+      </script> -->
+
+    <script>
+      function sendData(cmd) {
+        console.log(cmd);
+        // saida.innerText = cmd;
+      };
+    </script>
 </body>
 </html>
