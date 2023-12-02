@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Jogo com Controle Analógico</title>
+    <style>
+        *{
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body{
+          display: block;
+          text-align: center;
+          justify-content: center;
+          overflow: hidden;
+          background-color: #171717;
+          color: white;
+          height: 500px;
+          padding-top: 20px;
+        }
+        canvas {
+          border: 1px solid black;
+          display: block;
+          margin: 0px auto;
+          border-radius: 50%;
+          background-color: #171717;
+          margin-top: 20px;     
+        }
+        .hide{
+          display: none;
+        }
+        .show{
+          color: green;
+          display: block;
+          position: absolute;
+          z-index: 5;
+        }
+        .error{
+          color: red;
+          display: block;
+          position: absolute;
+          z-index: 5;
+        }
+        .container{
+          display: flex;
+          flex-direction: column;
+          /* justify-content: space-around; */
+          align-items: center;
+          height: 100vh;
+          gap: 50px;
+        }
+        @media only screen and (min-width: 600px) {
+        .container {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+        }
+      }
+        #containerGameBtn{
+          display: grid;
+          grid-template-columns: auto auto auto;
+          grid-template-rows: auto auto auto;
+          justify-content: center;
+          align-content: center;
+          border: 1px solid black;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background-color: #171717;
+          /* border: 1px solid red; */
+        }
+        #containerGameBtn button{
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          /* padding: 15px 25px; */
+          font-size: 30px;
+          font-weight: bold;
+          text-align: center;
+          cursor: pointer;
+          outline: none;
+          color: #fff;
+          background-color: #04AA6D;
+          border: none;
+          box-shadow: 0 9px #999;
+        }
+        #containerGameBtn button:active {
+          box-shadow: 0 5px #666;
+          transform: translateY(4px);
+        }
+        #Y{
+          grid-column: 2;
+          grid-row: 1;
+        }
+        #A{
+          grid-column: 2;
+          grid-row: 3;
+        }
+        #X{
+          grid-column: 1;
+          grid-row: 2;
+        }
+        #B{
+          grid-column: 3;
+          grid-row: 2;
+        }
+    </style>
+</head>
+<body>
+  <div id="notify" class="hide">
+    
+  </div>
+  <div class="container" id="container">
+    <div id="joy1Div" style="width:300px;height:300px;margin:0px"></div>
+
+    <div id="containerGameBtn" class="grid-container">
+      <button id="Y" style="background-color: orange;">Y</button>
+      <button id="X" style="background-color: lightskyblue;">X</button>
+      <button id="A" style="background-color: #3e8e41;">A</button>
+      <button id="B" style="background-color: lightcoral;">B</button>
+    </div>
+  </div>
+
+    <script src="joy.js"></script>
+
+    <script>
+      // var targetUrl = `ws://${window.location.hostname}/ws`;
+      const targetUrl = `ws://192.168.15.4/ws`;
+      window.addEventListener('load', onLoad);
+
+      function onLoad() {
+        initializeSocket();
+      }
+      function initializeSocket() {
+        console.log('Opening WebSocket connection to ESP32...');
+
+        notify.classList.add('show')
+        notify.innerHTML = '<h1>Conectando...</h1>'
+
+        websocket = new WebSocket(targetUrl);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage;
+        websocket.onerror = onError;
+      }
+      function onError(event){
+        console.log(event.type);
+        notify.classList.add('error')
+        notify.innerHTML = '<h1>Erro!</h1>'
+      }
+      function onOpen(event) {
+        console.log('Starting connection to server..');
+        notify.classList.add('show')
+        notify.innerHTML = '<h1>Conectado!</h1>'
+        
+        setTimeout(function(){
+          notify.classList.remove('show')
+          notify.innerHTML = ''
+        },2000)
+
+      }
+      function onClose(event) {
+        console.log('Closing connection to server..');
+        setTimeout(initializeSocket, 2000);
+      }
+      function onMessage(event) {
+        console.log("WebSocket message received:", event)
+      }
+
+      function sendMessage(message) {
+        websocket.send(message);
+      }
+    
+
+      const Joy1 = new JoyStick('joy1Div', {}, function(stickData) {
+
+        if (stickData.cardinalDirection != 'C'){
+          console.log(`${stickData.cardinalDirection}:true`);
+          sendMessage(`${stickData.cardinalDirection}:true`);
+        }
+        else{
+          console.log(`${stickData.cardinalDirection}:false`);
+          sendMessage(`${stickData.cardinalDirection}:false`);
+        }
+
+      });
+
+      const elements = document.querySelectorAll('#containerGameBtn');
+      elements.forEach(element => {
+        element.addEventListener('touchstart', function(event) {
+          event.preventDefault();
+          const elementId = event.target.id;
+          const data = {
+            elementId: 'true'
+          };
+
+          if(elementId != 'containerGameBtn'){
+
+            // console.log(`${elementId}:true`)
+            // sendMessage(`${elementId}:true`)
+            sendMessage(JSON.stringify(data))
+
+          }
+        });
+
+        element.addEventListener('touchend', function(event) {
+          event.preventDefault();
+          const elementId = event.target.id;
+          if(elementId != 'containerGameBtn'){
+
+            // console.log(`${elementId}:false`)
+            // sendMessage(`${elementId}:false`)
+
+          }
+        });
+
+
+      });
+    </script>
+
+</body>
+</html>
