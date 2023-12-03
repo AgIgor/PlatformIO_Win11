@@ -157,7 +157,7 @@
     <button id="conn">Conectar</button>
   </div>
 
-  <div id="block" class="block"></div>
+  <!-- <div id="block" class="block"></div> -->
   
   <div class="off">
     <button id="btnClose">X</button>
@@ -230,6 +230,7 @@
     }
     function sendMessage(message) {
       websocket.send(message);
+      // console.log(message);
     }
     btnClose.addEventListener('click', () => {
       websocket.close()
@@ -253,7 +254,7 @@
       element.addEventListener('touchstart', function(event) {
         event.preventDefault();
         const elementId = event.target.id;  
-        console.log(elementId);        
+         
         if(elementId != 'containerGameBtn'){
           console.log(`${elementId}:true`)
           sendMessage(`${elementId}:true`)

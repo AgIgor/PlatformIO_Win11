@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <Arduino.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -24,6 +23,9 @@ AsyncWebSocket ws("/ws");
 #define pinL1  4
 #define pinL2  5
 #define pinL3  18
+
+bool l1 = false;
+bool l2 = false;
 
 
 void sendCarCommand(const char *command)
@@ -94,6 +96,21 @@ void sendCarCommand(const char *command)
     digitalWrite(pinE, LOW);
     digitalWrite(pinD, LOW);
   }
+  
+  if (cmd == "Y:true") digitalWrite(pinSF, HIGH);
+  if (cmd == "Y:false") digitalWrite(pinSF, LOW);
+
+  if (cmd == "A:true") digitalWrite(pinST, HIGH);
+  if (cmd == "A:false") digitalWrite(pinST, LOW);
+
+  if (cmd == "B:true") {
+    l1 = !l1;
+    digitalWrite(pinL1, l1);
+  }
+  if (cmd == "X:true") {
+    l2 = !l2;
+    digitalWrite(pinL2, l2);
+  }
 }
 
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
@@ -103,14 +120,14 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   {
   case WS_EVT_CONNECT:
   {
-    // Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
+    Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
     // client->printf("Hello Client %u :)", client->id());
     // client->ping();
   }
 
   case WS_EVT_DISCONNECT:
   {
-    // Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
+    Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
   }
 
   case WS_EVT_DATA:
@@ -134,7 +151,7 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
     // Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char *)data : "");
     // data[len] = 0;
     //     char *command = (char *)data;
-        sendCarCommand((char *)data);
+        //sendCarCommand((char *)data);
   }
 
   case WS_EVT_ERROR:
@@ -148,28 +165,7 @@ void notFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain", "Not found");
 }
-String getRedes(){
-  WiFi.mode(WIFI_STA);
-  WiFi.begin();
-  String redes = "";
-  // Serial.println("Scanning Wi-Fi networks...");
-  
-  int numNetworks = WiFi.scanNetworks();
-  if (numNetworks == 0) {
-    return "Wifi não encontrado!";
-  } else {
 
-    for (int i = 0; i < numNetworks; ++i) {
-      // Serial.print("Network name: ");
-      // Serial.println(WiFi.SSID(i));
-      // Serial.print("Signal strength: ");
-      // Serial.println(WiFi.RSSI(i));
-      // Serial.println("-----------------------");
-      redes += String(WiFi.SSID(i))+",";
-    }
-  }
-  return redes;
-}
 void setup()
 {
   pinMode(pinF, OUTPUT);
@@ -206,41 +202,6 @@ void setup()
   Serial.print("AP address: ");
   Serial.println(WiFi.softAPIP());
 
-  /* WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    Serial.printf("WiFi Failed!\n");
-    WiFi.softAP("Esp", "");
-    Serial.print("AP address: ");
-    Serial.println(WiFi.softAPIP());
-
-
-    //getRedes();
-    bool flag = true;
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-    {
-      Serial.println("Requesting index page...");
-      request->send(LittleFS, "/wm.html", "text/html", false);
-      // request->send(200, getRedes() , "text/plain");
-    });
-    server.on("/wm", HTTP_GET, [](AsyncWebServerRequest *request)
-    {
-      Serial.println("Requesting index page...");
-      request->send(200, getRedes() , "text/plain");
-    });
-    server.onNotFound(notFound);
-    server.begin();
-    while (flag)
-    {
-      delay(1);
-    }
-
-  }
-
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP()); */
-
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
   DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
@@ -261,4 +222,5 @@ void setup()
   server.begin();
 }
 void loop() {
+  
 }
