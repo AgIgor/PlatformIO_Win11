@@ -4,76 +4,98 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h> 
-#include <ArduinoJson.h>
 
-const char* ssid = "VIVOFIBRA-9501";
-const char* password = "rgw7ucm3GT";
+// const char* ssid = "VIVOFIBRA-9501";
+// const char* password = "rgw7ucm3GT";
 
 // const char *ssid = "Esp";
 // const char *password = "";
 
-// AsyncWebserver runs on port 80 and the asyncwebsocket is initialize at this point also
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-int ledPin1 = 13; // Pino do LED
-int ledPin2 = 12; // Pino do LED
-int ledPin3 = 14; // Pino do LED
-int ledPin4 = 27; // Pino do LED
+#define pinF  13
+#define pinT  12
+#define pinE  14
+#define pinD  27
+
+#define pinSF  15
+#define pinST  2
+#define pinL1  4
+#define pinL2  5
+#define pinL3  18
 
 
 void sendCarCommand(const char *command)
 {
-  // command could be either "left", "right", "forward" or "reverse" or "stop"
-  // or speed settingg "slow-speed", "normal-speed", or "fast-speed"
-  if (strcmp(command, "left") == 0)
+  String cmd = String(command);
+  Serial.println(cmd);
+
+  if (cmd == "E:true")
   {
-    digitalWrite(ledPin1, HIGH);
-    //car.turnLeft();
-    Serial.println("1");
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinE, HIGH);
+    digitalWrite(pinD, LOW);
+    digitalWrite(pinT, LOW);
   }
-  else if (strcmp(command, "right") == 0)
+  if (cmd == "D:true")
   {
-    digitalWrite(ledPin2, HIGH);
-    //car.turnRight();
-    Serial.println("2");
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinD, HIGH);
+    digitalWrite(pinT, LOW);
   }
-  else if (strcmp(command, "up") == 0)
+  if (cmd == "F:true")
   {
-    digitalWrite(ledPin3, HIGH);
-    //car.moveForward();
-    Serial.println("3");
+    digitalWrite(pinF, HIGH);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinD, LOW);
+    digitalWrite(pinT, LOW);
   }
-  else if (strcmp(command, "down") == 0)
+  if (cmd == "T:true")
   {
-    digitalWrite(ledPin4, HIGH);
-    //car.moveBackward();
-    Serial.println("4");
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinD, LOW);
+    digitalWrite(pinT, HIGH);
   }
-  else if (strcmp(command, "stop") == 0)
+  if (cmd == "FE:true")
   {
-    digitalWrite(ledPin1, LOW);
-    digitalWrite(ledPin2, LOW);
-    digitalWrite(ledPin3, LOW);
-    digitalWrite(ledPin4, LOW);
-    //car.stop();
+    digitalWrite(pinF, HIGH);
+    digitalWrite(pinE, HIGH);
+    digitalWrite(pinD, LOW);
+    digitalWrite(pinT, LOW);
   }
-  else if (strcmp(command, "slow-speed") == 0)
+  if (cmd == "FD:true")
   {
-    //car.setCurrentSpeed(speedSettings::SLOW);
+    digitalWrite(pinF, HIGH);
+    digitalWrite(pinD, HIGH);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinT, LOW);
   }
-  else if (strcmp(command, "normal-speed") == 0)
+  if (cmd == "TE:true")
   {
-    //car.setCurrentSpeed(speedSettings::NORMAL);
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinD, LOW);
+    digitalWrite(pinE, HIGH);
+    digitalWrite(pinT, HIGH);
   }
-  else if (strcmp(command, "fast-speed") == 0)
+  if (cmd == "TD:true")
   {
-    //car.setCurrentSpeed(speedSettings::FAST);
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinD, HIGH);
+    digitalWrite(pinT, HIGH);
+  }
+  if (cmd == "C:false")
+  {
+    digitalWrite(pinF, LOW);
+    digitalWrite(pinT, LOW);
+    digitalWrite(pinE, LOW);
+    digitalWrite(pinD, LOW);
   }
 }
 
-
-// Callback function that receives messages from websocket client
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
                void *arg, uint8_t *data, size_t len)
 {
@@ -81,14 +103,14 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   {
   case WS_EVT_CONNECT:
   {
-    Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
+    // Serial.printf("ws[%s][%u] connect\n", server->url(), client->id());
     // client->printf("Hello Client %u :)", client->id());
     // client->ping();
   }
 
   case WS_EVT_DISCONNECT:
   {
-    Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
+    // Serial.printf("ws[%s][%u] disconnect\n", server->url(), client->id());
   }
 
   case WS_EVT_DATA:
@@ -109,7 +131,10 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
 
   case WS_EVT_PONG:
   {
-    Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char *)data : "");
+    // Serial.printf("ws[%s][%u] pong[%u]: %s\n", server->url(), client->id(), len, (len) ? (char *)data : "");
+    // data[len] = 0;
+    //     char *command = (char *)data;
+        sendCarCommand((char *)data);
   }
 
   case WS_EVT_ERROR:
@@ -119,71 +144,121 @@ void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventTyp
   }
 }
 
-// Function called when resource is not found on the server
 void notFound(AsyncWebServerRequest *request)
 {
   request->send(404, "text/plain", "Not found");
 }
+String getRedes(){
+  WiFi.mode(WIFI_STA);
+  WiFi.begin();
+  String redes = "";
+  // Serial.println("Scanning Wi-Fi networks...");
+  
+  int numNetworks = WiFi.scanNetworks();
+  if (numNetworks == 0) {
+    return "Wifi não encontrado!";
+  } else {
 
-
+    for (int i = 0; i < numNetworks; ++i) {
+      // Serial.print("Network name: ");
+      // Serial.println(WiFi.SSID(i));
+      // Serial.print("Signal strength: ");
+      // Serial.println(WiFi.RSSI(i));
+      // Serial.println("-----------------------");
+      redes += String(WiFi.SSID(i))+",";
+    }
+  }
+  return redes;
+}
 void setup()
 {
-  pinMode(ledPin1, OUTPUT);
-  pinMode(ledPin2, OUTPUT);
-  pinMode(ledPin3, OUTPUT);
-  pinMode(ledPin4, OUTPUT);
+  pinMode(pinF, OUTPUT);
+  pinMode(pinT, OUTPUT);
+  pinMode(pinE, OUTPUT);
+  pinMode(pinD, OUTPUT);
+  
+  pinMode(pinSF, OUTPUT);
+  pinMode(pinST, OUTPUT);
+  pinMode(pinL1, OUTPUT);
+  pinMode(pinL2, OUTPUT);
+  pinMode(pinL3, OUTPUT);
+
+  digitalWrite(pinF, LOW);
+  digitalWrite(pinT, LOW);
+  digitalWrite(pinE, LOW);
+  digitalWrite(pinD, LOW);
+  
+  digitalWrite(pinSF, LOW);
+  digitalWrite(pinST, LOW);
+  digitalWrite(pinL1, LOW);
+  digitalWrite(pinL2, LOW);
+  digitalWrite(pinL3, LOW);
 
 
   Serial.begin(115200);
-
-  Serial.println("Connecting to ");
-  Serial.println(ssid);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  if (WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    Serial.printf("WiFi Failed!\n");
-    return;
-  }
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-
-  // WiFi.softAP(ssid, password);
-  // Serial.print("IP address: ");
-  // Serial.println(WiFi.softAPIP());
-
-  // Initialize LittleFS
   if (!LittleFS.begin(true))
   {
     Serial.println("An Error has occurred while mounting LittleFS");
     return;
   }
 
-  // Add callback function to websocket server
+  WiFi.softAP("Silverado", "");
+  Serial.print("AP address: ");
+  Serial.println(WiFi.softAPIP());
+
+  /* WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  if (WiFi.waitForConnectResult() != WL_CONNECTED)
+  {
+    Serial.printf("WiFi Failed!\n");
+    WiFi.softAP("Esp", "");
+    Serial.print("AP address: ");
+    Serial.println(WiFi.softAPIP());
+
+
+    //getRedes();
+    bool flag = true;
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
+      Serial.println("Requesting index page...");
+      request->send(LittleFS, "/wm.html", "text/html", false);
+      // request->send(200, getRedes() , "text/plain");
+    });
+    server.on("/wm", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
+      Serial.println("Requesting index page...");
+      request->send(200, getRedes() , "text/plain");
+    });
+    server.onNotFound(notFound);
+    server.begin();
+    while (flag)
+    {
+      delay(1);
+    }
+
+  }
+
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP()); */
+
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
+  DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            {
-              Serial.println("Requesting index page...");
-              request->send(LittleFS, "/index.html", "text/html", false);
-            });
+  {
+    Serial.println("Requesting index page...");
+    request->send(LittleFS, "/index.html", "text/html", false);
+  });
 
   server.on("/joy.js", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(LittleFS, "/joy.js", "text/javascript"); });
+  { 
+    request->send(LittleFS, "/joy.js", "text/javascript"); 
+  });
 
-  /* // Route to load custom.css file
-  server.on("/css/custom.css", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(LittleFS, "/css/custom.css", "text/css"); });
-
-  // Route to load custom.js file
-  server.on("/js/custom.js", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send(LittleFS, "/js/custom.js", "text/javascript"); }); */
-
-  // On Not Found
   server.onNotFound(notFound);
-
-  // Start server
   server.begin();
 }
-void loop() {}
+void loop() {
+}

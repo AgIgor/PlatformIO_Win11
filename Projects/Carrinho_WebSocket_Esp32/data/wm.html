@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wifi</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+        .container{
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        input{
+            width: 200px;
+            height: 20px;
+        }
+        button{
+            margin-top: 10px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">  
+        <div id="list">
+            <p>Rede 1</p>
+            <p>Rede 2</p>
+            <p>Rede 3</p>
+            <p>Rede 4</p>
+            <p>Rede 1</p>
+            <p>Rede 2</p>
+            <p>Rede 3</p>
+            <p>Rede 4</p>
+            <p>Rede 1</p>
+            <p>Rede 2</p>
+            <p>Rede 3</p>
+            <p>Rede 4</p>
+            <p>Rede 1</p>
+            <p>Rede 2</p>
+            <p>Rede 3</p>
+            <p>Rede 4</p>
+        </div>
+        <label for="nome">Nome</label>
+        <input type="text" name="nome" id="nome">
+        <label for="pass">Senha</label>
+        <input type="text" name="pass" id="">
+        <button id="conn">Conectar</button>
+    </div>
+    <script>
+        list.addEventListener('click',(e)=>{
+            console.log(e.target.innerText);
+            nome.value = e.target.innerText
+        });
+
+        window.onload = function(){
+            
+        }
+    </script>
+</body>
+</html>
