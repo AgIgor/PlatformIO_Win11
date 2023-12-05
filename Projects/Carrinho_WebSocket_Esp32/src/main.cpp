@@ -197,7 +197,7 @@ void setup()
     return;
   }
 
-  WiFi.softAP("Silverado", "");
+  WiFi.softAP("CARRINHO_NEW_BRIGHT", "Silverado2005");
   Serial.print("AP address: ");
   Serial.println(WiFi.softAPIP());
 
