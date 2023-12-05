@@ -110,6 +110,10 @@
           box-shadow: 0 5px #666;
           transform: translateY(4px);
         }
+        .btnActive {
+          box-shadow: 0 5px #666;
+          transform: translateY(4px);
+        }
         #Y{
           grid-column: 2;
           grid-row: 1;
@@ -240,11 +244,11 @@
     const Joy1 = new JoyStick('joy1Div', {}, function(stickData) {
 
       if (stickData.cardinalDirection != 'C'){
-        console.log(`${stickData.cardinalDirection}:true`);
+        //console.log(`${stickData.cardinalDirection}:true`);
         sendMessage(`${stickData.cardinalDirection}:true`);
       }
       else{
-        console.log(`${stickData.cardinalDirection}:false`);
+        //console.log(`${stickData.cardinalDirection}:false`);
         sendMessage(`${stickData.cardinalDirection}:false`);
       }
 
@@ -256,7 +260,7 @@
         const elementId = event.target.id;  
          
         if(elementId != 'containerGameBtn'){
-          console.log(`${elementId}:true`)
+          event.target.classList.toggle('btnActive')
           sendMessage(`${elementId}:true`)
         }
       });
@@ -265,7 +269,7 @@
         event.preventDefault();
         const elementId = event.target.id;
         if(elementId != 'containerGameBtn'){
-          console.log(`${elementId}:false`)
+          event.target.classList.toggle('btnActive')
           sendMessage(`${elementId}:false`)
         }
       });

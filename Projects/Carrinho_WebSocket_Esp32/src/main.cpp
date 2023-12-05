@@ -18,11 +18,11 @@ AsyncWebSocket ws("/ws");
 #define pinE  14
 #define pinD  27
 
-#define pinSF  15
+#define pinSF  19 //
 #define pinST  2
-#define pinL1  4
-#define pinL2  5
-#define pinL3  18
+#define pinL1  4  // caçamba
+#define pinL2  15 // farois
+#define pinL3  18 // caçamba
 
 bool l1 = false;
 bool l2 = false;
@@ -105,7 +105,6 @@ void sendCarCommand(const char *command)
 
   if (cmd == "B:true") {
     l1 = !l1;
-    digitalWrite(pinL1, l1);
   }
   if (cmd == "X:true") {
     l2 = !l2;
@@ -221,6 +220,41 @@ void setup()
   server.onNotFound(notFound);
   server.begin();
 }
+
+unsigned long previousMillis = 0;
+const long interval = 70;
+
+int ledState = LOW;
+int ledCounter = 0;
+int currentLed = pinL1;
+
 void loop() {
-  
+  if(l1){
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval) {
+      previousMillis = currentMillis;
+      
+      if (ledCounter < 3) {
+        if (ledState == LOW) {
+          ledState = HIGH;
+          digitalWrite(currentLed, ledState);
+        } else {
+          ledState = LOW;
+          digitalWrite(currentLed, ledState);
+          ledCounter++;
+        }
+      } else {
+        ledCounter = 0;
+        if (currentLed == pinL1) {
+          currentLed = pinL3;
+        } else {
+          currentLed = pinL1;
+        }
+      }
+    }
+  }else{
+    digitalWrite(pinL1, LOW);
+    digitalWrite(pinL3, LOW);
+  }
+
 }
