@@ -88,7 +88,11 @@
           height: 300px;
           border-radius: 50%;
           background-color: #171717;
-          /* border: 1px solid red; */
+          
+  
+          /* border-radius: 15px;
+          padding: 10px;
+          gap: 15px; */
         }
         #containerGameBtn button{
           width: 80px;
@@ -174,7 +178,9 @@
       <button id="Y" style="background-color: orange;">Y</button>
       <button id="X" style="background-color: lightskyblue;">X</button>
       <button id="A" style="background-color: #3e8e41;">A</button>
-      <button id="B" style="background-color: lightcoral;">B</button>
+      <button id="B" style="background-color: brown;">B</button>
+      <!-- <button id="1" style="background-color: blue;">1</button>
+      <button id="2" style="background-color: teal;">2</button> -->
     </div>
   </div>
 
@@ -185,10 +191,10 @@
     // const targetUrl = `ws://192.168.15.4/ws`;
     window.addEventListener('load', onLoad);
     function onLoad() {
-      //initializeSocket();
+      initializeSocket();
       notify.classList.add('show')
       conn.onclick = function(){
-        initializeSocket();
+//        initializeSocket();
       }
     }
     function initializeSocket() {
