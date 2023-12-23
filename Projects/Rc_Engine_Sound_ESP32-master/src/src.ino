@@ -1353,7 +1353,7 @@ void IRAM_ATTR fixedPlaybackTimer()
 //
 
 // Reference https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/rmt.html?highlight=rmt
-static void IRAM_ATTR rmt_isr_handler(void *arg)
+/* static void IRAM_ATTR rmt_isr_handler(void *arg)
 {
 
   uint32_t intr_st = RMT.int_st.val;
@@ -1406,7 +1406,7 @@ static void IRAM_ATTR rmt_isr_handler(void *arg)
     xSemaphoreGive(xPwmSemaphore); // Free or "Give" the semaphore for others, if not required!
   }
 }
-
+ */
 //
 // =======================================================================================================
 // PPM SIGNAL READ INTERRUPT
@@ -2072,12 +2072,16 @@ void readPwmSignals()
     // nothing is done here, the PWM signals are now read, using the
     // "static void IRAM_ATTR rmt_isr_handler(void* arg)" interrupt function
 
+    for (byte i = 1; i < PWM_CHANNELS_NUM + 1; i++){
+      pulseWidthRaw[i] = 1500;
+    }
+
     // NOTE: There is no channel mapping in this mode! Just plug in the wires in the order as defined in "2_adjustmentsRemote.h"
     // for example: sound controller channel 2 (GEARBOX) connects to receiver channel 6
 
     // See if we can obtain or "Take" the Semaphore.
     // If the semaphore is not available, wait 1 ticks of the Scheduler to see if it becomes free.
-    if (xSemaphoreTake(xPwmSemaphore, portMAX_DELAY))
+    if (xSemaphoreTake(xPwmSemaphore, portMAX_DELAY ))
     {
       // We were able to obtain or "Take" the semaphore and can now access the shared resource.
       // We want to have the pwmBuf variable for us alone,
