@@ -60,6 +60,21 @@ String toString(String data){
 
 }
  */
+
+// void receiveEvent(int howMany) {
+//  while (Wire.available()) {
+//     Wire.readBytes((byte*)&myData, sizeof(myData));
+//     Serial.print( myData.steering);
+//     Serial.print( " " );
+//     Serial.print( myData.throttle);
+//   }
+//   Serial.println();
+// }
+
+// void requestEvent() {
+//  Wire.write((byte *)&myData, sizeof myData);  /*send string on request */
+// }
+
 void sendWire(int data){
   Wire.beginTransmission(4);
   Wire.write(data);
@@ -81,17 +96,28 @@ void setup() {
   Serial.begin(115200);
   Wire.begin(0,2);
   Wire.onReceive(receiveEvent);
-  // Wire.onRequest();
+  // Wire.onRequest(requestEvent);
 }
+
 long int dly;
 int val = 0;
-
 void loop() {
   if(millis() - dly >= 1000){
     dly = millis();
     Serial.println("ok");
     val++;
     sendWire(val);
+
+    // Wire.beginTransmission(8); // transmit to device #8
+    // Wire.write((byte *)&myData, sizeof myData);              // sends one byte
+    // Wire.endTransmission();    // stop transmitting
+
+    //  Wire.requestFrom(8, sizeof(myData));
+    //  while (Wire.available()) {
+    //     Wire.readBytes((byte*)&myData, sizeof(myData));
+    //     Serial.print( myData.led1);
+    //   }
+    //   Serial.println();
 
   }
 }
