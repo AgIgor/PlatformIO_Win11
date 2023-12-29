@@ -1,6 +1,6 @@
 #include <Arduino.h>
 /* 
-const byte pinRF = 7;  // Pin where RF Module is connected. If necessary, change this for your project
+const byte pinRF = 6;  // Pin where RF Module is connected. If necessary, change this for your project
 
 int lambda;      // on pulse clock width (if fosc = 2KHz than lambda = 500 us)
 
@@ -24,13 +24,17 @@ boolean ACT_HT6P20B_RX(struct rfControl &_rfControl){
   if (!startbit)
   {// Check the PILOT CODE until START BIT;
     dur0 = pulseIn(pinRF, LOW);  //Check how long DOUT was "0" (ZERO) (refers to PILOT CODE)
+
+    Serial.println(dur0);////////////
         
     //If time at "0" is between 9200 us (23 cycles of 400us) and 13800 us (23 cycles of 600 us).
-    if((dur0 > 9200) && (dur0 < 13800) && !startbit)
+    if((dur0 > 9200) && (dur0 < 13800) && !startbit) //13800
     {    
       //calculate wave length - lambda
       lambda = dur0 / 23;
-      
+
+      // Serial.println(lambda);//////////
+
       //Reset variables
       dur0 = 0;
       buffer = 0;
@@ -38,6 +42,7 @@ boolean ACT_HT6P20B_RX(struct rfControl &_rfControl){
       
       startbit = true;
     }
+
   }
 
   //If Start Bit is OK, then starts measure os how long the signal is level "1" and check is value is into acceptable range.
@@ -140,99 +145,8 @@ void loop(){
     // Serial.println();
   }
 }
-
-  */
-
-/* 
-#include <RCSwitch.h>
-
-RCSwitch mySwitch = RCSwitch();
-
-static const char* bin2tristate(const char* bin);
-static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength);
-
-void output(unsigned long decimal, unsigned int length, unsigned int delay, unsigned int* raw, unsigned int protocol) {
-
-  const char* b = dec2binWzerofill(decimal, length);
-  Serial.print("Decimal: ");
-  Serial.print(decimal);
-  Serial.print(" (");
-  Serial.print( length );
-  Serial.print("Bit) Binary: ");
-  Serial.print( b );
-  Serial.print(" Tri-State: ");
-  Serial.print( bin2tristate( b) );
-  Serial.print(" PulseLength: ");
-  Serial.print(delay);
-  Serial.print(" microseconds");
-  Serial.print(" Protocol: ");
-  Serial.println(protocol);
-  
-  Serial.print("Raw data: ");
-  for (unsigned int i=0; i<= length*2; i++) {
-    Serial.print(raw[i]);
-    Serial.print(",");
-  }
-  Serial.println();
-  Serial.println();
-}
-
-static const char* bin2tristate(const char* bin) {
-  static char returnValue[50];
-  int pos = 0;
-  int pos2 = 0;
-  while (bin[pos]!='\0' && bin[pos+1]!='\0') {
-    if (bin[pos]=='0' && bin[pos+1]=='0') {
-      returnValue[pos2] = '0';
-    } else if (bin[pos]=='1' && bin[pos+1]=='1') {
-      returnValue[pos2] = '1';
-    } else if (bin[pos]=='0' && bin[pos+1]=='1') {
-      returnValue[pos2] = 'F';
-    } else {
-      return "not applicable";
-    }
-    pos = pos+2;
-    pos2++;
-  }
-  returnValue[pos2] = '\0';
-  return returnValue;
-}
-
-static char * dec2binWzerofill(unsigned long Dec, unsigned int bitLength) {
-  static char bin[64]; 
-  unsigned int i=0;
-
-  while (Dec > 0) {
-    bin[32+i++] = ((Dec & 1) > 0) ? '1' : '0';
-    Dec = Dec >> 1;
-  }
-
-  for (unsigned int j = 0; j< bitLength; j++) {
-    if (j >= bitLength - i) {
-      bin[j] = bin[ 31 + i - (j - (bitLength - i)) ];
-    } else {
-      bin[j] = '0';
-    }
-  }
-  bin[bitLength] = '\0';
-  
-  return bin;
-}
-
-void setup() {
-  Serial.begin(115200);
-  mySwitch.enableReceive(0);  // Receiver on interrupt 0 => that is pin #2
-  mySwitch.setProtocol(1); 
-}
-
-void loop() { 
-  if (mySwitch.available()) {
-    output(mySwitch.getReceivedValue(), mySwitch.getReceivedBitlength(), mySwitch.getReceivedDelay(), mySwitch.getReceivedRawdata(),mySwitch.getReceivedProtocol());
-    mySwitch.resetAvailable();
-  }
-}
- 
  */
+
 
 
 /* 
@@ -299,6 +213,8 @@ void loop()
       startbit = false;
     }
   }
+
+
   
   //Check if all 28 bits were received (22 of Address + 2 of Data + 4 of Anti-Code)
   if (counter==28) 
@@ -342,348 +258,170 @@ void loop()
  */
 
 
-/*
+/* 
+const int pinoSinal = 2; // Pino onde o sinal binário está conectado
+long duration;
+long ontime;
+long offtime;
+long period;
+long inicio, final;
 
-#define OOK_PIN 7
-#define LED_PIN 13
 
-#define MOD_PPM 1
-#define MOD_PWM 0
 
-char inChar;
-String inputString        = "";         // a string to hold incoming data
-unsigned int modulation   = 1;          // PWM = 0, PPM = 1
-unsigned int repeats      = 5;          // signal repeats
-unsigned int bits         = 36;         // amount of bits in a packet
-unsigned int pd_len       = 2000;       // pulse/distance length (in us)
-unsigned int zero_ca_len  = 250;        // length of 0 (in us)
-unsigned int zero_ci_len  = 1250;       // length of 0 (in us)
-unsigned int one_ca_len   = 1250;       // length of 1 (in us)
-unsigned int one_ci_len   = 250;        // length of 0 (in us)
-unsigned int pause_len    = 10000;      // pause length (in us), time between packets
-unsigned int preamble     = 2500;       // preamble length (in us)
-unsigned int invert       = 0;          // invert the bits before transmit
-char packet_buf[256]      = {0};        // packet payload buffer
-unsigned int pbuf_len     = 0;          // payload buffer length
 
-unsigned int bit_pos      = 0;          // bit reader bit position
-int carrier_mode          = 0;
-void setup()
-{
-  // initialize digital pin 13 as an output.
-  pinMode(OOK_PIN, OUTPUT);  // ook transmitter
-  pinMode(LED_PIN, OUTPUT);  // led
-  
-  // reserve 200 bytes for the inputString:
-  inputString.reserve(200);
-  
-  // start serial port at 9600 bps and wait for port to open:
-  Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
+
+void setup() {
+  pinMode(pinoSinal, INPUT_PULLUP); // Define o pino do sinal como entrada
+  Serial.begin(115200); // Inicializa a comunicação serial para depuração
+}
+
+void loop() {
+  ontime = pulseIn(pinoSinal, HIGH);
+  offtime = pulseIn(pinoSinal,LOW);
+  period = ontime+offtime;
+
+  if(offtime < 30){
+    Serial.print(offtime);
+    Serial.print(" ");
+    Serial.println(ontime);
   }
-  Serial.println("OOK_gen 0.1");
-  Serial.println("Copyright (C) 2015");  
-  Serial.println("by Benjamin Larsson");
-  Serial.print("> ");
-}
 
-char hextoInt(char hex_nibble) {
-  switch (hex_nibble) {
-    case '0': return 0;
-    case '1': return 1;
-    case '2': return 2;
-    case '3': return 3;
-    case '4': return 4;
-    case '5': return 5;
-    case '6': return 6;
-    case '7': return 7;
-    case '8': return 8;
-    case '9': return 9;
-    case 'A': return 0xA;
-    case 'B': return 0xB;
-    case 'C': return 0xC;
-    case 'D': return 0xD;
-    case 'E': return 0xE;
-    case 'F': return 0xF;
-    case 'a': return 0xA;
-    case 'b': return 0xB;
-    case 'c': return 0xC;
-    case 'd': return 0xD;
-    case 'e': return 0xE;
-    case 'f': return 0xF;
-    default: return 0;
-  }
-}
-
-// sprintf bugs made me do this, the object code is smaller without sprintf also
-char get_hex_char(char hchar){
-  if (hchar>9)
-    return hchar+'A'-10;
-  else
-    return hchar+'0';
-}
-
-void printhex(char hex_char){
-  char tmp;
-  tmp = get_hex_char(((hex_char>>4)&0x0F));
-  Serial.print(tmp);
-  tmp = get_hex_char(hex_char&0x0F);
-  Serial.print(tmp);
-  Serial.print(" ");
-}
-
-int get_bit() {
-  int ret;
-  int byte_pos     = bit_pos / 8;
-  int byte_bit_pos = 7 - (bit_pos % 8);     // reverse indexing to send the bits msb
-  bit_pos++;
-  ret = (packet_buf[byte_pos] & (1<<byte_bit_pos)) ? 1 : 0;
-  return ret^invert;
-}
-
-int transmit_signal() {
-  int i,j;
-  int bit;
-  int pwm_bl;
-
-  // send preamble - not implemented
-
-  // support leds on Leonardo and Pro Micro
-  if (LED_PIN == 13)
-    digitalWrite(LED_PIN, HIGH);
-  else
-    digitalWrite(LED_PIN, LOW);
-
-  // repeats
-  for (j=0 ; j<repeats ; j++) {
-    // reset bit reader
-    bit_pos = 0;
-
-    // send bits
-    for (i=0 ; i<bits ; i++) {
-      bit = get_bit();
-      if ((modulation==MOD_PPM) || (modulation==MOD_PWM)) {
-        digitalWrite(OOK_PIN, HIGH);
-        if (bit) {
-          delayMicroseconds(one_ca_len);
-          digitalWrite(OOK_PIN, LOW);
-          delayMicroseconds(one_ci_len);
-        } else {
-          delayMicroseconds(zero_ca_len);
-          digitalWrite(OOK_PIN, LOW);
-          delayMicroseconds(zero_ci_len);
-        }
-      } else {
-        return -1; 
-      }
-    }
+  // if( digitalRead(pinoSinal) == LOW){
+    // inicio = millis();
+  //}
+  // else{
+  //   final = millis();
     
-    // Send ending PPM pulse
-    if (modulation == MOD_PPM) {
-        digitalWrite(OOK_PIN, HIGH);
-//        digitalWrite(LED_PIN, HIGH);
-        delayMicroseconds(pd_len);
-        digitalWrite(OOK_PIN, LOW);
-//        digitalWrite(LED_PIN, LOW);    
-    }
-    // delay between packets
-    delayMicroseconds(pause_len);
-  }
+  //   Serial.println(final - inicio);
+  // }
 
-  // support leds on Leonardo and Pro Micro
-  if (LED_PIN == 13)
-    digitalWrite(LED_PIN, LOW);
-  else
-    digitalWrite(LED_PIN, HIGH);
-
-  return 0;
+  delay(50);
 }
 
-void loop()
-{
-  // read serial input
-  if (Serial.available() > 0) {
-    inChar = (char)Serial.read();
-    inputString += inChar;
+ */
 
-    // Serial echo
-    Serial.print(inChar);
-
-
-    // handle commands
-    if (inChar=='\r') {
-
-      Serial.print("\nCMD: ");
-      Serial.println(inputString);
-
-      switch((char)inputString[0]) {
-        case 'm':
-          if (inputString.length() == 2) {
-            Serial.print("Modulation: ");
-            if (modulation == MOD_PPM)
-              Serial.println("PPM");
-            else if (modulation == MOD_PWM)
-              Serial.println("PWM");
-            else
-              Serial.println("Invalid state");            
-          }
-          if (inputString.length() > 3) {
-            modulation = (char)inputString[2]-'0';   // the easy way
-          }
-          break;
-        case 'i':
-          if (inputString.length() == 2) {
-            Serial.print("Invert: ");
-            Serial.println(invert);
-          }
-          if (inputString.length() > 3) {
-            invert = (char)inputString[2]-'0';   // the easy way
-          }
-          break;
-        case 'r':
-          if (inputString.length() == 2) {
-            Serial.print("Repeats: ");
-            Serial.println(repeats);
-          }
-          if (inputString.length() > 3) {
-            repeats = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'b':
-          if (inputString.length() == 2) {
-            Serial.print("Bits: ");
-            Serial.println(bits);
-          }
-          if (inputString.length() > 3) {
-            bits = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'z':
-          if (inputString.length() == 2) {
-            Serial.print("Zero ca length: ");
-            Serial.println(zero_ca_len);
-          }
-          if (inputString.length() > 3) {
-            zero_ca_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'x':
-          if (inputString.length() == 2) {
-            Serial.print("Zero ci length: ");
-            Serial.println(zero_ci_len);
-          }
-          if (inputString.length() > 3) {
-            zero_ci_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'o':
-          if (inputString.length() == 2) {
-            Serial.print("One ca length: ");
-            Serial.println(one_ca_len);
-          }
-          if (inputString.length() > 3) {
-            one_ca_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'u':
-          if (inputString.length() == 2) {
-            Serial.print("One ci length: ");
-            Serial.println(one_ci_len);
-          }
-          if (inputString.length() > 3) {
-            one_ci_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-
-        case 'd':
-          if (inputString.length() == 2) {
-            Serial.print("Pulse / Distance length(pd/z/o): ");
-            Serial.println(pd_len);
-          }
-          if (inputString.length() > 3) {
-            pd_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'e':
-          if (inputString.length() == 2) {
-            Serial.print("Pause length: ");
-            Serial.println(pause_len);
-          }
-          if (inputString.length() > 3) {
-            pause_len = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'a':
-          if (inputString.length() == 2) {
-            Serial.print("Preamble length: ");
-            Serial.println(preamble);
-          }
-          if (inputString.length() > 3) {
-            preamble = inputString.substring(2,inputString.length()).toInt();  // the hard way
-          }
-          break;
-        case 'p':
-          if (inputString.length() == 2) {
-            Serial.print("Packet: ");
-            Serial.println(pbuf_len);
-            for (int i=0 ; i<pbuf_len ; i++){
-              printhex(packet_buf[i]);
-            }
-            Serial.print("\n");
-          }
-          if (inputString.length() > 3) {
-            for (int i=0 ; i<inputString.length()-3 ; i++){
-              packet_buf[i]  = hextoInt((char)inputString[(i*2) + 2]) << 4;
-              packet_buf[i] |= hextoInt((char)inputString[(i*2) + 3]);
-            }
-            // TODO clear the packet_buf buffer 
-            pbuf_len = ((inputString.length()-3)+1)/2;  //round up
-          }
-          break;
-        case 't':
-            {
-            int res = transmit_signal();
-            if (!res)
-              Serial.println("OK");
-            else {
-              Serial.print("FAIL: ");
-              Serial.println(res);
-            }
-            }
-          break;
-        case 's':
-          if (inputString.length() == 2) {
-            Serial.print("Carrier mode: ");
-            Serial.println(carrier_mode);
-          }
-          if (inputString.length() > 3) {
-            carrier_mode = inputString[2]-'0';   // the easy way
-            if (carrier_mode)
-              digitalWrite(OOK_PIN, HIGH);
-            else
-              digitalWrite(OOK_PIN, LOW);
-          }
-          break;
-        }
-      // reset command line buffer
-      inputString = "";
-      Serial.print("> ");
-    }
-  }
-}
-
-
-*/
 /* 
 
-#include <RCSwitch.h>
+#define pulse_ip 2
+
+int ontime,offtime,duty;
+float freq,period;
+bool trigger;
+
+long current, old, final;
+
+// void down(){
+//   current = micros();
+//   //trigger = !trigger;
+// }
+// void up(){
+//   final = old - current;
+//   old = micros();
+// }
+void setup(){
+  // pinMode(pulse_ip,INPUT);
+  // pinMode(LED_BUILTIN,OUTPUT);
+  // attachInterrupt(digitalPinToInterrupt(pulse_ip), down, FALLING);
+  // attachInterrupt(digitalPinToInterrupt(pulse_ip), up, RISING);
+  Serial.begin(115200);
+}
+void loop(){
+  // ontime = pulseIn(pulse_ip,HIGH);
+  // offtime = pulseIn(pulse_ip,LOW);
+  // period = ontime - offtime;
+  // freq = 1000000.0/period;
+  // duty = (ontime/period)*100; 
+
+  // if(period==0){ 
+  // freq=0;
+  // }
+  
+  //if(period < 700){
+    // Serial.print("ontime: ");
+    // Serial.print(ontime);
+    // Serial.print(" offtime: ");
+    Serial.print(final);
+    Serial.println();
+
+  //}
+
+  //delay(10);
+}
+ */
+
+ 
+#include <SoftwareSerial.h>
+
+SoftwareSerial ss( 6,-1 );
+
+void buscarPadraoNaMatriz(byte dados[], byte tamanho) {
+  for (int i = 0; i < tamanho - 2; i++) {
+
+    Serial.println(dados[i]);
+
+    if (dados[i] == 0xAA && dados[i + 1] == 0xBB && dados[i + 2] == 0xCC) {
+      // Padrão encontrado, faça algo
+      Serial.println("Padrão encontrado!");
+    }
+  }
+}
+
+void setup() {
+  Serial.begin(115200); // Inicia a comunicação serial com uma taxa de 9600 bps
+  ss.begin(2400);
+  while (!Serial) {}
+  Serial.println("Ok");
+}
+byte dados[100];
+bool flag;
+
+void loop() {
+
+  ss.listen();
+
+  if (ss.available()) {
+    byte index = 0;
+
+    while (ss.available()) {
+      byte byteLido = ss.read();
+      dados[index] = byteLido;
+      index++;
+
+
+
+      if(byteLido > 0){
+        Serial.print(byteLido, HEX);
+        Serial.print(" ");
+        flag = true;
+
+      }
+      else{
+        if(flag){
+          flag = false;
+          Serial.println();
+        }
+      }
+
+    }
+    
+    // Aqui você pode buscar um padrão na matriz de dados
+    //buscarPadraoNaMatriz(dados, index); // Você precisa implementar essa função
+  }
+}
+
+
+ 
+
+
+
+
+
+/* #include <RCSwitch.h>
 
 RCSwitch mySwitch = RCSwitch();
 
 void setup() {
   Serial.begin(115200);
-  mySwitch.setProtocol(1);
   mySwitch.enableReceive(0);  // Receiver on interrupt 0 => that is pin #2
 }
 
@@ -700,124 +438,4 @@ void loop() {
 
     mySwitch.resetAvailable();
   }
-}
-
- */
-
-/* 
-uint8_t uartBit;      // received
-uint8_t prevBit = 1;  // previously received
-uint32_t lastTime;    // remember when state change was detected
-
-const uint8_t somePin = 7;  // gpio pin
-
-void setup()
-{
-  Serial.begin(115200);  // use the highest baudrate supported by 3rd party terminal program
-}
-
-void loop()
-{
-  uartBit = digitalRead(somePin);
-  if(uartBit != prevBit)
-  {
-    Serial.print(millis() - lastTime);
-    Serial.print(" ");
-    Serial.println(uartBit);
-    prevBit = uartBit;
-    lastTime = millis();
-  }
-}
-
- */
-
-
-
-
-
-
-
-/*
-This example outputs values from all PPM channels to Serial
-in a format compatible with Arduino IDE Serial Plotter
-*/
-
-/* 
-#include <PPMReader.h>
-
-// Initialize a PPMReader on digital pin 3 with 6 expected channels.
-byte interruptPin = 3;
-byte channelAmount = 6;
-PPMReader ppm(interruptPin, channelAmount);
-
-void setup() {
-    Serial.begin(115200);
-}
-
-void loop() {
-    // Print latest valid values from all channels
-    for (byte channel = 1; channel <= channelAmount; ++channel) {
-        unsigned value = ppm.latestValidChannelValue(channel, 0);
-        Serial.print(value);
-        if(channel < channelAmount) Serial.print('\t');
-    }
-    Serial.println();
-    delay(10);
-}
-
- */
-
-
-unsigned long int a,b,c;
-int x[15],ch1[15],ch[7],i;
-//specifing arrays and variables to store values 
-
-void read_me()  {
-  //this code reads value from RC reciever from PPM pin (Pin 2 or 3)
-  //this code gives channel values from 0-1000 values 
-  //    -: ABHILASH :-    //
-  a=micros(); //store time value a when pin value falling
-  c=a-b;      //calculating time inbetween two peaks
-  b=a;        // 
-  x[i]=c;     //storing 15 value in array
-  i=i+1;
-  if(i==15){
-    for(int j=0;j<15;j++){
-      ch1[j]=x[j];
-    }
-    i=0;
-  }
-}//copy store all values from temporary array another array after 15 reading  
-void read_rc(){
-  int i,j,k=0;
-  for(k=14;k>-1;k--){
-    if(ch1[k]>10000){
-      j=k;
-    }
-  }  //detecting separation space 10000us in that another array                     
-  for(i=1;i<=6;i++){
-    ch[i]=(ch1[i+j]-1000);
-  }
-}     //assign 6 channel values after separation space
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(2, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(2), read_me, FALLING);
-  // enabling interrupt at pin 2
-}
-
-void loop() {
-  read_rc();
-
-  Serial.print(ch[1]);Serial.print("\t");
-  Serial.print(ch[2]);Serial.print("\t");
-  Serial.print(ch[3]);Serial.print("\t");
-  Serial.print(ch[4]);Serial.print("\t");
-  Serial.print(ch[5]);Serial.print("\t");
-  Serial.print(ch[6]);Serial.print("\n");
-
-  delay(100);
-}
-
-
+} */
