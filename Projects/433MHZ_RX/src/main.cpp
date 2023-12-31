@@ -1,5 +1,5 @@
 #include <Arduino.h>
-/* 
+/*
 const byte pinRF = 6;  // Pin where RF Module is connected. If necessary, change this for your project
 
 int lambda;      // on pulse clock width (if fosc = 2KHz than lambda = 500 us)
@@ -25,10 +25,10 @@ boolean ACT_HT6P20B_RX(struct rfControl &_rfControl){
   {// Check the PILOT CODE until START BIT;
     dur0 = pulseIn(pinRF, LOW);  //Check how long DOUT was "0" (ZERO) (refers to PILOT CODE)
 
-    Serial.println(dur0);////////////
+    //Serial.println(dur0);////////////
         
     //If time at "0" is between 9200 us (23 cycles of 400us) and 13800 us (23 cycles of 600 us).
-    if((dur0 > 9200) && (dur0 < 13800) && !startbit) //13800
+    if((dur0 > 9200) && (dur0 < 13800) && !startbit)
     {    
       //calculate wave length - lambda
       lambda = dur0 / 23;
@@ -144,9 +144,13 @@ void loop(){
     // Serial.print("Button4: "); Serial.println(rfControl_1.btn4, BIN);
     // Serial.println();
   }
-}
- */
 
+
+  // Serial.println(digitalPinToBitMask(pinRF));
+  //delay(1);
+}
+
+*/
 
 
 /* 
@@ -349,63 +353,195 @@ void loop(){
 }
  */
 
- 
+
+
 #include <SoftwareSerial.h>
 
 SoftwareSerial ss( 6,-1 );
 
-void buscarPadraoNaMatriz(byte dados[], byte tamanho) {
-  for (int i = 0; i < tamanho - 2; i++) {
+char* controle1[] = {
+                      "1001101011011110011110100111",
+                      "1101101010011111010110110100",
+                      "1101101101001101011011110011",
+                      "1101001111101101010011111010",
+                      "1101101001101101101001101011",
+                      "0111100111101001111101101010",
+                      "0111110101101101001101101101",
+                      "0011010110111100111101001111"
+};
+char* controle4[] = {
+                      "1001101011010000011110100111",
+                      "1101000000011111010110110100",
+                      "1101101101001101011011110011",
+                      "1101000011011010101011111010",
+                      "1101101001101101101001101011",
+                      "0100100111101001111101101010",
+                      "0111110101101101001101101101",
+                      "0011010010101101010000111111"
+};
 
-    Serial.println(dados[i]);
 
-    if (dados[i] == 0xAA && dados[i + 1] == 0xBB && dados[i + 2] == 0xCC) {
-      // Padrão encontrado, faça algo
-      Serial.println("Padrão encontrado!");
+char* controle2[]={
+                    "1001111001101110111100111110",
+                    "1101101001111110111110110100",
+                    "1101100111011101111001111001",
+                    "1011010011111101111101101001",
+                    "1011001111001101110111100111",
+                    "1101101101001111110111110110",
+                    "1001101001111001101110111100",
+                    "1111101101101001111110111110"
+};
+char* controle3[]={
+                    "1001101011011110011110100111",
+                    "1010011010100111110101101101",
+                    "0011011011010011010110111100",
+                    "1111010011110100110101001111",
+                    "1010110110100110110110100110",
+                    "1011011110011110100111101001",
+                    "1010100111110101101101001101",
+                    "1001010011010110111100111101"
+};
+
+bool findElemento(char* data, char* matriz[]){
+  char* elementoProcurado = data;
+  bool encontrado = false;
+  int linhaEncontrada = -1;
+  char* teste = "";
+
+
+  for (int i = 0; i < 8; i++) {
+    teste = matriz[i];
+    if (teste == elementoProcurado) {
+      encontrado = true;
+      linhaEncontrada = i;
+      break; // Se o elemento for encontrado, interrompe o loop
     }
+    if (encontrado) {
+      break; // Se o elemento for encontrado, interrompe o loop externo
+    }
+  }
+  // Verificando se o elemento foi encontrado e exibindo o resultado na Serial
+  if (encontrado) {
+    Serial.print("Elemento encontrado na linha ");
+    Serial.print(linhaEncontrada);
+    Serial.println();
+    return true;
+  } else {
+    //Serial.println("Elemento não encontrado na matriz.");
+    return false;
   }
 }
 
+String decToHEx(char* data){
+  char* binaryString = data;
+  int length = strlen(binaryString);
+  String result;
+
+  // Certifique-se de que o comprimento da string é um múltiplo de 4
+  int remainder = length % 4;
+  if (remainder != 0) {
+    length += 4 - remainder;
+  }
+
+  // Loop para converter os dígitos binários para hexadecimal
+  for (int i = 0; i < length; i += 4) {
+    int decimal = 0;
+    for (int j = 0; j < 4; j++) {
+      if (i + j < strlen(binaryString)) {
+        decimal = decimal * 2 + (binaryString[i + j] - '0');
+      } else {
+        decimal *= 2; // Adiciona um zero se a string for menor que 4
+      }
+    }
+
+    // Convertendo o valor decimal para hexadecimal e exibindo na Serial
+    if (decimal < 10) {
+      //Serial.print(decimal);
+      result += decimal;
+    } else {
+      char hexChar = 'A' + (decimal - 10);
+      //Serial.print(hexChar);
+      result += hexChar;
+    }
+  }
+  return result;
+}
+
 void setup() {
-  Serial.begin(115200); // Inicia a comunicação serial com uma taxa de 9600 bps
+  Serial.begin(115200);
   ss.begin(2400);
   while (!Serial) {}
   Serial.println("Ok");
-}
-byte dados[100];
-bool flag;
+
+  // bool result;
+  
+  // for(int i=0; i<8;i++){
+  //   result = findElemento(controle1[i], controle1);
+  //   if(result){
+  //     Serial.println(decToHEx(controle1[i]));
+  //   }
+  // }
+  // Serial.println(result);
+
+  // while(true){};
+
+}//end setup
+
+// byte dados[100];
+// bool flag;
+bool result;
+int val;
+
 
 void loop() {
 
   ss.listen();
-
   if (ss.available()) {
-    byte index = 0;
+    // byte index = 0;
 
     while (ss.available()) {
-      byte byteLido = ss.read();
-      dados[index] = byteLido;
-      index++;
+      String package;
+      do{
+        String byteLido = String(ss.read(),BIN);
+        // Serial.print(byteLido);
+        package += byteLido;
+        val++;
 
+      } while (val <8);
+      // Serial.println(package);
 
-
-      if(byteLido > 0){
-        Serial.print(byteLido, HEX);
-        Serial.print(" ");
-        flag = true;
-
-      }
-      else{
-        if(flag){
-          flag = false;
-          Serial.println();
+      for(int i=0;i<8;i++){
+        int t = String(package).indexOf(controle1[i]);
+        if(t > 0){
+          Serial.println("ok");
         }
       }
 
-    }
-    
-    // Aqui você pode buscar um padrão na matriz de dados
-    //buscarPadraoNaMatriz(dados, index); // Você precisa implementar essa função
+      // Serial.println(package);
+      //Serial.println("---------------END-------------");
+      val = 0;
+      package = "";
+
+      
+      
+      // dados[index] = byteLido;
+      // index++;
+
+      // if(byteLido){
+
+      //   //result = findElemento(byteLido.c_str(), controle1);
+      //   // Serial.println(byteLido.length());
+      //   // Serial.print(byteLido);
+      //   // Serial.print(" ");
+      //   flag = true;
+      // }
+      // else{
+      //   if(flag){
+      //     flag = false;
+      //     Serial.println();
+      //   }
+      // }
+    } 
   }
 }
 
