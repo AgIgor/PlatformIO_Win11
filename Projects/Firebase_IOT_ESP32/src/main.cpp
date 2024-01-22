@@ -23,6 +23,8 @@ unsigned long sendDataPrevMillis = 0;
 
 int count = 0;
 
+String chip_id = "CHIP_ID_";
+
 void streamCallback(StreamData data)
 {
   Serial.printf("sream path, %s\nevent path, %s\ndata type, %s\nevent type, %s\n\n",
@@ -73,7 +75,6 @@ void streamTimeoutCallback(bool timeout)
 
 void setup()
 {
-
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
@@ -153,6 +154,25 @@ void setup()
   config.timeout.rtdbStreamError = 3 * 1000;
 
   */
+
+
+	Serial.printf("ESP32 Chip model = %s Rev %d\n", ESP.getChipModel(), ESP.getChipRevision());
+	Serial.printf("This chip has %d cores\n", ESP.getChipCores());
+  Serial.print("Chip ID: "); Serial.println(ESP.getEfuseMac());
+
+  chip_id += ESP.getEfuseMac();
+
+  String path_chip_id = "/ESP32/";
+  path_chip_id += chip_id;
+
+  FirebaseJson json_id;
+  json_id.add("chip_id", ESP.getEfuseMac());
+  json_id.add("chip_model", ESP.getChipModel());
+  json_id.add("chip_rev", ESP.getChipRevision());
+  json_id.add("chip_cores", ESP.getChipCores());
+
+  Serial.printf("Set json... %s\n\n", Firebase.setJSON(fbdo, path_chip_id , json_id) ? "ok" : fbdo.errorReason().c_str());
+
 }
 
 void loop()
