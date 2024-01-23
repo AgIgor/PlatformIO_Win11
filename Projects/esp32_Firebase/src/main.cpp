@@ -43,12 +43,7 @@ void makeRequest(String url) {
 void postRequest(String url) {
   // Iniciar a conexão
   HTTPClient http;
-
-  // json_id.add("chip_id", ESP.getEfuseMac());
-  // json_id.add("chip_model", ESP.getChipModel());
-  // json_id.add("chip_rev", ESP.getChipRevision());
-  // json_id.add("chip_cores", ESP.getChipCores());
-
+  
   String strBody;
   DynamicJsonDocument dataJson(1024);
   dataJson["chip_model"] = ESP.getChipModel();
