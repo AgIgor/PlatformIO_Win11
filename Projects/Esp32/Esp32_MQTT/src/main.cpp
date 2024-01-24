@@ -1,11 +1,12 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
+
 
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
 const char* mqtt_server = "mqtt.eclipseprojects.io";
-//const char* mqtt_server = "mqtt.eclipse.org";
 const int mqtt_port = 1883;
 
 WiFiClient espClient;
@@ -77,18 +78,26 @@ void callback(char* topic, byte* payload, unsigned int length) {
     //Serial.print(data);
   }
   Serial.println(data);
-  
-  if(true){//strcmp(topic, subscriberTopic) == 
-    if(data == "led_2_on"){
-      client.publish(publisherTopic, "led_2_on");
-      digitalWrite(LED_BUILTIN, HIGH);
-      led = true;
-    }
-    if(data == "led_2_off"){
-      client.publish(publisherTopic, "led_2_off");
-      digitalWrite(LED_BUILTIN, LOW);
-      led = false;
-    }
+
+  JsonDocument jsonPayload;
+  deserializeJson(jsonPayload, data);
+  int sensor1 = jsonPayload["Sensor1"]["Temp"];
+  int sensor2 = jsonPayload["Sensor2"]["Humidity"];
+  bool sensor3 = jsonPayload["Sensor3"]["Light"];
+
+  Serial.println("Json");
+  Serial.println(sensor1);
+  Serial.println(sensor2);
+  Serial.println(sensor3);
+  Serial.println();
+
+  if(sensor3){
+    digitalWrite(LED_BUILTIN, HIGH);
+    led = true;
+  }
+  if(!sensor3){
+    digitalWrite(LED_BUILTIN, LOW);
+    led = false;
   }
 }
 
@@ -116,12 +125,12 @@ void publishMessage() {
     delay(500);
     led = !led;
     if(led){
-      client.publish(publisherTopic, "led_2_on");
-      client.publish(subscriberTopic, "led_2_on");
+      //client.publish(publisherTopic, "{\"Sensor3\": {\"Light\": true}}");
+      client.publish(subscriberTopic, "{\"Sensor3\": {\"Light\": true}}");
     }
     else {
-      client.publish(publisherTopic, "led_2_off");
-      client.publish(subscriberTopic, "led_2_off");
+      //client.publish(publisherTopic, "{\"Sensor3\": {\"Light\": false}}");
+      client.publish(subscriberTopic, "{\"Sensor3\": {\"Light\": false}}");
     }
     Serial.println("send");
   }
