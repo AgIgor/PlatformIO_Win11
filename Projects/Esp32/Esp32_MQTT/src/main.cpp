@@ -7,6 +7,7 @@
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
 const char* mqtt_server = "mqtt.eclipseprojects.io";
+// const char* mqtt_server = "192.168.15.155";
 const int mqtt_port = 1883;
 
 WiFiClient espClient;
@@ -96,8 +97,6 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
   pinMode(0, INPUT_PULLUP);
 
-  // client.setCallback(callback);
-
   // Conecte-se à rede WiFi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -129,11 +128,28 @@ void setup() {
   delay(100);
 }//end setup
 
+long delayPost;
 void loop() {
   // Manter a conexão com o servidor MQTT
-  if (!client.connected()) {
-    reconnect();
-  }
   client.loop();
   publishMessage();
+
+  if (client.connected()) {
+    if(millis() - delayPost > 1000){
+      
+      delayPost = millis();
+        char ms[50];
+        char* payload;
+        // itoa ( millis(), ms, 10 );
+        sprintf(ms, "{\"Millis\": {\"Time\":%d}}", millis());
+        payload = ms;
+        Serial.println(payload);
+        Serial.println(sizeof(payload));
+        client.publish(publisherTopic, payload);
+    }
+  }
+
+  if (!client.connected()) {
+    reconnect(); 
+  }
 }//end loop
