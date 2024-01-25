@@ -129,7 +129,7 @@ void loop() {
   publishMessage();
 
   if (client.connected()) {
-    if(millis() - delayPost > 1000){
+    if(millis() - delayPost > 3000){
 
       delayPost = millis();
         char ms[50];
