@@ -6,8 +6,10 @@
 
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
-const char* mqtt_server = "mqtt.eclipseprojects.io";
-// const char* mqtt_server = "192.168.15.155";
+const char* username = "igor";
+const char* pass = "igor1234";
+// const char* mqtt_server = "mqtt.eclipseprojects.io";
+const char* mqtt_server = "192.168.15.155";
 const int mqtt_port = 1883;
 
 WiFiClient espClient;
@@ -59,12 +61,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void reconnect() {
   // Reconectar ao servidor MQTT
   while (!client.connected()) {
-    Serial.println("Tentando reconectar ao servidor MQTT...");
-    if (client.connect("ESP32Client")) {
-      Serial.println("Reconectado ao servidor MQTT");
+    Serial.println("Conectando ao servidor MQTT...");
+    const char* chip_model = ESP.getChipModel();
+    long chip_id = ESP.getEfuseMac();
+    char client_id[50];
+    sprintf(client_id, "%s%d",chip_model, chip_id);
 
-      // Inscrever-se novamente no tópico do subscriber após a reconexão
+    if (client.connect(client_id, username, pass)) {
+      Serial.println("Conectado ao servidor MQTT");
+      // Inscrever-se no tópico do subscriber
       client.subscribe(subscriberTopic);
+
     } else {
       Serial.print("Falha, rc=");
       Serial.print(client.state());
@@ -110,20 +117,7 @@ void setup() {
   client.setCallback(callback);
 
   // Conectar ao servidor MQTT
-  while (!client.connected()) {
-    Serial.println("Conectando ao servidor MQTT...");
-    if (client.connect("ESP32Client")) {
-      Serial.println("Conectado ao servidor MQTT");
-      // Inscrever-se no tópico do subscriber
-      client.subscribe(subscriberTopic);
-
-    } else {
-      Serial.print("Falha, rc=");
-      Serial.print(client.state());
-      Serial.println(" Tentando novamente em 5 segundos");
-      delay(5000);
-    }
-  }
+  reconnect();
   digitalWrite(LED_BUILTIN, LOW);
   delay(100);
 }//end setup
@@ -136,7 +130,7 @@ void loop() {
 
   if (client.connected()) {
     if(millis() - delayPost > 1000){
-      
+
       delayPost = millis();
         char ms[50];
         char* payload;
@@ -144,7 +138,7 @@ void loop() {
         sprintf(ms, "{\"Millis\": {\"Time\":%d}}", millis());
         payload = ms;
         Serial.println(payload);
-        Serial.println(sizeof(payload));
+        //Serial.println(sizeof(payload));
         client.publish(publisherTopic, payload);
     }
   }
