@@ -3,17 +3,26 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 
+#define MQQTT_VERSION = MQTT_VERSION_3_1_1
 
 const char* ssid = "VIVOFIBRA-9501";
 const char* password = "rgw7ucm3GT";
-const char* username = "igor";
-const char* pass = "igor1234";
+const char* username = "solace-cloud-client";
+const char* pass = "pre7c5hajo7k781dk7kvjbfnid";
+const char* mqtt_server = "mr-connection-its9016z64v.messaging.solace.cloud";
 // const char* mqtt_server = "mqtt.eclipseprojects.io";
-const char* mqtt_server = "192.168.15.155";
+// const char* mqtt_server = "192.168.15.155";
+// const char* mqtt_server = "3352203942da47b298951cbcd567f978.s1.eu.hivemq.cloud";
+// const char* mqtt_server = "broker.hivemq.com";
 const int mqtt_port = 1883;
+
+void callback(char* topic, byte* payload, unsigned int length);
+void reconnect();
+void publishMessage();
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+// PubSubClient client(mqtt_server, mqtt_port, callback, espClient);
 
 const char* subscriberTopic = "@igor_db";
 const char* publisherTopic = "@igor_esp32";
