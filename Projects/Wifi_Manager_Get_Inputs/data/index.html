@@ -106,8 +106,26 @@
 
     </form>
     <script>
-        console.log("ok")
-        const eventSource = new EventSource('http://192.168.4.1/events');
+        
+        const socket = new WebSocket("ws://192.168.4.1/ws");
+        socket.addEventListener("open", (event) => {
+        console.log("Conexão WebSocket aberta");
+
+        const dataToSend = { message: "Olá, servidor!" };
+            socket.send(JSON.stringify(dataToSend));
+        });
+        socket.addEventListener("message", (event) => {
+            const receivedData = JSON.parse(event.data);
+            console.log("Dados recebidos do servidor:", receivedData);
+        });
+        socket.addEventListener("error", (event) => {
+            console.error("Erro na conexão WebSocket:", event);
+        });
+        socket.addEventListener("close", (event) => {
+            console.log("Conexão WebSocket fechada");
+        });
+
+        /* const eventSource = new EventSource('http://192.168.4.1/events');
         eventSource.onopen = function(event) {
             console.log('Conexão estabelecida', event.target.readyState);
         };
@@ -123,14 +141,14 @@
                 adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
             });
             
-        });
+        }); */
         // eventSource.addEventListener('millis', function(event) {
         //     console.log('Millis:', Number(event.data)/1000);
         // });
         
         document.getElementById("wifiTable").addEventListener("click", (element) => {
             document.getElementById("wifi_ssid").value = element.target.innerText
-            console.log(element.target.innerText)
+            document.getElementById("wifi_password").focus();
         });
         document.getElementById("wifi-pass").addEventListener("click", () => {
             document.getElementById("wifi_password").focus();

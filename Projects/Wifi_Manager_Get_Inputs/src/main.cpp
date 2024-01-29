@@ -6,105 +6,46 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
-
-/* 
-#include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-
-void setup() {
-    // WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
-    Serial.begin(115200);
-    pinMode(0, INPUT_PULLUP);
-    pinMode(LED_BUILTIN, OUTPUT);
-    WiFiManager wm;
-    
-    bool flag;
-    while(millis()/1000 <= 5){
-      // digitalWrite(LED_BUILTIN, (millis()/90)%2);
-
-      if( (millis()/500)%2 ){
-        if( flag ){
-          Serial.println(millis()/1000);
-          flag = false;
-        }
-      }else{
-        flag = true;
-      }
-      digitalWrite(LED_BUILTIN, flag);
-
-      if(!digitalRead(0)){
-        wm.resetSettings();
-        delay(50);
-        break;
-        //ESP.restart();
-      }
-    }
-    // wm.resetSettings();
-    //bool res = wm.autoConnect(); // auto generated AP name from chipid
-    //bool res = wm.autoConnect("AutoConnectAP"); // anonymous ap
-    const char* name_ap = ESP.getChipModel();
-    bool res = wm.autoConnect( name_ap ,"12345678"); // password protected ap
-
-    if(!res) {
-        Serial.println("Failed to connect");
-        // ESP.restart();
-    } 
-    else { 
-        Serial.println("connected...yeey :)");
-    }
-
-}//end setup
-
-void loop() {
-    // put your main code here, to run repeatedly:   
-} */
-
-
-/* 
-
-
-
-
-
-void setup(void) {
-  // Carregue as configurações do arquivo JSON
-  carregarConfiguracao();
-  // Exiba as configurações carregadas
-  Serial.println("Configurações carregadas:");
-  Serial.print("SSID: ");
-  Serial.println(ssid);
-  Serial.print("Senha: ");
-  Serial.println(pass);
-
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin("ssid", "password");
-  Serial.println("");
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-}
-
-
- */
-
-
-#ifndef STASSID
-#define STASSID "VIVOFIBRA-9501"
-#define STAPSK "rgw7ucm3GT"
-#endif
-
 #define FORMAT_LITTLEFS_IF_FAILED true
 AsyncWebServer server(80);
-AsyncEventSource events("/events");
+//AsyncEventSource events("/events");
+AsyncWebSocket ws("/ws");
+
+void notifyClients(String sensorReadings) {
+  ws.textAll(sensorReadings);
+}
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  // Lidar com mensagens recebidas do cliente
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, data, len);
+
+  const char *message = doc["message"];
+  Serial.print("Mensagem recebida do cliente: ");
+  Serial.println(message);
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      break;
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
+
+  String response;
+  serializeJson(w_list, response);
+  notifyClients(response); // enviar lista para o cliente / receber inputs do cliente
+
+}
 
 void deleteFile(fs::FS &fs, const char * path){
     Serial.printf("Deleting file: %s\r\n", path);
@@ -245,21 +186,21 @@ void setup(){
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
     
-    events.onConnect([](AsyncEventSourceClient *client){
+    // events.onConnect([](AsyncEventSourceClient *client){
 
-      if(client->lastId()){
-        Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
-      }
-      // send event with message "hello!", id current millis
-      // and set reconnect delay to 1 second
-      // client->send("hello!", NULL, millis(), 10000);
+    //   if(client->lastId()){
+    //     Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+    //   }
+    //   // send event with message "hello!", id current millis
+    //   // and set reconnect delay to 1 second
+    //   // client->send("hello!", NULL, millis(), 10000);
 
-      delay(1000);
-      String response;
-      serializeJson(w_list, response);
-      client->send(String(response).c_str(),"w_list",millis());
+    //   delay(1000);
+    //   String response;
+    //   serializeJson(w_list, response);
+    //   client->send(String(response).c_str(),"w_list",millis());
 
-    });
+    // });
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
     });
@@ -292,8 +233,10 @@ void setup(){
 
     });
 
+    ws.onEvent(onEvent);
+    server.addHandler(&ws);
     server.onNotFound(notFound);
-    server.addHandler(&events);
+    //server.addHandler(&events);
     server.begin();
     Serial.println("HTTP server started");
     long msDelay;
@@ -308,17 +251,19 @@ void setup(){
       long ms = millis();
       if(ms - msDelay > 1000){
         msDelay = ms;
-        events.send(String(ms/1000).c_str(),"millis",millis());
+        //events.send(String(ms/1000).c_str(),"millis",millis());
+        notifyClients(String(ms/1000).c_str());
         Serial.print("ms: ");
         Serial.println(ms);
       }
-      digitalWrite(LED_BUILTIN, (millis()/200)%2);
+      digitalWrite(LED_BUILTIN, (millis()/90)%2);
+      ws.cleanupClients();
 
     }//end while true
 
   }//not exists /config.json
 
-
+  digitalWrite(LED_BUILTIN, LOW);
 }//end setup
 
 void loop(){
