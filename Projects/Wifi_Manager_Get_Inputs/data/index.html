@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wifi Manager</title>
+    <style>
+        :root{color-scheme: dark;}
+        body{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        input{
+            display: flex;
+            margin: 10px;
+        }
+        input[type="checkbox"]{
+            display: inline;
+        }
+        </style>
+</head>
+<body>
+    <form action="/save" method="POST">
+
+        <input type="text" placeholder="Wifi" name="wifi_ssi" id="wifi_ssi" required>
+        <input type="password" placeholder="PASSWD" name="wifi_password" id="wifi_password">
+        <input type="checkbox" onclick="w()" id="wifi-pass">
+        <label for="wifi-pass">Show password</label>
+        <input type="text" placeholder="URL" name="url" id="url" required> 
+        <input type="submit" placeholder=Send>
+    </form>
+    <script>
+        function w(){
+            var x = document.getElementById('wifi_password');
+            x.type === 'password' ? x.type = 'text' : x.type = 'password';
+        }
+    </script>
+</body>
+</html>
