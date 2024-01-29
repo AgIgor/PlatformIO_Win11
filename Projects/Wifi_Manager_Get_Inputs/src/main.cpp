@@ -104,6 +104,7 @@ void setup(void) {
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 AsyncWebServer server(80);
+AsyncEventSource events("/events");
 
 void deleteFile(fs::FS &fs, const char * path){
     Serial.printf("Deleting file: %s\r\n", path);
@@ -218,14 +219,15 @@ void setup(){
 
   }
   else {
-    Serial.println("Arquivo JSON de configuração não encontrado.");
+    Serial.println("Arquivo JSON de configuração não encontrado.\n\n");
     WiFi.mode(WIFI_AP);
     const char* name_ap = ESP.getChipModel();
     byte countWifi = WiFi.scanNetworks();
     if (countWifi > 0) {
       for (int i = 0; i < countWifi; ++i) {
         // listWifi[i] = WiFi.SSID(i);
-        w_list[String(i)] = WiFi.SSID(i);
+        w_list[i]["SSID"] = WiFi.SSID(i);
+        w_list[i]["RSSI"] = WiFi.RSSI(i);
       }
     }
     serializeJson(w_list, Serial);
@@ -235,27 +237,41 @@ void setup(){
       while(1);
     }
     IPAddress myIP = WiFi.softAPIP();
-    Serial.print("AP IP address: ");
+    Serial.print("\n\nAP IP address: ");
     Serial.println(myIP);
     server.begin();
     Serial.println("Server started\n\n");
 
-    server.on("/w_list", HTTP_GET, [](AsyncWebServerRequest *request){
-      AsyncResponseStream *response = request->beginResponseStream("application/json");
-      serializeJson(w_list, *response);
-      request->send(response);
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
+    DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
+    
+    events.onConnect([](AsyncEventSourceClient *client){
+
+      if(client->lastId()){
+        Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+      }
+      // send event with message "hello!", id current millis
+      // and set reconnect delay to 1 second
+      // client->send("hello!", NULL, millis(), 10000);
+
+      delay(1000);
+      String response;
+      serializeJson(w_list, response);
+      client->send(String(response).c_str(),"w_list",millis());
+
     });
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
     });
     server.on("/save", HTTP_POST, [](AsyncWebServerRequest *request){
+
       String url;
-      String wifi_ssi;
+      String wifi_ssid;
       String wifi_password;
 
-      if (request->hasParam("wifi_ssi", true)) {
+      if (request->hasParam("wifi_ssid", true)) {
           url = request->getParam("url", true)->value();
-          wifi_ssi = request->getParam("wifi_ssi", true)->value();
+          wifi_ssid = request->getParam("wifi_ssid", true)->value();
           wifi_password = request->getParam("wifi_password", true)->value();
       }
       request->send(200, "text/plain", "Salvo!");
@@ -263,24 +279,46 @@ void setup(){
       Serial.print("url: ");
       Serial.println(url);
 
-      Serial.print("wifi_ssi: ");
-      Serial.println(wifi_ssi); 
+      Serial.print("wifi_ssid: ");
+      Serial.println(wifi_ssid); 
 
       Serial.print("wifi_password: ");
       Serial.println(wifi_password);
 
-      salvarConfiguracao(wifi_ssi, wifi_password, url);
+      salvarConfiguracao(wifi_ssid, wifi_password, url);
       Serial.println("\nReiniciando..");
       delay(1000);
       ESP.restart();
+
     });
 
     server.onNotFound(notFound);
+    server.addHandler(&events);
     server.begin();
+    Serial.println("HTTP server started");
+    long msDelay;
 
-  }//LittleFS.exists("/config.json")
+    while(true){
+      
+      // delay(1500);
+      // String response;
+      // serializeJson(w_list, response);
+      // events.send(String(response).c_str(),"w_list",millis());
 
-  Serial.println("HTTP server started");
+      long ms = millis();
+      if(ms - msDelay > 1000){
+        msDelay = ms;
+        events.send(String(ms/1000).c_str(),"millis",millis());
+        Serial.print("ms: ");
+        Serial.println(ms);
+      }
+      digitalWrite(LED_BUILTIN, (millis()/200)%2);
+
+    }//end while true
+
+  }//not exists /config.json
+
+
 }//end setup
 
 void loop(){

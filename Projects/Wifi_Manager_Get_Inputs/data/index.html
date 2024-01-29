@@ -6,35 +6,146 @@
     <title>Wifi Manager</title>
     <style>
         :root{color-scheme: dark;}
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body{
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            width: 100vw;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            overflow-x: hidden;
+        }
+        form{
+            width: 80vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        form span{
+            font-size: large;
+            text-align: start;
+            width: 100%;
         }
         input{
             display: flex;
-            margin: 10px;
+            margin: 5px;
+        }
+        input[type="text"],[type="password"]{
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            font-size: larger;
         }
         input[type="checkbox"]{
-            display: inline;
+            display: inline-block;
         }
-        </style>
+        button[type="submit"]{
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }    
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #f2f2f2;
+            color: black;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            background-color: #f2f2f2;
+            font-size: large;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-size: large;
+            text-align: center;
+        }
+        table button{
+            width: 100%;
+            min-height: 40px;
+            border-radius: 10px;
+            font-size: large;
+            text-align: center;; 
+        }
+        
+    </style>
 </head>
 <body>
+    <h2>Redes Disponíveis</h2>
+    <table id="wifiTable">
+        <thead>
+            <tr>
+                <th>Nome da Rede WiFi</th>
+                <th>Potência do Sinal</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
     <form action="/save" method="POST">
+        <input type="text" placeholder="Selecione uma rede" name="wifi_ssid" id="wifi_ssid" required>
+        <input type="password" placeholder="Senha da rede" name="wifi_password" id="wifi_password">
+        <span>
+            <input type="checkbox" onclick="w()" id="wifi-pass">
+            <label for="wifi-pass">Show password</label>
+        </span>
+        <input type="text" placeholder="Endereço servidor MQTT" name="url" id="url" required> 
+        <button type="submit" >Enviar</button>
 
-        <input type="text" placeholder="Wifi" name="wifi_ssi" id="wifi_ssi" required>
-        <input type="password" placeholder="PASSWD" name="wifi_password" id="wifi_password">
-        <input type="checkbox" onclick="w()" id="wifi-pass">
-        <label for="wifi-pass">Show password</label>
-        <input type="text" placeholder="URL" name="url" id="url" required> 
-        <input type="submit" placeholder=Send>
     </form>
     <script>
+        console.log("ok")
+        const eventSource = new EventSource('http://192.168.4.1/events');
+        eventSource.onopen = function(event) {
+            console.log('Conexão estabelecida', event.target.readyState);
+        };
+        eventSource.onerror = function(event) {
+            if (event.target.readyState != EventSource.OPEN) {
+                console.log('Conexão Finalizada', event.target.readyState);
+            }
+        };
+        eventSource.addEventListener('w_list', function(event) {
+            console.log('Mensagem recebida:', event.data);
+            const dataJson = JSON.parse(event.data);
+            dataJson.forEach(element => {        
+                adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+            });
+            
+        });
+        // eventSource.addEventListener('millis', function(event) {
+        //     console.log('Millis:', Number(event.data)/1000);
+        // });
+        
+        document.getElementById("wifiTable").addEventListener("click", (element) => {
+            document.getElementById("wifi_ssid").value = element.target.innerText
+            console.log(element.target.innerText)
+        });
+        document.getElementById("wifi-pass").addEventListener("click", () => {
+            document.getElementById("wifi_password").focus();
+        });
         function w(){
             var x = document.getElementById('wifi_password');
             x.type === 'password' ? x.type = 'text' : x.type = 'password';
+        }
+        function adicionarLinha(nome, potencia) {
+            var table = document.getElementById("wifiTable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.rows.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            cell1.innerHTML = nome;
+            cell2.innerHTML = potencia;
         }
     </script>
 </body>
