@@ -41,7 +41,7 @@ void salvarConfiguracao(String strSSID, String strPasswd, String mqtt_url) {
 void notifyClients(String sensorReadings) {
   ws.textAll(sensorReadings);
 }
-
+//receber dados json
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   // Lidar com mensagens recebidas do cliente
   JsonDocument doc;
@@ -76,7 +76,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 
       String response;
       serializeJson(w_list, response);
-      notifyClients(response); // enviar lista para o cliente / receber inputs do cliente
+      notifyClients(response);
 
       break;
     }
@@ -203,7 +203,7 @@ void setup(){
 
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
-    
+
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
     });

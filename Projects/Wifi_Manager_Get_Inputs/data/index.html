@@ -43,6 +43,9 @@
             border-radius: 10px;
             font-size: larger;
         }
+        /* input[type="text"],[type="password"]:focus{
+            border: 1px solid blue;
+        } */
         input[type="checkbox"]{
             display: inline-block;
         }
@@ -96,19 +99,37 @@
         </tbody>
     </table>
     <div>
-        <input type="text" placeholder="Selecione uma rede" name="wifi_ssid" id="wifi_ssid" required>
+        <input type="text" placeholder="Selecione uma rede" name="wifi_ssid" id="wifi_ssid" class="wifi_ssid">
         <input type="password" placeholder="Senha da rede" name="wifi_password" id="wifi_password">
         <span>
             <input type="checkbox" onclick="toggle_pass()" id="wifi-pass">
             <label for="wifi-pass">Show password</label>
         </span>
-        <input type="text" placeholder="Endereço servidor MQTT" name="url" id="url" required> 
+        <input type="text" placeholder="Endereço servidor MQTT" name="url" id="url" class="url"> 
         <!-- <button type="submit" >Enviar</button> -->
-        <button onclick="send()">Salvar</button>
+        <button onclick="send()" disabled id="sendBtn">Salvar</button>
     </div>
 
     <script>
-        
+        const listInput = document.querySelectorAll("#wifi_ssid, #url");
+        const btnSend = document.getElementById("sendBtn")
+        const inSSID = document.getElementById("wifi_ssid")
+        const inURL = document.getElementById("url")
+        listInput.forEach(element => { 
+            element.addEventListener("input",(e)=>{
+                if(inSSID.value == "" || inURL.value == "") {
+                    btnSend.setAttribute("disabled", true)
+                    inSSID.value == "" ? inSSID.style.border = "1px solid red" : null
+                    inURL.value == "" ? inURL.style.border = "1px solid red" : null
+                }
+                else {
+                    btnSend.removeAttribute("disabled")
+                    inSSID.style.border = "none";
+                    inURL.style.border = "none";
+                }
+            })
+        });
+
         const socket = new WebSocket("ws://192.168.4.1/ws");
         socket.addEventListener("open", (event) => {
             console.log("Conexão WebSocket aberta");
@@ -118,7 +139,9 @@
         });
         socket.addEventListener("message", (event) => {
             const receivedData = JSON.parse(event.data);
-            console.log("Dados recebidos do servidor:", receivedData);
+            receivedData.forEach(element => {        
+                adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+            });
         });
         socket.addEventListener("error", (event) => {
             console.error("Erro na conexão WebSocket:", event);
@@ -150,6 +173,7 @@
         
         document.getElementById("wifiTable").addEventListener("click", (element) => {
             document.getElementById("wifi_ssid").value = element.target.innerText
+            inURL.value == "" ? inURL.style.border = "1px solid red" : null
             document.getElementById("wifi_password").focus();
         });
         document.getElementById("wifi-pass").addEventListener("click", () => {
@@ -167,8 +191,21 @@
                 wifi_ssid : wifi_ssid,
                 wifi_password : wifi_password
             };
-            socket.send(dataToSend);
+            socket.send(JSON.stringify(dataToSend));
             console.log(dataToSend);
+
+            const text = `
+                            Conectar em: ${dataToSend.wifi_ssid}\n
+                            Senha: ${dataToSend.wifi_password}\n
+                            Servidor MQTT: ${dataToSend.url}
+                        `;
+            if (confirm(text) == true) {
+                alert("Reiniciando sistema!")
+                setTimeout(() => {
+                    document.location.reload()
+                }, 2000);
+            }
+            else alert("Cancelado!")
 
         }
         function toggle_pass(){
