@@ -41,7 +41,7 @@ void salvarConfiguracao(String strSSID, String strPasswd, String mqtt_url) {
 void notifyClients(String sensorReadings) {
   ws.textAll(sensorReadings);
 }
-//receber dados json
+
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
   // Lidar com mensagens recebidas do cliente
   JsonDocument doc;

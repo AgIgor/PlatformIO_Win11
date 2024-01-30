@@ -20,6 +20,7 @@
             margin-top: 50px;
             margin-bottom: 50px;
             overflow-x: hidden;
+            background-color: #212121;
         }
         div{
             width: 80vw;
@@ -43,9 +44,6 @@
             border-radius: 10px;
             font-size: larger;
         }
-        /* input[type="text"],[type="password"]:focus{
-            border: 1px solid blue;
-        } */
         input[type="checkbox"]{
             display: inline-block;
         }
@@ -60,19 +58,19 @@
             width: 90%;
             border-collapse: collapse;
             margin: 20px auto;
-            background-color: #f2f2f2;
+            background-color: #e8e8e8;
             color: black;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 10px;
             text-align: left;
-            background-color: #f2f2f2;
+            background-color: #e8e8e8;
             font-size: large;
             text-align: center;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #e8e8e8;
             font-size: large;
             text-align: center;
         }
@@ -110,109 +108,109 @@
         <button onclick="send()" disabled id="sendBtn">Salvar</button>
     </div>
 
-    <script>
-        const listInput = document.querySelectorAll("#wifi_ssid, #url");
-        const btnSend = document.getElementById("sendBtn")
-        const inSSID = document.getElementById("wifi_ssid")
-        const inURL = document.getElementById("url")
-        listInput.forEach(element => { 
-            element.addEventListener("input",(e)=>{
-                if(inSSID.value == "" || inURL.value == "") {
-                    btnSend.setAttribute("disabled", true)
-                    inSSID.value == "" ? inSSID.style.border = "1px solid red" : null
-                    inURL.value == "" ? inURL.style.border = "1px solid red" : null
-                }
-                else {
-                    btnSend.removeAttribute("disabled")
-                    inSSID.style.border = "none";
-                    inURL.style.border = "none";
-                }
-            })
-        });
-
-        const socket = new WebSocket("ws://192.168.4.1/ws");
-        socket.addEventListener("open", (event) => {
-            console.log("Conexão WebSocket aberta");
-
-            // const dataToSend = { message: "Olá, servidor!" };
-            // socket.send(JSON.stringify(dataToSend));
-        });
-        socket.addEventListener("message", (event) => {
-            const receivedData = JSON.parse(event.data);
-            receivedData.forEach(element => {        
-                adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
-            });
-        });
-        socket.addEventListener("error", (event) => {
-            console.error("Erro na conexão WebSocket:", event);
-        });
-        socket.addEventListener("close", (event) => {
-            console.log("Conexão WebSocket fechada");
-        });
-
-        /* const eventSource = new EventSource('http://192.168.4.1/events');
-        eventSource.onopen = function(event) {
-            console.log('Conexão estabelecida', event.target.readyState);
-        };
-        eventSource.onerror = function(event) {
-            if (event.target.readyState != EventSource.OPEN) {
-                console.log('Conexão Finalizada', event.target.readyState);
+<script>
+    const listInput = document.querySelectorAll("#wifi_ssid, #url");
+    const btnSend = document.getElementById("sendBtn")
+    const inSSID = document.getElementById("wifi_ssid")
+    const inURL = document.getElementById("url")
+    listInput.forEach(element => { 
+        element.addEventListener("input",(e)=>{
+            if(inSSID.value == "" || inURL.value == "") {
+                btnSend.setAttribute("disabled", true)
+                inSSID.value == "" ? inSSID.style.border = "1px solid red" : null
+                inURL.value == "" ? inURL.style.border = "1px solid red" : null
             }
-        };
-        eventSource.addEventListener('w_list', function(event) {
-            console.log('Mensagem recebida:', event.data);
-            const dataJson = JSON.parse(event.data);
-            dataJson.forEach(element => {        
-                adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
-            });
-            
-        }); */
-        // eventSource.addEventListener('millis', function(event) {
-        //     console.log('Millis:', Number(event.data)/1000);
-        // });
-        
-        document.getElementById("wifiTable").addEventListener("click", (element) => {
-            document.getElementById("wifi_ssid").value = element.target.innerText
-            inURL.value == "" ? inURL.style.border = "1px solid red" : null
-            document.getElementById("wifi_password").focus();
-        });
-        document.getElementById("wifi-pass").addEventListener("click", () => {
-            document.getElementById("wifi_password").focus();
-        });
-        
-        function send(){
-            const url = document.getElementById("url").value
-            const wifi_ssid = document.getElementById("wifi_ssid").value
-            const wifi_password = document.getElementById("wifi_password").value
+            else {
+                btnSend.removeAttribute("disabled")
+                inSSID.style.border = "none";
+                inURL.style.border = "none";
+            }
+        })
+    });
 
-            const dataToSend = {
-                message: "Olá, servidor!",
-                url : url,
-                wifi_ssid : wifi_ssid,
-                wifi_password : wifi_password
-            };
+    const socket = new WebSocket("ws://192.168.4.1/ws");
+    socket.addEventListener("open", (event) => {
+        console.log("Conexão WebSocket aberta");
+
+        // const dataToSend = { message: "Olá, servidor!" };
+        // socket.send(JSON.stringify(dataToSend));
+    });
+    socket.addEventListener("message", (event) => {
+        const receivedData = JSON.parse(event.data);
+        receivedData.forEach(element => {        
+            adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+        });
+    });
+    socket.addEventListener("error", (event) => {
+        console.error("Erro na conexão WebSocket:", event);
+    });
+    socket.addEventListener("close", (event) => {
+        console.log("Conexão WebSocket fechada");
+    });
+
+    /* const eventSource = new EventSource('http://192.168.4.1/events');
+    eventSource.onopen = function(event) {
+        console.log('Conexão estabelecida', event.target.readyState);
+    };
+    eventSource.onerror = function(event) {
+        if (event.target.readyState != EventSource.OPEN) {
+            console.log('Conexão Finalizada', event.target.readyState);
+        }
+    };
+    eventSource.addEventListener('w_list', function(event) {
+        console.log('Mensagem recebida:', event.data);
+        const dataJson = JSON.parse(event.data);
+        dataJson.forEach(element => {        
+            adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+        });
+        
+    }); */
+    // eventSource.addEventListener('millis', function(event) {
+    //     console.log('Millis:', Number(event.data)/1000);
+    // });
+    
+    document.getElementById("wifiTable").addEventListener("click", (element) => {
+        document.getElementById("wifi_ssid").value = element.target.innerText
+        inURL.value == "" ? inURL.style.border = "1px solid red" : null
+        document.getElementById("wifi_password").focus();
+    });
+    document.getElementById("wifi-pass").addEventListener("click", () => {
+        document.getElementById("wifi_password").focus();
+    });
+    
+    function send(){
+        const url = document.getElementById("url").value
+        const wifi_ssid = document.getElementById("wifi_ssid").value
+        const wifi_password = document.getElementById("wifi_password").value
+
+        const dataToSend = {
+            message: "Olá, servidor!",
+            url : url,
+            wifi_ssid : wifi_ssid,
+            wifi_password : wifi_password
+        };
+        console.log(dataToSend);
+
+        const text = `
+                        Conectar em: ${dataToSend.wifi_ssid}\n
+                        Senha: ${dataToSend.wifi_password}\n
+                        Servidor MQTT: ${dataToSend.url}
+                    `;
+        if (confirm(text) == true) {
             socket.send(JSON.stringify(dataToSend));
-            console.log(dataToSend);
-
-            const text = `
-                            Conectar em: ${dataToSend.wifi_ssid}\n
-                            Senha: ${dataToSend.wifi_password}\n
-                            Servidor MQTT: ${dataToSend.url}
-                        `;
-            if (confirm(text) == true) {
-                alert("Reiniciando sistema!")
-                setTimeout(() => {
-                    document.location.reload()
-                }, 2000);
-            }
-            else alert("Cancelado!")
-
+            alert("Reiniciando sistema!")
+            setTimeout(() => {
+                document.location.reload()
+            }, 2000);
         }
-        function toggle_pass(){
-            var x = document.getElementById('wifi_password');
-            x.type === 'password' ? x.type = 'text' : x.type = 'password';
-        }
-        function adicionarLinha(nome, potencia) {
+        else alert("Cancelado!")
+
+    }
+    function toggle_pass(){
+        var x = document.getElementById('wifi_password');
+        x.type === 'password' ? x.type = 'text' : x.type = 'password';
+    }
+    function adicionarLinha(nome, potencia) {
             var table = document.getElementById("wifiTable").getElementsByTagName('tbody')[0];
             var newRow = table.insertRow(table.rows.length);
             var cell1 = newRow.insertCell(0);
@@ -220,6 +218,6 @@
             cell1.innerHTML = nome;
             cell2.innerHTML = potencia;
         }
-    </script>
+</script>
 </body>
 </html>
