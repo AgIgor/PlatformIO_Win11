@@ -21,14 +21,14 @@
             margin-bottom: 50px;
             overflow-x: hidden;
         }
-        form{
+        div{
             width: 80vw;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-        form span{
+        div span{
             font-size: large;
             text-align: start;
             width: 100%;
@@ -46,11 +46,12 @@
         input[type="checkbox"]{
             display: inline-block;
         }
-        button[type="submit"]{
+        div button{
             width: 100%;
             height: 50px;
             border-radius: 10px;
             margin-top: 5px;
+            font-size: large;
         }    
         table {
             width: 90%;
@@ -94,25 +95,26 @@
         <tbody>
         </tbody>
     </table>
-    <form action="/save" method="POST">
+    <div>
         <input type="text" placeholder="Selecione uma rede" name="wifi_ssid" id="wifi_ssid" required>
         <input type="password" placeholder="Senha da rede" name="wifi_password" id="wifi_password">
         <span>
-            <input type="checkbox" onclick="w()" id="wifi-pass">
+            <input type="checkbox" onclick="toggle_pass()" id="wifi-pass">
             <label for="wifi-pass">Show password</label>
         </span>
         <input type="text" placeholder="Endereço servidor MQTT" name="url" id="url" required> 
-        <button type="submit" >Enviar</button>
+        <!-- <button type="submit" >Enviar</button> -->
+        <button onclick="send()">Salvar</button>
+    </div>
 
-    </form>
     <script>
         
         const socket = new WebSocket("ws://192.168.4.1/ws");
         socket.addEventListener("open", (event) => {
-        console.log("Conexão WebSocket aberta");
+            console.log("Conexão WebSocket aberta");
 
-        const dataToSend = { message: "Olá, servidor!" };
-            socket.send(JSON.stringify(dataToSend));
+            // const dataToSend = { message: "Olá, servidor!" };
+            // socket.send(JSON.stringify(dataToSend));
         });
         socket.addEventListener("message", (event) => {
             const receivedData = JSON.parse(event.data);
@@ -153,7 +155,23 @@
         document.getElementById("wifi-pass").addEventListener("click", () => {
             document.getElementById("wifi_password").focus();
         });
-        function w(){
+        
+        function send(){
+            const url = document.getElementById("url").value
+            const wifi_ssid = document.getElementById("wifi_ssid").value
+            const wifi_password = document.getElementById("wifi_password").value
+
+            const dataToSend = {
+                message: "Olá, servidor!",
+                url : url,
+                wifi_ssid : wifi_ssid,
+                wifi_password : wifi_password
+            };
+            socket.send(dataToSend);
+            console.log(dataToSend);
+
+        }
+        function toggle_pass(){
             var x = document.getElementById('wifi_password');
             x.type === 'password' ? x.type = 'text' : x.type = 'password';
         }

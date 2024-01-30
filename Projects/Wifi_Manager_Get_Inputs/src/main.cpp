@@ -7,45 +7,10 @@
 #include <ESPAsyncWebServer.h>
 
 #define FORMAT_LITTLEFS_IF_FAILED true
+JsonDocument w_list;
 AsyncWebServer server(80);
 //AsyncEventSource events("/events");
 AsyncWebSocket ws("/ws");
-
-void notifyClients(String sensorReadings) {
-  ws.textAll(sensorReadings);
-}
-
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
-  // Lidar com mensagens recebidas do cliente
-  DynamicJsonDocument doc(1024);
-  deserializeJson(doc, data, len);
-
-  const char *message = doc["message"];
-  Serial.print("Mensagem recebida do cliente: ");
-  Serial.println(message);
-}
-
-void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
-  switch (type) {
-    case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-      break;
-    case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
-      break;
-    case WS_EVT_DATA:
-      handleWebSocketMessage(arg, data, len);
-      break;
-    case WS_EVT_PONG:
-    case WS_EVT_ERROR:
-      break;
-  }
-
-  String response;
-  serializeJson(w_list, response);
-  notifyClients(response); // enviar lista para o cliente / receber inputs do cliente
-
-}
 
 void deleteFile(fs::FS &fs, const char * path){
     Serial.printf("Deleting file: %s\r\n", path);
@@ -54,10 +19,6 @@ void deleteFile(fs::FS &fs, const char * path){
     } else {
         Serial.println("- delete failed");
     }
-}
-
-void notFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "Not found");
 }
 
 void salvarConfiguracao(String strSSID, String strPasswd, String mqtt_url) {
@@ -77,7 +38,64 @@ void salvarConfiguracao(String strSSID, String strPasswd, String mqtt_url) {
   configFile.close();
 }
 
-JsonDocument w_list;
+void notifyClients(String sensorReadings) {
+  ws.textAll(sensorReadings);
+}
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) {
+  // Lidar com mensagens recebidas do cliente
+  JsonDocument doc;
+  deserializeJson(doc, data, len);
+
+  const char *message = doc["message"];
+  Serial.print("Mensagem recebida do cliente: ");
+  Serial.println(message);
+
+  String url  = doc["url"];
+  String wifi_ssid  = doc["wifi_ssid"];
+  String wifi_password  = doc["wifi_password"];
+  Serial.print("url: ");
+  Serial.println(url);
+
+  Serial.print("wifi_ssid: ");
+  Serial.println(wifi_ssid); 
+
+  Serial.print("wifi_password: ");
+  Serial.println(wifi_password);
+
+  salvarConfiguracao(wifi_ssid, wifi_password, url);
+  Serial.println("\nReiniciando..");
+  delay(1000);
+  ESP.restart();
+}
+
+void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  switch (type) {
+    case WS_EVT_CONNECT:{
+      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+
+      String response;
+      serializeJson(w_list, response);
+      notifyClients(response); // enviar lista para o cliente / receber inputs do cliente
+
+      break;
+    }
+    case WS_EVT_DISCONNECT:
+      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      break;
+    case WS_EVT_DATA:
+      handleWebSocketMessage(arg, data, len);
+      break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+      break;
+  }
+}
+
+void notFound(AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "Not found");
+}
+
 void setup(){
   Serial.begin(115200);
   if(!LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED)){
@@ -186,24 +204,26 @@ void setup(){
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Origin"), F("*"));
     DefaultHeaders::Instance().addHeader(F("Access-Control-Allow-Headers"), F("content-type"));
     
-    // events.onConnect([](AsyncEventSourceClient *client){
-
-    //   if(client->lastId()){
-    //     Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
-    //   }
-    //   // send event with message "hello!", id current millis
-    //   // and set reconnect delay to 1 second
-    //   // client->send("hello!", NULL, millis(), 10000);
-
-    //   delay(1000);
-    //   String response;
-    //   serializeJson(w_list, response);
-    //   client->send(String(response).c_str(),"w_list",millis());
-
-    // });
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
       request->send(LittleFS, "/index.html", "text/html");
     });
+/*     
+    events.onConnect([](AsyncEventSourceClient *client){
+
+      if(client->lastId()){
+        Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+      }
+      // send event with message "hello!", id current millis
+      // and set reconnect delay to 1 second
+      // client->send("hello!", NULL, millis(), 10000);
+
+      delay(1000);
+      String response;
+      serializeJson(w_list, response);
+      client->send(String(response).c_str(),"w_list",millis());
+
+    }); */
+/*     
     server.on("/save", HTTP_POST, [](AsyncWebServerRequest *request){
 
       String url;
@@ -211,9 +231,11 @@ void setup(){
       String wifi_password;
 
       if (request->hasParam("wifi_ssid", true)) {
+
           url = request->getParam("url", true)->value();
           wifi_ssid = request->getParam("wifi_ssid", true)->value();
           wifi_password = request->getParam("wifi_password", true)->value();
+
       }
       request->send(200, "text/plain", "Salvo!");
 
@@ -231,7 +253,7 @@ void setup(){
       delay(1000);
       ESP.restart();
 
-    });
+    }); */
 
     ws.onEvent(onEvent);
     server.addHandler(&ws);
@@ -252,9 +274,10 @@ void setup(){
       if(ms - msDelay > 1000){
         msDelay = ms;
         //events.send(String(ms/1000).c_str(),"millis",millis());
-        notifyClients(String(ms/1000).c_str());
+        //notifyClients(String(ms/1000).c_str());
         Serial.print("ms: ");
         Serial.println(ms);
+
       }
       digitalWrite(LED_BUILTIN, (millis()/90)%2);
       ws.cleanupClients();
