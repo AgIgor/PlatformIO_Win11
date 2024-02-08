@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wifi Manager</title>
+    <style>
+        :root{color-scheme: dark;}
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            overflow-x: hidden;
+            background-color: #212121;
+        }
+        div{
+            width: 80vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        div span{
+            font-size: large;
+            text-align: start;
+            width: 100%;
+        }
+        input{
+            display: flex;
+            margin: 5px;
+        }
+        input[type="text"],[type="password"]{
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            font-size: larger;
+        }
+        input[type="checkbox"]{
+            display: inline-block;
+        }
+        div button{
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            margin-top: 5px;
+            font-size: large;
+        }    
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #e8e8e8;
+            color: black;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            background-color: #e8e8e8;
+            font-size: large;
+            text-align: center;
+        }
+        th {
+            background-color: #e8e8e8;
+            font-size: large;
+            text-align: center;
+        }
+        table button{
+            width: 100%;
+            min-height: 40px;
+            border-radius: 10px;
+            font-size: large;
+            text-align: center;; 
+        }
+        
+    </style>
+</head>
+<body>
+    <h2>Redes Disponíveis</h2>
+    <table id="wifiTable">
+        <thead>
+            <tr>
+                <th>Nome da Rede WiFi</th>
+                <th>Potência do Sinal</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div>
+        <input type="text" placeholder="Selecione uma rede" name="wifi_ssid" id="wifi_ssid" class="wifi_ssid">
+        <input type="password" placeholder="Senha da rede" name="wifi_password" id="wifi_password">
+        <span>
+            <input type="checkbox" onclick="toggle_pass()" id="wifi-pass">
+            <label for="wifi-pass">Show password</label>
+        </span>
+        <input type="text" placeholder="Endereço servidor MQTT" name="mqtt_server" id="mqtt_server"> 
+        <input type="text" placeholder="Usuario MQTT" name="mqtt_user" id="mqtt_user"> 
+        <input type="text" placeholder="Senha MQTT" name="mqtt_pass" id="mqtt_pass">
+
+        <button onclick="send()" disabled id="sendBtn">Salvar</button>
+    </div>
+
+<script>
+    const listInput = document.querySelectorAll("#wifi_ssid, #mqtt_server");
+    const btnSend = document.getElementById("sendBtn")
+    const inSSID = document.getElementById("wifi_ssid")
+    const inURL = document.getElementById("mqtt_server")
+
+    listInput.forEach(element => { 
+        element.addEventListener("input",(e)=>{
+            if(inSSID.value == "" || inURL.value == "") {
+                btnSend.setAttribute("disabled", true)
+                inSSID.value == "" ? inSSID.style.border = "1px solid red" : null
+                inURL.value == "" ? inURL.style.border = "1px solid red" : null
+            }
+            else {
+                btnSend.removeAttribute("disabled")
+                inSSID.style.border = "none";
+                inURL.style.border = "none";
+            }
+        })
+    });
+
+    const socket = new WebSocket("ws://192.168.4.1/ws");
+    socket.addEventListener("open", (event) => {
+        console.log("Conexão WebSocket aberta");
+
+        // const dataToSend = { message: "Olá, servidor!" };
+        // socket.send(JSON.stringify(dataToSend));
+    });
+    socket.addEventListener("message", (event) => {
+        const receivedData = JSON.parse(event.data);
+        receivedData.forEach(element => {        
+            adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+        });
+    });
+    socket.addEventListener("error", (event) => {
+        console.error("Erro na conexão WebSocket:", event);
+    });
+    socket.addEventListener("close", (event) => {
+        console.log("Conexão WebSocket fechada");
+    });
+
+    /* const eventSource = new EventSource('http://192.168.4.1/events');
+    eventSource.onopen = function(event) {
+        console.log('Conexão estabelecida', event.target.readyState);
+    };
+    eventSource.onerror = function(event) {
+        if (event.target.readyState != EventSource.OPEN) {
+            console.log('Conexão Finalizada', event.target.readyState);
+        }
+    };
+    eventSource.addEventListener('w_list', function(event) {
+        console.log('Mensagem recebida:', event.data);
+        const dataJson = JSON.parse(event.data);
+        dataJson.forEach(element => {        
+            adicionarLinha(`<button>${element.SSID}</button>`, `${element.RSSI} dBm`);
+        });
+        
+    }); */
+    // eventSource.addEventListener('millis', function(event) {
+    //     console.log('Millis:', Number(event.data)/1000);
+    // });
+    
+    document.getElementById("wifiTable").addEventListener("click", (element) => {
+        document.getElementById("wifi_ssid").value = element.target.innerText
+        inURL.value == "" ? inURL.style.border = "1px solid red" : null
+        document.getElementById("wifi_password").focus();
+    });
+    document.getElementById("wifi-pass").addEventListener("click", () => {
+        document.getElementById("wifi_password").focus();
+    });
+    
+    function send(){
+        const wifi_ssid = document.getElementById("wifi_ssid").value
+        const wifi_password = document.getElementById("wifi_password").value
+        const mqtt_server = document.getElementById("mqtt_server").value
+        const mqtt_user = document.getElementById("mqtt_user").value
+        const mqtt_pass = document.getElementById("mqtt_pass").value
+
+        const dataToSend = {
+            message: "Olá, servidor!",
+            mqtt_server : mqtt_server,
+            wifi_ssid : wifi_ssid,
+            wifi_password : wifi_password,
+            mqtt_user : mqtt_user,
+            mqtt_pass : mqtt_pass
+        };
+        console.log(dataToSend);
+
+        const text = `
+                        Conectar em: ${dataToSend.wifi_ssid}\n
+                        Senha: ${dataToSend.wifi_password}\n
+                        MQTT: ${dataToSend.mqtt_server}\n
+                        User: ${dataToSend.mqtt_user}\n
+                        Pass: ${dataToSend.mqtt_pass}
+                    `;
+        if (confirm(text) == true) {
+            socket.send(JSON.stringify(dataToSend));
+            alert("Reiniciando sistema!")
+            setTimeout(() => {
+                document.location.reload()
+            }, 2000);
+        }
+        else alert("Cancelado!")
+
+    }
+    function toggle_pass(){
+        var x = document.getElementById('wifi_password');
+        x.type === 'password' ? x.type = 'text' : x.type = 'password';
+    }
+    function adicionarLinha(nome, potencia) {
+            var table = document.getElementById("wifiTable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.rows.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            cell1.innerHTML = nome;
+            cell2.innerHTML = potencia;
+        }
+</script>
+</body>
+</html>
