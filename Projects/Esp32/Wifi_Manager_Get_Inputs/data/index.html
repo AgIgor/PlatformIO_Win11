@@ -194,7 +194,7 @@
         const text = `
                         Conectar em: ${dataToSend.wifi_ssid}\n
                         Senha: ${dataToSend.wifi_password}\n
-                        Servidor MQTT: ${dataToSend.url}
+                        MQTT: ${dataToSend.url}
                     `;
         if (confirm(text) == true) {
             socket.send(JSON.stringify(dataToSend));
