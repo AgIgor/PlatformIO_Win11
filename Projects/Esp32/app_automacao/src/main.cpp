@@ -33,7 +33,12 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 // mqtt.eclipseprojects.io
 
 const char* subscriberTopic = "@igor_db";
-const char* publisherTopic = "@igor_esp32";
+
+//char* chip_model = ESP.getChipModel();
+//chip_model += ESP.getEfuseMac();
+
+
+const char* publisherTopic = "publisher/esp32/001";
 
 JsonDocument  docLoad;
 bool led = false;
@@ -72,10 +77,14 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if(sensor3 and by != "null"){
     led = true;
+    Serial.print("Topic: ");
+    Serial.println(publisherTopic);
     client.publish(publisherTopic, "{\"Sensor3\": {\"Light\": true}}");
   }
   else{
     led = false;
+    Serial.print("Topic: ");
+    Serial.println(publisherTopic);
     client.publish(publisherTopic, "{\"Sensor3\": {\"Light\": false}}");
   }
 }
@@ -447,6 +456,9 @@ void loop() {
         // itoa ( millis(), ms, 10 );
         sprintf(ms, "{\"Millis\": {\"Time\":%d}}", millis());
         payload = ms;
+        Serial.print("Topic: ");
+        Serial.print(publisherTopic);
+        Serial.print(" Data: ");
         Serial.println(payload);
         //Serial.println(sizeof(payload));
         client.publish(publisherTopic, payload);
