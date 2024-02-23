@@ -15,26 +15,29 @@ class Botao {
       tempoAnterior = 0;
     }
 
-  void press(void (*funcao)()) {
+  void press(void (*press)(),void (*longPress)()) {
     bool estadoBotao = !digitalRead(pino);
     unsigned long tempoAtual = millis();
 
     if (estadoBotao && !estadoAnterior && (tempoAtual - tempoAnterior) > 25) {
       tempoAnterior = tempoAtual;
       //Serial.println("Down");
+      //press();
     }
     else if (!estadoBotao && estadoAnterior && (tempoAtual - tempoAnterior) > 25) {
       tempoAnterior = tempoAtual;
       //Serial.println("Up");
-      funcao();
+      press();
     }
     else if (estadoBotao ) {
       if(tempoAtual - tempoAnterior > 2000){
         tempoAnterior = tempoAtual;
-        Serial.println("5sec");
+        //Serial.println("5sec");
+        longPress();
+        return;
       }
     }
-    
+
     estadoAnterior = estadoBotao;
   }
 };
@@ -49,6 +52,11 @@ void dec() {
   Serial.print("Contagem: ");
   Serial.println(contadorCliques);
 }
+void rst(){
+  contadorCliques = 0;
+  Serial.print("Contagem: ");
+  Serial.println(contadorCliques);
+}
 
 Botao Up(32);
 Botao Down(33);
@@ -60,8 +68,8 @@ void setup() {
 
 void loop() {
 
-  Up.press(inc);
-  Down.press(dec);
+  Up.press(inc, rst);
+  Down.press(dec, rst);
   delay(10);
 
 }

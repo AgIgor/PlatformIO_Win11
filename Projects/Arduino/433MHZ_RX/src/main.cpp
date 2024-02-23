@@ -1,6 +1,6 @@
 #include <Arduino.h>
-/*
-const byte pinRF = 6;  // Pin where RF Module is connected. If necessary, change this for your project
+
+const byte pinRF = 2;  // Pin where RF Module is connected. If necessary, change this for your project
 
 int lambda;      // on pulse clock width (if fosc = 2KHz than lambda = 500 us)
 
@@ -28,7 +28,7 @@ boolean ACT_HT6P20B_RX(struct rfControl &_rfControl){
     //Serial.println(dur0);////////////
         
     //If time at "0" is between 9200 us (23 cycles of 400us) and 13800 us (23 cycles of 600 us).
-    if((dur0 > 9200) && (dur0 < 13800) && !startbit)
+    if((dur0 > 9200) && (dur0 < 13800) && !startbit)//9200 13800
     {    
       //calculate wave length - lambda
       lambda = dur0 / 23;
@@ -128,6 +128,11 @@ void setup(){
   Serial.println("ok");
 }
 
+// unsigned long pulseDur = 0;
+// unsigned long pulseHigh = 0;
+// unsigned long pulseLow = 0;
+// int val;
+
 void loop(){
 
   digitalWrite(13, digitalRead(pinRF));  //blink de onboard LED when receive something
@@ -145,12 +150,22 @@ void loop(){
     // Serial.println();
   }
 
+  // pulseDur = pulseIn(pinRF, HIGH, 11000);
+
+  // if(pulseDur > 431 && pulseDur < 500){
+  //   val++;
+  //   if(val >= 84){
+  //     Serial.println(val);
+  //     val = 0;
+  //   }
+  // }
+
 
   // Serial.println(digitalPinToBitMask(pinRF));
   //delay(1);
 }
 
-*/
+
 
 
 /* 
@@ -168,9 +183,9 @@ int dur0, dur1;  // pulses durations (auxiliary)
 unsigned long buffer=0;  //buffer for received data storage
 
 void setup(){ 
-  pinRF = 2;        //If necessary, change this for you project
+  pinRF = 13;        //If necessary, change this for you project
   pinMode(pinRF, INPUT);
-  pinMode(13, OUTPUT);
+  pinMode(2, OUTPUT);
   Serial.begin(115200);
 }
 
@@ -261,9 +276,9 @@ void loop()
 
  */
 
-
 /* 
-const int pinoSinal = 2; // Pino onde o sinal binário está conectado
+
+const int pinoSinal = 13; // Pino onde o sinal binário está conectado
 long duration;
 long ontime;
 long offtime;
@@ -275,7 +290,7 @@ long inicio, final;
 
 
 void setup() {
-  pinMode(pinoSinal, INPUT_PULLUP); // Define o pino do sinal como entrada
+  pinMode(pinoSinal, INPUT); // Define o pino do sinal como entrada
   Serial.begin(115200); // Inicializa a comunicação serial para depuração
 }
 
@@ -301,8 +316,8 @@ void loop() {
 
   delay(50);
 }
-
  */
+
 
 /* 
 
@@ -354,7 +369,7 @@ void loop(){
  */
 
 
-
+/* 
 #include <SoftwareSerial.h>
 
 SoftwareSerial ss( 6,-1 );
@@ -545,7 +560,7 @@ void loop() {
   }
 }
 
-
+ */
  
 
 
