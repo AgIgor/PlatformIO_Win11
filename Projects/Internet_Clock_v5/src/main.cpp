@@ -39,8 +39,8 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define MQTT_PASS ""
 #define MQTT_CLIENT "internet_clock#v.5"
 #define MQTT_ADDRESS "mqtt.eclipseprojects.io"
-#define MQTT_PUBLISH "/mqtt/internet_clock_v.5/STATUS"
-#define MQTT_SUBSCRIBE "/mqtt/internet_clock_v.5/config/#"
+#define MQTT_PUBLISH "/mqtt/internet_clock_v.5/SENSORS"
+#define MQTT_SUBSCRIBE "/mqtt/internet_clock_v.5/CONFIG/#"
 
 bool LIGHT;
 byte* TIME;
@@ -81,8 +81,7 @@ void mqttSend(){
 
   String S_JSON = "";
   serializeJson(JSON, S_JSON);
-  //MQTT.publish("/mqtt/internet_clock_v.5/sensor",C_JSON, false, 0);
-  MQTT.publish("/mqtt/internet_clock_v.5/sensor", S_JSON , false, 0);
+  MQTT.publish( MQTT_PUBLISH, S_JSON , false, 0 );
   delay(10);
 
 }
@@ -254,7 +253,7 @@ void mqttConnect(){
   while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
     delay(500);
   }
-  // MQTT.publish( MQTT_PUBLISH, "OK" );
+  MQTT.publish( "/mqtt/internet_clock_v.5/STATUS", "OK" );
   // MQTT.subscribe( MQTT_SUBSCRIBE );
 
 }
