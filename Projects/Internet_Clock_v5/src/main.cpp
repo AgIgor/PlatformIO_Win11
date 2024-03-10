@@ -31,9 +31,9 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define LUX_MAX         3
 #define LUX_MIN         2
 
-#define DELAY_CLOCK    8
-#define DELAY_TEMP     6
-#define DELAY_HUMI     6
+#define DELAY_CLOCK    6
+#define DELAY_TEMP     4
+#define DELAY_HUMI     4
 
 #define MQTT_USER ""
 #define MQTT_PASS ""
@@ -79,9 +79,10 @@ void mqttSend(){
     sprintf(out, "{\"temperature\":%.1f,\"humidity\":%.1f}", tempFloat, humiFloat);
   */
 
-  char C_JSON[sizeof(JSON)];
-  serializeJson(JSON, C_JSON);
-  MQTT.publish("/mqtt/internet_clock_v.5/sensor",C_JSON, false, 0);
+  String S_JSON = "";
+  serializeJson(JSON, S_JSON);
+  //MQTT.publish("/mqtt/internet_clock_v.5/sensor",C_JSON, false, 0);
+  MQTT.publish("/mqtt/internet_clock_v.5/sensor", S_JSON , false, 0);
   delay(10);
 
 }
@@ -189,10 +190,10 @@ byte* getAHT10(){
   aht.getEvent(&humidity, &temp);
   delay(1);
 
-  double tempFloat = temp.temperature;
-  double humiFloat = humidity.relative_humidity;
-  JSON["AHT10"]["temperature"]  = String(tempFloat);
-  JSON["AHT10"]["humidity"]     = String(humiFloat);
+  float tempFloat = temp.temperature;
+  float humiFloat = humidity.relative_humidity;
+  JSON["AHT10"]["temp"] = String( tempFloat,1 );
+  JSON["AHT10"]["humi"] = String( humiFloat,1 );
   
   static byte digitos[4];
   digitos[0] = (byte)tempFloat / 10;
