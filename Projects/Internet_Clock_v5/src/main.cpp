@@ -31,7 +31,7 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define LUX_MAX         3
 #define LUX_MIN         2
 
-#define DELAY_CLOCK    6
+#define DELAY_CLOCK    8
 #define DELAY_TEMP     4
 #define DELAY_HUMI     4
 
@@ -59,25 +59,11 @@ const byte displayConfig[12][7] = {{0,0,1,2,4,5,6},  //Digito 0
                                    {0,1,2,3,4,5,6},  //Digito 8
                                    {0,0,1,2,3,4,5},  //Digito 9
                                    {0,0,0,0,1,2,3},  //Grau
-                                   {2,2,2,2,3,4,6}}; //Umidade;
-
+                                   {4,4,4,4,4,5,6}}; //Umidade;
 
 //==========* Funções *==========//
 
 void mqttSend(){
-
-  /*
-    char ct[5];
-    char *char_temp = dtostrf(tempFloat,4,2,ct);
-    client.publish("/mqtt/internet_clock_v.4/temperature", char_temp);
-    
-    char ch[5];
-    char *char_humi = dtostrf(humiFloat,4,2,ch);
-    client.publish("/mqtt/internet_clock_v.4/humidity",char_humi);
-
-    char out[50];
-    sprintf(out, "{\"temperature\":%.1f,\"humidity\":%.1f}", tempFloat, humiFloat);
-  */
 
   String S_JSON = "";
   serializeJson(JSON, S_JSON);
@@ -189,10 +175,11 @@ byte* getAHT10(){
   aht.getEvent(&humidity, &temp);
   delay(1);
 
-  float tempFloat = temp.temperature;
-  float humiFloat = humidity.relative_humidity;
-  JSON["AHT10"]["temp"] = String( tempFloat,1 );
-  JSON["AHT10"]["humi"] = String( humiFloat,1 );
+  double tempFloat = temp.temperature;
+  double humiFloat = humidity.relative_humidity;
+
+  JSON["AHT10"]["temp"] = round(tempFloat * 10) / 10.0;
+  JSON["AHT10"]["humi"] = round(humiFloat * 10) / 10.0;
   
   static byte digitos[4];
   digitos[0] = (byte)tempFloat / 10;
@@ -284,21 +271,28 @@ void wifiConnect(){
   
   WiFi.mode(WIFI_STA);
   WiFi.begin("VIVOFIBRA-79D0", "58331BB245");
+  const byte loadingWifi[3][6]={{0,1,2,6,5,4},
+                                {7,8,9,13,12,11},
+                                {15,16,17,21,20,19}};
 
   while (WiFi.status() != WL_CONNECTED) {
+    
     pixels.clear();
-    delay(20);
-    byte loadingWifi[]={0,1,2,3,4,5,6,3};
-    for(byte i=0; i<8;i++){
-
-      pixels.setPixelColor(loadingWifi[i], pixels.Color(255, 0, 255));
-      pixels.setPixelColor(loadingWifi[i]-1, pixels.Color(0, 0, 0));
-      pixels.show();
-      delay(200);
-
+    for(byte c=0; c<3;c++){
+      for(byte l=0; l<6; l++){
+        pixels.setPixelColor( loadingWifi[c][l], pixels.Color(255, 0, 0) );
+        pixels.setPixelColor( loadingWifi[c][l-1], pixels.Color(0, 0, 0) );
+        pixels.show();
+        delay(100);
+      }
     }
+    delay(200);
+
   }
+
   pixels.clear();
+  mqttConnect();
+  delay(1);
 
 }
 //end wifiConnect
@@ -325,8 +319,8 @@ void setup(){
   delay(100);
 
   wifiConnect();
-  mqttConnect();
-  
+  delay(1);
+
   timeClient.begin();
   delay(1);
 
@@ -338,6 +332,8 @@ void setup(){
 //end setup
 
 void loop(){
+
+  MQTT.loop();
 
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
@@ -380,13 +376,13 @@ void loop(){
 //==========**==========//
 
   if(WiFi.status() != WL_CONNECTED) wifiConnect();
-  if(!MQTT.connected()) mqttConnect();
+  //if(!MQTT.connected()) mqttConnect();
 
-  JSON["status"]["wifi"]["ssid"] = WiFi.SSID();
-  JSON["status"]["wifi"]["STATUS"] = WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected";
+  JSON["STATUS"]["wifi"]["ssid"] = WiFi.SSID();
+  JSON["STATUS"]["wifi"]["status"] = WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected";
 
-  JSON["status"]["mqtt"]["url"] = MQTT_ADDRESS;
-  JSON["status"]["mqtt"]["status"] = MQTT.connected() ? "Connected" : "Disconnected";
+  JSON["STATUS"]["mqtt"]["url"] = MQTT_ADDRESS;
+  JSON["STATUS"]["mqtt"]["status"] = MQTT.connected() ? "Connected" : "Disconnected";
 
   mqttSend();
   delay(1);
