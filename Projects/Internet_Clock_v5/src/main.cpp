@@ -25,38 +25,64 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 
 //==========* Variaveis *==========//
 
-#define BRILHO_MAX    230
+#define BRILHO_MAX    255
 #define BRILHO_MIN      2
 
 #define LUX_MAX         3
 #define LUX_MIN         2
 
-#define DELAY_CLOCK    10
-#define DELAY_TEMP     15
-#define DELAY_HUMI     20
+#define DELAY_CLOCK    8
+#define DELAY_TEMP     6
+#define DELAY_HUMI     6
+
+#define MQTT_USER ""
+#define MQTT_PASS ""
+#define MQTT_CLIENT "internet_clock#v.5"
+#define MQTT_ADDRESS "mqtt.eclipseprojects.io"
+#define MQTT_PUBLISH "/mqtt/internet_clock_v.5/STATUS"
+#define MQTT_SUBSCRIBE "/mqtt/internet_clock_v.5/config/#"
 
 bool LIGHT;
 byte* TIME;
 byte* TEMP_HUMI;
+JsonDocument JSON;
 byte RGB[3]={255,0,0};
 
-const byte displayConfig[12][7]= {{0,0,1,2,4,5,6},  //Digito 0
-                                  {0,0,0,0,0,0,4},  //Digito 1
-                                  {0,0,0,1,3,5,6},  //Digito 2
-                                  {0,0,0,1,3,4,5},  //Digito 3
-                                  {0,0,0,0,2,3,4},  //Digito 4
-                                  {1,1,1,2,3,4,5},  //Digito 5
-                                  {1,1,2,3,4,5,6},  //Digito 6
-                                  {0,0,0,0,0,1,4},  //Digito 7
-                                  {0,1,2,3,4,5,6},  //Digito 8
-                                  {0,0,1,2,3,4,5},  //Digito 9
-                                  {0,0,0,0,1,2,3},  //Grau
-                                  {0,0,0,0,0,3,6}}; //Umidade;
+const byte displayConfig[12][7] = {{0,0,1,2,4,5,6},  //Digito 0
+                                   {0,0,0,0,0,0,4},  //Digito 1
+                                   {0,0,0,1,3,5,6},  //Digito 2
+                                   {0,0,0,1,3,4,5},  //Digito 3
+                                   {0,0,0,0,2,3,4},  //Digito 4
+                                   {1,1,1,2,3,4,5},  //Digito 5
+                                   {1,1,2,3,4,5,6},  //Digito 6
+                                   {0,0,0,0,0,1,4},  //Digito 7
+                                   {0,1,2,3,4,5,6},  //Digito 8
+                                   {0,0,1,2,3,4,5},  //Digito 9
+                                   {0,0,0,0,1,2,3},  //Grau
+                                   {2,2,2,2,3,4,6}}; //Umidade;
 
 
 //==========* Funções *==========//
 
 void mqttSend(){
+
+  /*
+    char ct[5];
+    char *char_temp = dtostrf(tempFloat,4,2,ct);
+    client.publish("/mqtt/internet_clock_v.4/temperature", char_temp);
+    
+    char ch[5];
+    char *char_humi = dtostrf(humiFloat,4,2,ch);
+    client.publish("/mqtt/internet_clock_v.4/humidity",char_humi);
+
+    char out[50];
+    sprintf(out, "{\"temperature\":%.1f,\"humidity\":%.1f}", tempFloat, humiFloat);
+  */
+
+  char C_JSON[sizeof(JSON)];
+  serializeJson(JSON, C_JSON);
+  MQTT.publish("/mqtt/internet_clock_v.5/sensor",C_JSON, false, 0);
+  delay(10);
 
 }
 //end mqttSend
@@ -96,6 +122,9 @@ void limpaPixels(){
     }
     modeDirection = !modeDirection;
   }
+
+  pixels.clear();
+  delay(30);
 
 }
 //end limpa pixels
@@ -143,8 +172,12 @@ bool luxRead(){
   if(lux <= LUX_MIN){
     pixels.setBrightness(BRILHO_MIN);
     lux_flag = false;
+    RGB[0] = 255;
+    RGB[2] = 0;
+    RGB[1] = 0;
   }
 
+  JSON["BH1750"]["lux"] = lux;
   return lux_flag;
 
 }
@@ -156,42 +189,17 @@ byte* getAHT10(){
   aht.getEvent(&humidity, &temp);
   delay(1);
 
-  static byte digitos[4];
-  float tempFloat = temp.temperature;
-  float humiFloat = humidity.relative_humidity;
-
-  byte tempByte = tempFloat;
-  byte humiByte = humiFloat;
+  double tempFloat = temp.temperature;
+  double humiFloat = humidity.relative_humidity;
+  JSON["AHT10"]["temperature"]  = String(tempFloat);
+  JSON["AHT10"]["humidity"]     = String(humiFloat);
   
-  digitos[0] = tempByte / 10;
-  digitos[1] = tempByte % 10;
-  digitos[2] = humiByte / 10;
-  digitos[3] = humiByte % 10;
-
-  /*
-    char ct[5];
-    char *char_temp = dtostrf(tempFloat,4,2,ct);
-    client.publish("/mqtt/internet_clock_v.4/temperature", char_temp);
-    
-    char ch[5];
-    char *char_humi = dtostrf(humiFloat,4,2,ch);
-    client.publish("/mqtt/internet_clock_v.4/humidity",char_humi);
-
-    char out[50];
-    sprintf(out, "{\"temperature\":%.1f,\"humidity\":%.1f}", tempFloat, humiFloat);
-  */
-
-  JsonDocument doc;
-  doc["temperature"] = serialized(String(tempFloat,1));
-  doc["humidity"] = serialized(String(humiFloat,1));
-
-  char saida[sizeof(doc)];
-  serializeJson(doc, saida);
-  MQTT.publish("/mqtt/internet_clock_v.4/sensor",saida, true, 0);
-  delay(1);
-
+  static byte digitos[4];
+  digitos[0] = (byte)tempFloat / 10;
+  digitos[1] = (byte)tempFloat % 10;
+  digitos[2] = (byte)humiFloat / 10;
+  digitos[3] = (byte)humiFloat % 10;
   return digitos;
-
 }
 //end get AHT
 
@@ -240,13 +248,13 @@ void display( byte* digitos, byte* RGB ){
 
 void mqttConnect(){
 
-  MQTT.begin("mqtt.eclipseprojects.io", WIFI);
+  MQTT.begin( MQTT_ADDRESS, WIFI );
   delay(5);
-  while (!MQTT.connect("internet_clock#v.4", "", "")) {
+  while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
     delay(500);
   }
-  MQTT.publish("/mqtt/internet_clock_v.4/STATUS", "OK");
-  //client.subscribe("/mqtt/internet_clock_v.4/config/#");
+  // MQTT.publish( MQTT_PUBLISH, "OK" );
+  // MQTT.subscribe( MQTT_SUBSCRIBE );
 
 }
 //end mqttConnect
@@ -256,7 +264,7 @@ byte* getNtp() {
   timeClient.update();
   delay(20);
   static byte digitos[4];
-  byte H = timeClient.getHours() % 12;
+  byte H = timeClient.getHours() != 12 ? timeClient.getHours() % 12 : timeClient.getHours();
   byte M = timeClient.getMinutes();
 
   digitos[0] = H / 10;  // 2
@@ -264,6 +272,9 @@ byte* getNtp() {
   digitos[2] = M / 10;  // 0
   digitos[3] = M % 10;  // 2
 
+  JSON["NTP"]["hour"] = timeClient.getHours();
+  JSON["NTP"]["minute"] = timeClient.getMinutes();
+  
   return digitos;
 
 }
@@ -292,19 +303,18 @@ void wifiConnect(){
 }
 //end wifiConnect
 
-byte val;
+byte COUNTER;
+long int DELAY_COUNTER;
 void delayInc(){
-  static long int dly;
-  if(millis() - dly > 1000){
-    dly = millis();
-    val++;
+  if(millis() - DELAY_COUNTER > 1000){
+    DELAY_COUNTER = millis();
+    COUNTER++;
   }
 }
 //end delayInc
 
 void setup(){
 
-  timeClient.begin();
   Wire.begin(0, 2);
   aht.begin();
   lightMeter.begin();
@@ -316,6 +326,9 @@ void setup(){
 
   wifiConnect();
   mqttConnect();
+  
+  timeClient.begin();
+  delay(1);
 
   LIGHT = luxRead();
   TIME = getNtp();
@@ -324,50 +337,59 @@ void setup(){
 }
 //end setup
 
-void loop(){  
+void loop(){
 
-  while(val < 5){
+  TIME = getNtp();
+  TEMP_HUMI = getAHT10();
+  delay(100);
+
+//==========**==========//
+  COUNTER = 0;
+  limpaPixels();
+  while(COUNTER < DELAY_CLOCK){
 
     delayInc();
-    RGB[0] = 127; //rgb(127,11,229)
-    RGB[1] = 11;
-    RGB[2] = 229;
+    if( luxRead() ) nextRainbowColor();
     piscaPonto(RGB);
     display( TIME, RGB );
     delay(100);
 
   }
+//==========**==========//
+  COUNTER = 0;
   limpaPixels();
-  while(val < 10){
+  while(COUNTER < DELAY_TEMP){
 
     delayInc();
-    RGB[0] = 184; //rgb(184,105,55)
-    RGB[1] = 105;
-    RGB[2] = 55;
-    displayTemp( TEMP_HUMI, RGB);
+    if( luxRead() ) nextRainbowColor();
+    displayTemp( TEMP_HUMI, RGB );
     delay(100);
 
   }
+//==========**==========//
+  COUNTER = 0;
   limpaPixels();
-  while(val < 15){
+  while(COUNTER < DELAY_HUMI){
     
     delayInc();
-    RGB[0] = 44;  //rgb(44,209,208)
-    RGB[1] = 209;
-    RGB[2] = 208;
-    displayHumi( TEMP_HUMI, RGB);
+    if( luxRead() ) nextRainbowColor();
+    displayHumi( TEMP_HUMI, RGB );
     delay(100);
     
   }
-  limpaPixels();
-  val = 0;
+//==========**==========//
 
-  LIGHT = luxRead();
-  TIME = getNtp();
-  TEMP_HUMI = getAHT10();
-  
-  delay(100);
-  //if(WiFi.status() == WL_CONNECTED) wifiConnect();
+  if(WiFi.status() != WL_CONNECTED) wifiConnect();
+  if(!MQTT.connected()) mqttConnect();
+
+  JSON["status"]["wifi"]["ssid"] = WiFi.SSID();
+  JSON["status"]["wifi"]["STATUS"] = WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected";
+
+  JSON["status"]["mqtt"]["url"] = MQTT_ADDRESS;
+  JSON["status"]["mqtt"]["status"] = MQTT.connected() ? "Connected" : "Disconnected";
+
+  mqttSend();
+  delay(1);
 
 }
 //end loop
