@@ -35,12 +35,13 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define DELAY_TEMP     4
 #define DELAY_HUMI     4
 
+#define WIFI_SSID "VIVOFIBRA-79D0"
+#define WIFI_PASS "58331BB245"
+
 #define MQTT_USER ""
 #define MQTT_PASS ""
 #define MQTT_CLIENT "internet_clock#v.5"
 #define MQTT_ADDRESS "mqtt.eclipseprojects.io"
-#define MQTT_PUBLISH "/mqtt/internet_clock_v.5/SENSORS"
-#define MQTT_SUBSCRIBE "/mqtt/internet_clock_v.5/CONFIG/#"
 
 bool LIGHT;
 byte* TIME;
@@ -67,7 +68,7 @@ void mqttSend(){
 
   String S_JSON = "";
   serializeJson(JSON, S_JSON);
-  MQTT.publish( MQTT_PUBLISH, S_JSON , false, 0 );
+  MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
   delay(10);
 
 }
@@ -240,8 +241,8 @@ void mqttConnect(){
   while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
     delay(500);
   }
-  MQTT.publish( "/mqtt/internet_clock_v.5/STATUS", "OK" );
-  // MQTT.subscribe( MQTT_SUBSCRIBE );
+  MQTT.publish( "/mqtt/internet_clock_v.5/STATUS", "OK" , false, 0 );
+  MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
 
 }
 //end mqttConnect
@@ -270,7 +271,7 @@ byte* getNtp() {
 void wifiConnect(){
   
   WiFi.mode(WIFI_STA);
-  WiFi.begin("VIVOFIBRA-79D0", "58331BB245");
+  WiFi.begin( WIFI_SSID , WIFI_PASS );
   const byte loadingWifi[3][6]={{0,1,2,6,5,4},
                                 {7,8,9,13,12,11},
                                 {15,16,17,21,20,19}};
@@ -278,24 +279,37 @@ void wifiConnect(){
   while (WiFi.status() != WL_CONNECTED) {
     
     pixels.clear();
-    for(byte c=0; c<3;c++){
+    //for(byte c=0; c<3;c++){
       for(byte l=0; l<6; l++){
-        pixels.setPixelColor( loadingWifi[c][l], pixels.Color(255, 0, 0) );
-        pixels.setPixelColor( loadingWifi[c][l-1], pixels.Color(0, 0, 0) );
+        pixels.setPixelColor( loadingWifi[0][l], pixels.Color(255, 0, 0) );
+        pixels.setPixelColor( loadingWifi[0][l-1], pixels.Color(0, 0, 0) );
         pixels.show();
         delay(100);
       }
-    }
+    //}
     delay(200);
 
   }
 
   pixels.clear();
-  mqttConnect();
   delay(1);
 
 }
 //end wifiConnect
+
+void messageReceived(String &topic, String &payload) {
+
+  //Serial.println("incoming: " + topic + " - " + payload);
+  MQTT.publish( "/mqtt/internet_clock_v.5/RECEBIDO", payload , false, 0 );
+
+  if(payload == "GET"){
+    mqttSend();
+  }
+
+  delay(10);
+
+}
+//end message received
 
 byte COUNTER;
 long int DELAY_COUNTER;
@@ -319,7 +333,11 @@ void setup(){
   delay(100);
 
   wifiConnect();
+  mqttConnect();
   delay(1);
+
+  MQTT.onMessage(messageReceived);
+
 
   timeClient.begin();
   delay(1);
@@ -332,8 +350,6 @@ void setup(){
 //end setup
 
 void loop(){
-
-  MQTT.loop();
 
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
@@ -349,6 +365,7 @@ void loop(){
     piscaPonto(RGB);
     display( TIME, RGB );
     delay(100);
+    MQTT.loop();
 
   }
 //==========**==========//
@@ -360,6 +377,7 @@ void loop(){
     if( luxRead() ) nextRainbowColor();
     displayTemp( TEMP_HUMI, RGB );
     delay(100);
+    MQTT.loop();
 
   }
 //==========**==========//
@@ -371,18 +389,13 @@ void loop(){
     if( luxRead() ) nextRainbowColor();
     displayHumi( TEMP_HUMI, RGB );
     delay(100);
+    MQTT.loop();
     
   }
 //==========**==========//
 
-  if(WiFi.status() != WL_CONNECTED) wifiConnect();
+  //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
   //if(!MQTT.connected()) mqttConnect();
-
-  JSON["STATUS"]["wifi"]["ssid"] = WiFi.SSID();
-  JSON["STATUS"]["wifi"]["status"] = WiFi.status() == WL_CONNECTED ? "Connected" : "Disconnected";
-
-  JSON["STATUS"]["mqtt"]["url"] = MQTT_ADDRESS;
-  JSON["STATUS"]["mqtt"]["status"] = MQTT.connected() ? "Connected" : "Disconnected";
 
   mqttSend();
   delay(1);
