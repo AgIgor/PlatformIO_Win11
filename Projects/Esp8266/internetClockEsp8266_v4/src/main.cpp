@@ -1,4 +1,4 @@
-#include <Arduino.h>
+/* #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <Wire.h>
@@ -256,7 +256,7 @@ void limpaPixels(){
 //end limpa pixels
 
 void setup() {
-  Wire.pins(0, 2);
+  //Wire.pins(0, 2);
   Wire.begin(0, 2);
   pixels.begin();
   pixels.setBrightness(200);
@@ -352,3 +352,239 @@ void loop() {
   delay(100);
 }
 //end loop
+ */
+/* 
+#include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include <Wire.h>
+#include <Adafruit_AHTX0.h>
+#include <Adafruit_NeoPixel.h>
+#include <BH1750.h>
+#include <NTPClient.h>
+#include <ArduinoJson.h>
+#include <MQTT.h>
+
+const char *ssid     = "VIVOFIBRA-9501";
+const char *password = "rgw7ucm3GT";
+
+const char* ntpServer = "south-america.pool.ntp.org";
+const long  utcOffsetInSeconds = -10800;
+
+const int delayClock = 120;
+const int delayTemp = 30;
+const int delayHumi = 30;
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, ntpServer, utcOffsetInSeconds);
+
+Adafruit_AHTX0 aht;
+Adafruit_NeoPixel pixels(24, 1, NEO_GRB + NEO_KHZ800);
+BH1750 lightMeter;
+MQTTClient client;
+
+int newMinuto;  
+int modeDisplay;
+int IntervaloC, IntervaloT, IntervaloH;
+
+bool Trigger = false;
+bool Lux = false;
+
+byte dezenaH ,unidadeH,dezenaM ,unidadeM;
+byte dezenaT, unidadeT, dezenaHu, unidadeHu;
+
+byte r = 255;
+byte g = 0;
+byte b = 0;
+
+void setup() {
+  Wire.pins(0, 2);
+  Wire.begin(0, 2);
+  pixels.begin();
+  pixels.setBrightness(200);
+  pixels.clear();
+
+  if (!aht.begin()) {
+    delay(100);
+    setup();
+  }
+
+  if (!lightMeter.begin()) {
+    delay(100);
+    setup();
+  }
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  WiFi.setSleep(false);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+
+  client.begin("mqtt.eclipseprojects.io", WiFiClient());
+  connect();
+
+  timeClient.begin();
+  getAHT10();
+  getNTP();
+}
+
+void loop() {
+  client.loop();
+  delay(50);
+
+  if (!client.connected()) connect();
+
+  while (modeDisplay == 0) { //display clock
+    updateDisplayClock();
+  }
+
+  while (modeDisplay == 1) { //display temp
+    updateDisplayTemp();
+  }
+}
+
+void updateDisplayClock() {
+  if (millis() / 1000 % 2) {
+    if (Trigger) {
+      Trigger = false;
+      if (IntervaloC <= delayClock) {
+        IntervaloC++;
+      } else {
+        IntervaloC = 0;
+        modeDisplay = 1;
+        clearPixels();
+        break;
+      }
+      Lux = luxRead();
+    }
+  } else {
+    Trigger = true;
+  }
+
+  getNTP();
+  if (Lux) nextRainbowColor();
+  piscaPonto();
+  display();
+  delay(100);
+}
+
+void updateDisplayTemp() {
+  if (millis() / 1000 % 2) {
+    if (Trigger) {
+      Trigger = false;
+      if (IntervaloT <= delayTemp) {
+        IntervaloT++;
+      } else {
+        IntervaloT = 0;
+        modeDisplay = 0;
+        clearPixels();
+        break;
+      }
+      Lux = luxRead();
+      getAHT10();
+    }
+  } else {
+    Trigger = true;
+  }
+
+  if (Lux) nextRainbowColor();
+  displayTemp();
+  delay(100);
+}
+
+void getNTP() {
+  if (millis() / 1000 % 30) {
+    timeClient.update();
+    int Hora = timeClient.getHours();
+    int Minuto = timeClient.getMinutes();
+    delay(10);
+
+    if (newMinuto != Minuto) {
+      newMinuto = Minuto;
+      if (Hora >= 13) Hora -= 12;
+      dezenaH = Hora;
+      unidadeH = dezenaH;
+      dezenaH = dezenaH / 10;
+      unidadeH = unidadeH % 10;
+
+      dezenaM = Minuto;
+      unidadeM = dezenaM;
+      dezenaM = dezenaM / 10;
+      unidadeM = unidadeM % 10;
+
+      clearPixels();
+      delay(1);
+      pixels.clear();
+    }
+  }
+}
+
+void getAHT10() {
+  sensors_event_t humidity, temp;
+  aht.getEvent(&humidity, &temp);
+  delay(1);
+
+  float t = temp.temperature;
+  float h = humidity.relative_humidity;
+  byte Temp = t;
+  byte Humi = h;
+
+  JsonDocument doc;
+  doc["temperature"] = serialized(String(t, 1));
+  doc["humidity"] = serialized(String(h, 1));
+
+  char saida[sizeof(doc)];
+  serializeJson(doc, saida);
+  client.publish("/mqtt/internet_clock_v.4/sensor", saida, true, 0);
+  delay(1);
+
+  if (Temp > 60) Temp = 60;
+  if (Humi > 90) Humi = 90;
+
+  dezenaT = Temp;
+  unidadeT = dezenaT;
+  dezenaT = dezenaT / 10;
+  unidadeT = unidadeT % 10;
+
+  dezenaHu = Humi;
+  unidadeHu = dezenaHu;
+  dezenaHu = dezenaHu / 10;
+  unidadeHu = unidadeHu % 10;
+}
+
+bool luxRead() {
+  bool lux_flag;
+  int lux;
+
+  for (byte i = 0; i < 5; i++) {
+    lux = lightMeter.readLightLevel();
+    delay(5);
+  }
+
+  if (lux >= luxMax) {
+    pixels.setBrightness(brilhoMax);
+    lux_flag = true;
+  }
+
+  if (lux <= luxMin) {
+    pixels.setBrightness(brilhoMin);
+    lux_flag = false;
+    r = 255;
+    g = 0;
+    b = 0;
+  }
+  return lux_flag;
+}
+
+void piscaPonto() {
+  if (millis() / 1000 % 2) {
+    pixels */
+
+    void setup(){
+
+    }
+    void loop(){
+      
+    }
