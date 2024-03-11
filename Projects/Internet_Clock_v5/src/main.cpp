@@ -31,14 +31,6 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define LUX_MAX         3
 #define LUX_MIN         2
 
-#define DELAY_CLOCK    8
-#define DELAY_TEMP     4
-#define DELAY_HUMI     4
-
-#define DELAY_LOOP_1 10
-#define DELAY_LOOP_2 15
-#define DELAY_LOOP_3 20
-
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
 
@@ -329,8 +321,8 @@ void delayInc(){
 void setup(){
 
   Wire.begin(0, 2);
-  aht.begin();
-  lightMeter.begin();
+  if(!aht.begin()) while(true);
+  if(!lightMeter.begin()) while(true);
   delay(100);
   pixels.begin();
   pixels.setBrightness(BRILHO_MAX);
@@ -354,11 +346,15 @@ void setup(){
 }
 //end setup
 
+unsigned long delayMqtt;
+unsigned long INTERVALO = 10000;
+
 void loop(){
   
   static byte COUNTER;
-  static long delayIncremento;
-  if(millis() - delayIncremento > 5000){
+  static unsigned long delayIncremento;
+  
+  if(millis() - delayIncremento > INTERVALO){
 
     delayIncremento = millis();
     COUNTER++;
@@ -366,6 +362,7 @@ void loop(){
     TIME = getNtp();
     TEMP_HUMI = getAHT10();
     delay(1);
+    INTERVALO = 5000;
     
   }
 
@@ -375,24 +372,25 @@ void loop(){
       if( luxRead() ) nextRainbowColor();
       piscaPonto(RGB);
       display( TIME, RGB );
-      delay(1);
+      delay(100);
     break;
 
     case 1:
       if( luxRead() ) nextRainbowColor();
       displayTemp( TEMP_HUMI, RGB );
-      delay(1);
+      delay(100);
     break;
 
     case 2:
       if( luxRead() ) nextRainbowColor();
       displayHumi( TEMP_HUMI, RGB );
-      delay(1);
+      delay(100);
     break;
 
     default:
       COUNTER = 0;
-      mqttSend(true);
+      INTERVALO = 8000;
+      // mqttSend(true);
     break;
      
   }
@@ -437,10 +435,14 @@ void loop(){
  */
 
   //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
-  //if(!MQTT.connected()) mqttConnect();
+  if(!MQTT.connected()) mqttConnect();
 
-  delay(10);
   MQTT.loop();
+  
+  if(millis() - delayMqtt > 6000){
+    delayMqtt = millis();
+    mqttSend(true);
+  }
 
 }
 //end loop
