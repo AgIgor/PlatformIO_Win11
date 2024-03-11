@@ -31,6 +31,14 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define LUX_MAX         3
 #define LUX_MIN         2
 
+#define DELAY_CLOCK    8
+#define DELAY_TEMP     4
+#define DELAY_HUMI     4
+
+#define DELAY_LOOP_1 10
+#define DELAY_LOOP_2 15
+#define DELAY_LOOP_3 20
+
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
 
@@ -345,10 +353,7 @@ void setup(){
 
 }
 //end setup
-
-unsigned long delayMqtt;
 unsigned long INTERVALO = 10000;
-
 void loop(){
   
   static byte COUNTER;
@@ -390,7 +395,7 @@ void loop(){
     default:
       COUNTER = 0;
       INTERVALO = 8000;
-      // mqttSend(true);
+      mqttSend(true);
     break;
      
   }
@@ -438,11 +443,6 @@ void loop(){
   if(!MQTT.connected()) mqttConnect();
 
   MQTT.loop();
-  
-  if(millis() - delayMqtt > 6000){
-    delayMqtt = millis();
-    mqttSend(true);
-  }
 
 }
 //end loop
