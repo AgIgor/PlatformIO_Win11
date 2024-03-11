@@ -35,6 +35,10 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define DELAY_TEMP     4
 #define DELAY_HUMI     4
 
+#define DELAY_LOOP_1 10
+#define DELAY_LOOP_2 15
+#define DELAY_LOOP_3 20
+
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
 
@@ -64,11 +68,12 @@ const byte displayConfig[12][7] = {{0,0,1,2,4,5,6},  //Digito 0
 
 //==========* Funções *==========//
 
-void mqttSend(){
+void mqttSend(bool SYSTEM){
 
   String S_JSON = "";
   serializeJson(JSON, S_JSON);
-  MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
+  if(SYSTEM) MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
+  else MQTT.publish( "/mqtt/internet_clock_v.5/RESPONSE", S_JSON , true, 0 );
   delay(10);
 
 }
@@ -241,7 +246,7 @@ void mqttConnect(){
   while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
     delay(500);
   }
-  MQTT.publish( "/mqtt/internet_clock_v.5/STATUS", "OK" , false, 0 );
+  MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", "OK" , false, 0 );
   MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
 
 }
@@ -303,7 +308,7 @@ void messageReceived(String &topic, String &payload) {
   MQTT.publish( "/mqtt/internet_clock_v.5/RECEBIDO", payload , false, 0 );
 
   if(payload == "GET"){
-    mqttSend();
+    mqttSend(false);
   }
 
   delay(10);
@@ -311,7 +316,7 @@ void messageReceived(String &topic, String &payload) {
 }
 //end message received
 
-byte COUNTER;
+/* byte COUNTER, NEW_COUNTER;
 long int DELAY_COUNTER;
 void delayInc(){
   if(millis() - DELAY_COUNTER > 1000){
@@ -319,7 +324,7 @@ void delayInc(){
     COUNTER++;
   }
 }
-//end delayInc
+//end delayInc */
 
 void setup(){
 
@@ -350,11 +355,49 @@ void setup(){
 //end setup
 
 void loop(){
+  
+  static byte COUNTER;
+  static long delayIncremento;
+  if(millis() - delayIncremento > 5000){
 
-  TIME = getNtp();
-  TEMP_HUMI = getAHT10();
-  delay(100);
+    delayIncremento = millis();
+    COUNTER++;
+    limpaPixels();
+    TIME = getNtp();
+    TEMP_HUMI = getAHT10();
+    delay(1);
+    
+  }
 
+  switch(COUNTER){
+
+    case 0:
+      if( luxRead() ) nextRainbowColor();
+      piscaPonto(RGB);
+      display( TIME, RGB );
+      delay(1);
+    break;
+
+    case 1:
+      if( luxRead() ) nextRainbowColor();
+      displayTemp( TEMP_HUMI, RGB );
+      delay(1);
+    break;
+
+    case 2:
+      if( luxRead() ) nextRainbowColor();
+      displayHumi( TEMP_HUMI, RGB );
+      delay(1);
+    break;
+
+    default:
+      COUNTER = 0;
+      mqttSend(true);
+    break;
+     
+  }
+
+/* 
 //==========**==========//
   COUNTER = 0;
   limpaPixels();
@@ -364,8 +407,7 @@ void loop(){
     if( luxRead() ) nextRainbowColor();
     piscaPonto(RGB);
     display( TIME, RGB );
-    delay(100);
-    MQTT.loop();
+    delay(1);
 
   }
 //==========**==========//
@@ -376,8 +418,7 @@ void loop(){
     delayInc();
     if( luxRead() ) nextRainbowColor();
     displayTemp( TEMP_HUMI, RGB );
-    delay(100);
-    MQTT.loop();
+    delay(1);
 
   }
 //==========**==========//
@@ -388,17 +429,18 @@ void loop(){
     delayInc();
     if( luxRead() ) nextRainbowColor();
     displayHumi( TEMP_HUMI, RGB );
-    delay(100);
-    MQTT.loop();
+    delay(1);
     
   }
+  mqttConnect();
 //==========**==========//
+ */
 
   //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
   //if(!MQTT.connected()) mqttConnect();
 
-  mqttSend();
-  delay(1);
+  delay(10);
+  MQTT.loop();
 
 }
 //end loop
