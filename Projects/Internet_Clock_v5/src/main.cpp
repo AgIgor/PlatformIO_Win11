@@ -82,7 +82,7 @@ void mqttSend(bool SYSTEM){
 void nextRainbowColor() {
   static unsigned long nextRainbow;
 
-  if( millis() - nextRainbow > 50 ){
+  if( millis() - nextRainbow > 80 ){
     nextRainbow = millis();
     if (RGB[0] > 0 && RGB[2] == 0) {
       RGB[0]--;
@@ -321,48 +321,11 @@ void messageReceived(String &topic, String &payload) {
 }
 //end message received
 
-/* byte COUNTER, NEW_COUNTER;
-long int DELAY_COUNTER;
-void delayInc(){
-  if(millis() - DELAY_COUNTER > 1000){
-    DELAY_COUNTER = millis();
-    COUNTER++;
-  }
-}
-//end delayInc */
-
-void setup(){
-
-  Wire.begin(0, 2);
-  if(!aht.begin()) while(true);
-  if(!lightMeter.begin()) while(true);
-  //delay(100);
-  pixels.begin();
-  pixels.setBrightness(BRILHO_MAX);
-  pixels.clear();
-  //delay(100);
-
-  wifiConnect();
-  mqttConnect();
-  //delay(1);
-
-  MQTT.onMessage(messageReceived);
-
-
-  timeClient.begin();
-  //delay(1);
-
-  LIGHT = luxRead();
-  TIME = getNtp();
-  TEMP_HUMI = getAHT10();
-
-}
-//end setup
+/* 
 unsigned long INTERVALO = 10000;
-void loop(){
-  
-  static byte COUNTER, MQTT_INTERVAL;
-  static unsigned long delayIncremento;
+byte COUNTER, MQTT_INTERVAL;
+unsigned long delayIncremento;
+void delayInc(){
   
   if(millis() - delayIncremento > INTERVALO){
 
@@ -371,30 +334,95 @@ void loop(){
     limpaPixels();
     TIME = getNtp();
     TEMP_HUMI = getAHT10();
-    //delay(1);
     INTERVALO = 5000;
     
   }
+}
+//end delayInc
+*/
 
-  switch(COUNTER){
+void setup(){
+
+  // ESP.getResetReason();
+  // ESP.getResetInfo();
+
+  Wire.begin(0, 2);
+  if(!aht.begin()) while(true);
+  if(!lightMeter.begin()) while(true);
+  pixels.begin();
+  pixels.setBrightness(BRILHO_MAX);
+  pixels.clear();
+
+  wifiConnect();
+  mqttConnect();
+  MQTT.onMessage(messageReceived);
+
+  timeClient.begin();
+
+  LIGHT = luxRead();
+  TIME = getNtp();
+  TEMP_HUMI = getAHT10();
+
+}
+//end setup
+
+byte COUNTER;
+void loop(){
+
+
+  //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
+  if(!MQTT.connected()) mqttConnect();
+
+  COUNTER = 0;
+  limpaPixels();
+  while(COUNTER++ <= 50){
+    MQTT.loop();
+
+    if( luxRead() ) nextRainbowColor();
+    piscaPonto(RGB);
+    display( TIME, RGB );
+    delay(100);
+
+  }
+
+  COUNTER = 0;
+  limpaPixels();
+  while(COUNTER++ <= 50){
+
+    MQTT.loop();
+    if( luxRead() ) nextRainbowColor();
+    displayTemp( TEMP_HUMI, RGB );
+    delay(100);
+
+  }
+  COUNTER = 0;
+  limpaPixels();
+  while(COUNTER++ <= 50){
+
+    MQTT.loop();
+    if( luxRead() ) nextRainbowColor();
+    displayHumi( TEMP_HUMI, RGB );
+    delay(100);
+
+  }
+
+
+  /* switch(COUNTER){
 
     case 0:
       if( luxRead() ) nextRainbowColor();
       piscaPonto(RGB);
       display( TIME, RGB );
-      //delay(100);
     break;
 
     case 1:
       if( luxRead() ) nextRainbowColor();
       displayTemp( TEMP_HUMI, RGB );
-      //delay(100);
     break;
 
     case 2:
       if( luxRead() ) nextRainbowColor();
       displayHumi( TEMP_HUMI, RGB );
-      //delay(100);
     break;
 
     default:
@@ -408,13 +436,13 @@ void loop(){
 
     break;
      
-  }
+  } */
 
-  if(millis() > 30000 && WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
-  if(!MQTT.connected()) mqttConnect();
-
-  MQTT.loop();
-  // delay(1);
+  LIGHT = luxRead();
+  TIME = getNtp();
+  TEMP_HUMI = getAHT10();
+  mqttSend(true);
+  //ESP.reset();
 
 }
 //end loop
