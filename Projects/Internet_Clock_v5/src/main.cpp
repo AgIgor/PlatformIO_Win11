@@ -74,7 +74,6 @@ void mqttSend(bool SYSTEM){
   serializeJson(JSON, S_JSON);
   if(SYSTEM) MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
   else MQTT.publish( "/mqtt/internet_clock_v.5/RESPONSE", S_JSON , true, 0 );
-  //delay(10);
 
 }
 //end mqttSend
@@ -82,7 +81,7 @@ void mqttSend(bool SYSTEM){
 void nextRainbowColor() {
   static unsigned long nextRainbow;
 
-  if( millis() - nextRainbow > 80 ){
+  if( millis() - nextRainbow > 100 ){
     nextRainbow = millis();
     if (RGB[0] > 0 && RGB[2] == 0) {
       RGB[0]--;
@@ -119,9 +118,7 @@ void limpaPixels(){
     }
     modeDirection = !modeDirection;
   }
-
   pixels.clear();
-  //delay(30);
 
 }
 //end limpa pixels
@@ -158,7 +155,6 @@ bool luxRead(){
 
   for(byte i=0;i<5;i++){
     lux = lightMeter.readLightLevel();
-    //delay(5);
   }
 
   if(lux >= LUX_MAX){
@@ -184,7 +180,6 @@ byte* getAHT10(){
 
   sensors_event_t humidity, temp;
   aht.getEvent(&humidity, &temp);
-  //delay(1);
 
   double tempFloat = temp.temperature;
   double humiFloat = humidity.relative_humidity;
@@ -238,7 +233,6 @@ void display( byte* digitos, byte* RGB ){
       pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.Color(0, 0, 0)); //LEDS DEZENA DE Hora
     }
     pixels.show();
-    //delay(1);
   }
   
 }
@@ -247,12 +241,13 @@ void display( byte* digitos, byte* RGB ){
 void mqttConnect(){
 
   MQTT.begin( MQTT_ADDRESS, WIFI );
-  //delay(5);
   while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
     //delay(500);
   }
-  MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", "OK" , false, 0 );
+  MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
   MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
+
+  // ESP.getResetInfo();
 
 }
 //end mqttConnect
@@ -260,7 +255,6 @@ void mqttConnect(){
 byte* getNtp() {
 
   timeClient.update();
-  //delay(20);
   static byte digitos[4];
   byte H = timeClient.getHours() != 12 ? timeClient.getHours() % 12 : timeClient.getHours();
   byte M = timeClient.getMinutes();
@@ -272,7 +266,6 @@ byte* getNtp() {
 
   JSON["NTP"]["hour"] = timeClient.getHours();
   JSON["NTP"]["minute"] = timeClient.getMinutes();
-  
   return digitos;
 
 }
@@ -300,9 +293,7 @@ void wifiConnect(){
     //delay(200);
 
   }
-
   pixels.clear();
-  //delay(1);
 
 }
 //end wifiConnect
@@ -316,35 +307,10 @@ void messageReceived(String &topic, String &payload) {
     mqttSend(false);
   }
 
-  //delay(10);
-
 }
 //end message received
 
-/* 
-unsigned long INTERVALO = 10000;
-byte COUNTER, MQTT_INTERVAL;
-unsigned long delayIncremento;
-void delayInc(){
-  
-  if(millis() - delayIncremento > INTERVALO){
-
-    delayIncremento = millis();
-    COUNTER++;    
-    limpaPixels();
-    TIME = getNtp();
-    TEMP_HUMI = getAHT10();
-    INTERVALO = 5000;
-    
-  }
-}
-//end delayInc
-*/
-
 void setup(){
-
-  // ESP.getResetReason();
-  // ESP.getResetInfo();
 
   Wire.begin(0, 2);
   if(!aht.begin()) while(true);
@@ -406,43 +372,10 @@ void loop(){
 
   }
 
-
-  /* switch(COUNTER){
-
-    case 0:
-      if( luxRead() ) nextRainbowColor();
-      piscaPonto(RGB);
-      display( TIME, RGB );
-    break;
-
-    case 1:
-      if( luxRead() ) nextRainbowColor();
-      displayTemp( TEMP_HUMI, RGB );
-    break;
-
-    case 2:
-      if( luxRead() ) nextRainbowColor();
-      displayHumi( TEMP_HUMI, RGB );
-    break;
-
-    default:
-      COUNTER = 0;
-      INTERVALO = 8000;
-
-      if(MQTT_INTERVAL++ >= 15){
-        mqttSend(true);
-        MQTT_INTERVAL = 0;
-      }
-
-    break;
-     
-  } */
-
   LIGHT = luxRead();
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
   mqttSend(true);
-  //ESP.reset();
 
 }
 //end loop
