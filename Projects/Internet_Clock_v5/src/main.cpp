@@ -47,7 +47,6 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define MQTT_CLIENT "internet_clock#v.5"
 #define MQTT_ADDRESS "mqtt.eclipseprojects.io"
 
-bool LIGHT;
 byte* TIME;
 byte* TEMP_HUMI;
 JsonDocument JSON;
@@ -156,7 +155,7 @@ bool luxRead(){
   bool lux_flag;
   int lux;
 
-  for(byte i=0;i<5;i++){
+  for(byte i=0;i<15;i++){
     lux = lightMeter.readLightLevel();
   }
 
@@ -244,8 +243,8 @@ void display( byte* digitos/* , byte* RGB */ ){
 void mqttConnect(){
 
   MQTT.begin( MQTT_ADDRESS, WIFI );
-  while (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
-    //delay(500);
+  if (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
+    return;
   }
   MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
   MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
@@ -323,15 +322,18 @@ void setup(){
   pixels.setBrightness(BRILHO_MAX);
   pixels.clear();
 
+  if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+  else PIXEL_HUE = 0;
+
   wifiConnect();
   mqttConnect();
   MQTT.onMessage(messageReceived);
 
   timeClient.begin();
 
-  LIGHT = luxRead();
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
+
 
   ESP.wdtEnable(3000);
 
@@ -339,10 +341,6 @@ void setup(){
 //end setup
 
 void loop(){
-
-
-  //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
-  if(!MQTT.connected()) mqttConnect();
 
   byte COUNTER = 0;
   limpaPixels();
@@ -359,7 +357,7 @@ void loop(){
 
   COUNTER = 0;
   limpaPixels();
-  while(COUNTER++ <= 50){
+  while(COUNTER++ <= 30){
 
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
@@ -370,7 +368,7 @@ void loop(){
   }
   COUNTER = 0;
   limpaPixels();
-  while(COUNTER++ <= 50){
+  while(COUNTER++ <= 30){
 
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
@@ -380,10 +378,12 @@ void loop(){
 
   }
 
-  LIGHT = luxRead();
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
-  mqttSend(true);
+
+  //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
+  if(!MQTT.connected()) mqttConnect();
+  else mqttSend(true);
 
   ESP.wdtFeed();
 
