@@ -1,0 +1,70 @@
+on                      
+off	                    
+display                 
+mudo                    
+oscilar
++
+-
+velocidade
+timer
+ventilar
+eco
+
+
+
+    uint32_t tRawData[]={0xC024, 0x6D0320};
+    uint32_t tRawData[]={0xE024, 0x4D0320}; 
+    uint32_t tRawData[]={0x6024, 0xCF0120}; 
+    uint32_t tRawData[]={0xE024, 0x4F0120}; 
+    uint32_t tRawData[]={0xA024, 0xC0220}; 
+    uint32_t tRawData[]={0xE024, 0x4C0220}; 
+    uint32_t tRawData[]={0x20E024, 0x6A0420}; 
+    uint32_t tRawData[]={0x40E024, 0xA0420};
+    uint32_t tRawData[]={0x60E024, 0x2A0420}; 
+    uint32_t tRawData[]={0xE024, 0x4A0420}; 
+    uint32_t tRawData[]={0xF024, 0x560820};
+    uint32_t tRawData[]={0xE024, 0x460820};
+    uint32_t tRawData[]={0xE124, 0x4A0520};
+    uint32_t tRawData[]={0xE224, 0x490520};
+    uint32_t tRawData[]={0xE324, 0x480520};
+    uint32_t tRawData[]={0xE424, 0x4F0520};
+    uint32_t tRawData[]={0xE524, 0x4E0520};
+    uint32_t tRawData[]={0xE624, 0x4D0520};
+    uint32_t tRawData[]={0xEE24, 0x450520};
+    uint32_t tRawData[]={0xED24, 0x450620};
+    uint32_t tRawData[]={0xE724, 0x4F0620};
+    uint32_t tRawData[]={0xE624, 0x4E0620};
+    uint32_t tRawData[]={0xE524, 0x4D0620};
+    uint32_t tRawData[]={0xE424, 0x4C0620};
+    uint32_t tRawData[]={0xE324, 0x4B0620};
+    uint32_t tRawData[]={0xE224, 0x4A0620};
+    uint32_t tRawData[]={0xE124, 0x490620};
+    uint32_t tRawData[]={0xE024, 0x480620};
+    uint32_t tRawData[]={0xE724, 0x4C0520};
+    uint32_t tRawData[]={0xE824, 0x430520};
+    uint32_t tRawData[]={0xE924, 0x420520};
+    uint32_t tRawData[]={0xEA24, 0x410520};
+    uint32_t tRawData[]={0xEB24, 0x400520};
+    uint32_t tRawData[]={0xEC24, 0x470520};
+    uint32_t tRawData[]={0xED24, 0x460520};
+    uint32_t tRawData[]={0xEE24, 0x450520};
+    uint32_t tRawData[]={0x20EE24, 0x640420};
+    uint32_t tRawData[]={0x40EE24, 0x40420};
+    uint32_t tRawData[]={0x60EE24, 0x240420};
+    uint32_t tRawData[]={0xEE24, 0x440420};
+    uint32_t tRawData[]={0xF020EE24, 0x970720};
+    uint32_t tRawData[]={0xF020EE24, 0x390980};
+    uint32_t tRawData[]={0xF020EE24, 0x990920};
+    uint32_t tRawData[]={0xF020EE24, 0xB60600};
+    uint32_t tRawData[]={0xF040EE24, 0x540480};
+    uint32_t tRawData[]={0xF060EE24, 0x740480};
+    uint32_t tRawData[]={0xF020EE24, 0x340480};
+    uint32_t tRawData[]={0xF020EE24, 0xB90900};
+    uint32_t tRawData[]={0xF020EE24, 0x9A0A20};
+    uint32_t tRawData[]={0xF020EE24, 0xBA0A00};
+    uint32_t tRawData[]={0xEC20AE24, 0xEE0200};
+    uint32_t tRawData[]={0xEC20EE24, 0xAE0200};
+    uint32_t tRawData[]={0xEC208E24, 0xCF0300};
+    uint32_t tRawData[]={0xEC20AE24, 0xEF0300};
+    uint32_t tRawData[]={0x202E24, 0x810100};
+    uint32_t tRawData[]={0x20AE24, 0x10100};
