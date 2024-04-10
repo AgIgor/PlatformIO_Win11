@@ -27,10 +27,11 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 //==========* Variaveis *==========//
 
 #define BRILHO_MAX    200
-#define BRILHO_MIN      2
+#define BRILHO_MIN      1
 
 #define LUX_MAX         3
 #define LUX_MIN         2
+#define INTERVALO       1
 
 #define DELAY_CLOCK    8
 #define DELAY_TEMP     4
@@ -54,7 +55,7 @@ JsonDocument JSON;
 //byte RGB[3]={255,0,0};
 unsigned long int PIXEL_HUE;
 
-const byte displayConfig[12][7] = {{0,0,1,2,4,5,6},  //Digito 0
+const byte displayConfig[13][7] = {{0,0,1,2,4,5,6},  //Digito 0
                                    {0,0,0,0,0,0,4},  //Digito 1
                                    {0,0,0,1,3,5,6},  //Digito 2
                                    {0,0,0,1,3,4,5},  //Digito 3
@@ -65,7 +66,8 @@ const byte displayConfig[12][7] = {{0,0,1,2,4,5,6},  //Digito 0
                                    {0,1,2,3,4,5,6},  //Digito 8
                                    {0,0,1,2,3,4,5},  //Digito 9
                                    {0,0,0,0,1,2,3},  //Grau
-                                   {1,1,1,1,2,5,6}}; //Celsius
+                                   {1,1,1,1,2,5,6},  //Celsius
+                                   {1,1,1,1,2,11,12}}; 
 
 //==========* Funções *==========//
 
@@ -160,15 +162,14 @@ bool luxRead(){
     lux = lightMeter.readLightLevel();
   }
 
-  if(lux >= LUX_MAX){
-    // if(){
+  if(lux > LUX_MAX){
 
-    // }
     pixels.setBrightness(BRILHO_MAX);
     lux_flag = true;
   }//END IF LUX MAX
 
-  if(lux <= LUX_MIN){
+  if(lux < LUX_MIN){
+
     pixels.setBrightness(BRILHO_MIN);
     lux_flag = false;
     // RGB[0] = 255;
@@ -218,8 +219,7 @@ void displayTemp( byte* digitos/* , byte* RGB */ ){
 void displayHumi( byte* digitos/* , byte* RGB */ ){
 
   for (int ID = 0; ID < 7; ID++){
-    // pixels.setPixelColor(1, pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    // pixels.setPixelColor(12, pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+
     pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.setPixelColor((displayConfig[10][ID]+10-7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.setPixelColor((displayConfig[digitos[3]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS DEZENA DE Minuto
@@ -255,7 +255,7 @@ void mqttConnect(){
     return;
   }
   MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
-  MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
+  //MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
 
   // ESP.getResetInfo();
 
@@ -286,27 +286,25 @@ void wifiConnect(){
   
   WiFi.mode(WIFI_STA);
   WiFi.begin( WIFI_SSID , WIFI_PASS );
-  const byte loadingWifi[3][6]={{0,1,2,6,5,4},
-                                {7,8,9,13,12,11},
-                                {15,16,17,21,20,19}};
+  const byte loadingWifi[]={0,1,2,6,5,4};
 
   while (WiFi.status() != WL_CONNECTED) {
+
     
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
     else PIXEL_HUE = 0;
+    
     pixels.clear();
-    //for(byte c=0; c<3;c++){
       for(byte l=0; l<6; l++){
-        pixels.setPixelColor( loadingWifi[0][l], pixels.Color(255, 0, 0) );
-        pixels.setPixelColor( loadingWifi[0][l-1], pixels.Color(0, 0, 0) );
+        pixels.setPixelColor( loadingWifi[l], pixels.Color(255, 0, 0) );
+        pixels.setPixelColor( loadingWifi[l-1], pixels.Color(0, 0, 0) );
         pixels.show();
         delay(100);
       }
-    //}
-    //delay(200);
 
   }
   pixels.clear();
+  timeClient.update();
 
 }
 //end wifiConnect
@@ -341,9 +339,11 @@ void setup(){
 
   timeClient.begin();
 
-  TIME = getNtp();
-  TEMP_HUMI = getAHT10();
-
+  for(byte i=0; i<5; i++){
+    TIME = getNtp();
+    TEMP_HUMI = getAHT10();
+    delay(100);
+  }
 
   ESP.wdtEnable(3000);
 
@@ -355,8 +355,9 @@ void loop(){
   byte COUNTER = 0;
   limpaPixels();
   while(COUNTER++ <= 50){
-    MQTT.loop();
 
+    //MQTT.loop();
+    timeClient.update();
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
     else PIXEL_HUE = 0;
     piscaPonto(/* RGB */);
@@ -369,7 +370,8 @@ void loop(){
   limpaPixels();
   while(COUNTER++ <= 30){
 
-    MQTT.loop();
+    //MQTT.loop();
+    timeClient.update();
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
     else PIXEL_HUE = 0;
     displayTemp( TEMP_HUMI/* , RGB */ );
@@ -380,7 +382,8 @@ void loop(){
   limpaPixels();
   while(COUNTER++ <= 30){
 
-    MQTT.loop();
+    //MQTT.loop();
+    timeClient.update();
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
     else PIXEL_HUE = 0;
     displayHumi( TEMP_HUMI/* , RGB */ );
@@ -391,7 +394,7 @@ void loop(){
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
 
-  //if(WiFi.status() != WL_CONNECTED) setup(); //wifiConnect();
+  if(WiFi.status() != WL_CONNECTED) wifiConnect(); //setup();
   if(!MQTT.connected()) mqttConnect();
   else mqttSend(true);
 
