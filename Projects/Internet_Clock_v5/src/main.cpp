@@ -345,60 +345,120 @@ void setup(){
     delay(100);
   }
 
-  ESP.wdtEnable(3000);
+  ESP.wdtEnable( 1000 );
 
 }
 //end setup
 
+// void loop(){
+
+//   byte COUNTER = 0;
+//   limpaPixels();
+//   while(COUNTER++ <= 50){
+
+//     //MQTT.loop();
+//     timeClient.update();
+//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//     else PIXEL_HUE = 0;
+//     piscaPonto(/* RGB */);
+//     display( TIME/* , RGB */ );
+//     delay(100);
+
+//   }
+
+//   COUNTER = 0;
+//   limpaPixels();
+//   while(COUNTER++ <= 30){
+
+//     //MQTT.loop();
+//     timeClient.update();
+//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//     else PIXEL_HUE = 0;
+//     displayTemp( TEMP_HUMI/* , RGB */ );
+//     delay(100);
+
+//   }
+//   COUNTER = 0;
+//   limpaPixels();
+//   while(COUNTER++ <= 30){
+
+//     //MQTT.loop();
+//     timeClient.update();
+//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//     else PIXEL_HUE = 0;
+//     displayHumi( TEMP_HUMI/* , RGB */ );
+//     delay(100);
+
+//   }
+
+//   TIME = getNtp();
+//   TEMP_HUMI = getAHT10();
+
+//   if(WiFi.status() != WL_CONNECTED) wifiConnect(); //setup();
+//   if(!MQTT.connected()) mqttConnect();
+//   else mqttSend(true);
+
+//   ESP.wdtFeed();
+
+// }
+// //end loop
+
+
+
+unsigned int long TEMPO;
 void loop(){
+  delay(10);
 
-  byte COUNTER = 0;
+  TEMPO = millis();
   limpaPixels();
-  while(COUNTER++ <= 50){
 
-    //MQTT.loop();
-    timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+  while(millis() - TEMPO <= 5000){
+
+    MQTT.loop();
+    //timeClient.update();
+    if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
-    piscaPonto(/* RGB */);
-    display( TIME/* , RGB */ );
+    piscaPonto();
+    display( getNtp() );
     delay(100);
 
   }
 
-  COUNTER = 0;
+  TEMPO = millis();
   limpaPixels();
-  while(COUNTER++ <= 30){
 
-    //MQTT.loop();
-    timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+  while(millis() - TEMPO <= 5000){
+    
+    MQTT.loop();
+    //timeClient.update();
+    if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
-    displayTemp( TEMP_HUMI/* , RGB */ );
-    delay(100);
-
-  }
-  COUNTER = 0;
-  limpaPixels();
-  while(COUNTER++ <= 30){
-
-    //MQTT.loop();
-    timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
-    else PIXEL_HUE = 0;
-    displayHumi( TEMP_HUMI/* , RGB */ );
+    displayTemp( getAHT10() );
     delay(100);
 
   }
 
-  TIME = getNtp();
-  TEMP_HUMI = getAHT10();
+  TEMPO = millis();
+  limpaPixels();
 
-  if(WiFi.status() != WL_CONNECTED) wifiConnect(); //setup();
+  while(millis() - TEMPO <= 5000){
+    
+    MQTT.loop();
+    //timeClient.update();
+    if( luxRead() ) PIXEL_HUE = millis();
+    else PIXEL_HUE = 0;
+    displayHumi( getAHT10() );
+    delay(100);
+
+  }
+
+  // TIME = getNtp();
+  // TEMP_HUMI = getAHT10();
+
+  if(WiFi.status() != WL_CONNECTED) wifiConnect();
   if(!MQTT.connected()) mqttConnect();
   else mqttSend(true);
 
   ESP.wdtFeed();
 
 }
-//end loop
