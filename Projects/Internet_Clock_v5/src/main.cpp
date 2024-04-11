@@ -313,8 +313,8 @@ void setup(){
 }
 //end setup
 
-int TEMPO = 50;
-int INTERVALO = 50;
+int TEMPO = 30;
+int INTERVALO = 100;
 void loop(){
 
   for(byte i=0; i< INTERVALO ;i++){
