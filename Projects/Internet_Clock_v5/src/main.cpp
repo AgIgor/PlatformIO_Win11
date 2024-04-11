@@ -313,11 +313,10 @@ void setup(){
 }
 //end setup
 
-int TEMPO = 30;
-int INTERVALO = 100;
+int TEMPO = 100;
 void loop(){
 
-  for(byte i=0; i< INTERVALO ;i++){
+  for(byte i=0; i< 100 ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
@@ -329,7 +328,7 @@ void loop(){
   }
   limpaPixels();
 
-  for(byte i=0; i< INTERVALO ;i++){
+  for(byte i=0; i< 50 ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
@@ -340,7 +339,7 @@ void loop(){
   }
   limpaPixels();
 
-  for(byte i=0; i< INTERVALO ;i++){
+  for(byte i=0; i< 50 ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
@@ -360,66 +359,3 @@ void loop(){
 
 }
 //end loop
-
-// unsigned int long TEMPO;
-// void loop(){
-//   delay(10);
-
-//   TEMPO = millis();
-//   limpaPixels();
-//   // if( luxRead() ) PIXEL_HUE = millis();
-//   // else PIXEL_HUE = 0;
-
-//   while(millis() - TEMPO <= 5000){
-
-//     MQTT.loop();
-//     if( LUX ) PIXEL_HUE = millis();
-//     else PIXEL_HUE = 0;
-//     piscaPonto();
-//     display( TIME );
-//     delay(100);
-
-//   }
-
-//   TEMPO = millis();
-//   limpaPixels();
-//   // if( luxRead() ) PIXEL_HUE = millis();
-//   // else PIXEL_HUE = 0;
-
-//   while(millis() - TEMPO <= 5000){
-    
-//     MQTT.loop();
-//     if( LUX ) PIXEL_HUE = millis();
-//     else PIXEL_HUE = 0;
-//     displayTemp( TEMP_HUMI );
-//     delay(100);
-
-//   }
-
-//   TEMPO = millis();
-//   LUX = luxRead();
-//   limpaPixels();
-//   // if( luxRead() ) PIXEL_HUE = millis();
-//   // else PIXEL_HUE = 0;
-
-//   while(millis() - TEMPO <= 5000){
-    
-//     MQTT.loop();
-//     if( LUX ) PIXEL_HUE = millis();
-//     else PIXEL_HUE = 0;
-//     displayHumi( TEMP_HUMI );
-//     delay(100);
-
-//   }
-
-//   TIME = getNtp();
-//   TEMP_HUMI = getAHT10();
-
-//   //if(WiFi.status() != WL_CONNECTED) wifiConnect();
-//   if(!MQTT.connected()) mqttConnect();
-//   else mqttSend(true);
-
-//   ESP.wdtFeed();
-
-// }
-// //end loop
