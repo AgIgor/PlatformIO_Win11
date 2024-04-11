@@ -26,20 +26,11 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 
 //==========* Variaveis *==========//
 
-#define BRILHO_MAX    200
+#define BRILHO_MAX    150
 #define BRILHO_MIN      1
 
 #define LUX_MAX         3
 #define LUX_MIN         2
-#define INTERVALO       1
-
-#define DELAY_CLOCK    8
-#define DELAY_TEMP     4
-#define DELAY_HUMI     4
-
-#define DELAY_LOOP_1 10
-#define DELAY_LOOP_2 15
-#define DELAY_LOOP_3 20
 
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
@@ -49,10 +40,10 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define MQTT_CLIENT "internet_clock#v.5"
 #define MQTT_ADDRESS "mqtt.eclipseprojects.io"
 
+bool LUX;
 byte* TIME;
 byte* TEMP_HUMI;
 JsonDocument JSON;
-//byte RGB[3]={255,0,0};
 unsigned long int PIXEL_HUE;
 
 const byte displayConfig[13][7] = {{0,0,1,2,4,5,6},  //Digito 0
@@ -81,29 +72,6 @@ void mqttSend(bool SYSTEM){
 }
 //end mqttSend
 
-/* 
-void nextRainbowColor() {
-  static unsigned long nextRainbow;
-
-  if( millis() - nextRainbow > 150 ){
-    nextRainbow = millis();
-    if (RGB[0] > 0 && RGB[2] == 0) {
-      RGB[0]--;
-      RGB[1]++;
-    }
-    if (RGB[1] > 0 && RGB[0] == 0) {
-      RGB[1]--;
-      RGB[2]++;
-    }
-    if (RGB[2] > 0 && RGB[1] == 0) {
-      RGB[0]++;
-      RGB[2]--;
-    }
-  }
-}
-//end nextRainbowColor
- */
-
 void limpaPixels(){
 
   static bool modeDirection;
@@ -128,7 +96,7 @@ void limpaPixels(){
 }
 //end limpa pixels
 
-void piscaPonto( /* byte* RGB */ ){
+void piscaPonto(){
 
   static long delayBlink;
   static bool BLK;
@@ -203,46 +171,43 @@ byte* getAHT10(){
 }
 //end get AHT
 
-void displayTemp( byte* digitos/* , byte* RGB */ ){
+void displayTemp( byte* digitos ){
 
   for (int ID = 0; ID < 7; ID++){
     pixels.setPixelColor((displayConfig[11][ID]), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2])); //LEDS grau
-    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS DEZENA DE Minuto
-    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS UNIDADE DE Hora
+    pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.show();
   }
 
 }
 //end display temp
 
-void displayHumi( byte* digitos/* , byte* RGB */ ){
+void displayHumi( byte* digitos ){
 
   for (int ID = 0; ID < 7; ID++){
 
     pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.setPixelColor((displayConfig[10][ID]+10-7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[3]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS DEZENA DE Minuto
-    pixels.setPixelColor((displayConfig[digitos[2]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS UNIDADE DE Hora
+    pixels.setPixelColor((displayConfig[digitos[3]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[2]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.show();
   }
 
 }
 //end display humi
 
-void display( byte* digitos/* , byte* RGB */ ){
+void display( byte* digitos ){
 
   for (int ID = 0; ID < 7; ID++){
-    pixels.setPixelColor((displayConfig[digitos[3]][ID]), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS UNIDADE DE Minuto
-    pixels.setPixelColor((displayConfig[digitos[2]][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS DEZENA DE Minuto
-    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS UNIDADE DE Hora
-    
-    //if(digitos[0] > 0){
-      pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));//LEDS DEZENA DE Hora
-    //}else{
-      //pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.Color(0, 0, 0)); //LEDS DEZENA DE Hora
-    //}
+
+    pixels.setPixelColor((displayConfig[digitos[3]][ID]), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[2]][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
     pixels.show();
+
   }
   
 }
@@ -255,9 +220,7 @@ void mqttConnect(){
     return;
   }
   MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
-  //MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
-
-  // ESP.getResetInfo();
+  MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
 
 }
 //end mqttConnect
@@ -330,7 +293,7 @@ void setup(){
   pixels.setBrightness(BRILHO_MAX);
   pixels.clear();
 
-  if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+  if( luxRead() ) PIXEL_HUE = millis();
   else PIXEL_HUE = 0;
 
   wifiConnect();
@@ -345,48 +308,106 @@ void setup(){
     delay(100);
   }
 
-  ESP.wdtEnable( 1000 );
+  ESP.wdtEnable( 3000 );
 
 }
 //end setup
 
+int TEMPO = 50;
+int INTERVALO = 50;
+void loop(){
+
+  for(byte i=0; i< INTERVALO ;i++){
+    
+    MQTT.loop();
+    if( luxRead() ) PIXEL_HUE = millis();
+    else PIXEL_HUE = 0;
+    piscaPonto();
+    display( TIME );
+    delay( TEMPO );
+
+  }
+  limpaPixels();
+
+  for(byte i=0; i< INTERVALO ;i++){
+    
+    MQTT.loop();
+    if( luxRead() ) PIXEL_HUE = millis();
+    else PIXEL_HUE = 0;
+    displayTemp( TEMP_HUMI );
+    delay( TEMPO );
+
+  }
+  limpaPixels();
+
+  for(byte i=0; i< INTERVALO ;i++){
+    
+    MQTT.loop();
+    if( luxRead() ) PIXEL_HUE = millis();
+    else PIXEL_HUE = 0;
+    displayHumi( TEMP_HUMI );
+    delay( TEMPO );
+
+  }
+  limpaPixels();
+
+  if(!MQTT.connected()) mqttConnect();
+  else mqttSend(true);
+
+  ESP.wdtFeed();
+  TIME = getNtp();
+  TEMP_HUMI = getAHT10();
+
+}
+//end loop
+
+// unsigned int long TEMPO;
 // void loop(){
+//   delay(10);
 
-//   byte COUNTER = 0;
+//   TEMPO = millis();
 //   limpaPixels();
-//   while(COUNTER++ <= 50){
+//   // if( luxRead() ) PIXEL_HUE = millis();
+//   // else PIXEL_HUE = 0;
 
-//     //MQTT.loop();
-//     timeClient.update();
-//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//   while(millis() - TEMPO <= 5000){
+
+//     MQTT.loop();
+//     if( LUX ) PIXEL_HUE = millis();
 //     else PIXEL_HUE = 0;
-//     piscaPonto(/* RGB */);
-//     display( TIME/* , RGB */ );
+//     piscaPonto();
+//     display( TIME );
 //     delay(100);
 
 //   }
 
-//   COUNTER = 0;
+//   TEMPO = millis();
 //   limpaPixels();
-//   while(COUNTER++ <= 30){
+//   // if( luxRead() ) PIXEL_HUE = millis();
+//   // else PIXEL_HUE = 0;
 
-//     //MQTT.loop();
-//     timeClient.update();
-//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//   while(millis() - TEMPO <= 5000){
+    
+//     MQTT.loop();
+//     if( LUX ) PIXEL_HUE = millis();
 //     else PIXEL_HUE = 0;
-//     displayTemp( TEMP_HUMI/* , RGB */ );
+//     displayTemp( TEMP_HUMI );
 //     delay(100);
 
 //   }
-//   COUNTER = 0;
-//   limpaPixels();
-//   while(COUNTER++ <= 30){
 
-//     //MQTT.loop();
-//     timeClient.update();
-//     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
+//   TEMPO = millis();
+//   LUX = luxRead();
+//   limpaPixels();
+//   // if( luxRead() ) PIXEL_HUE = millis();
+//   // else PIXEL_HUE = 0;
+
+//   while(millis() - TEMPO <= 5000){
+    
+//     MQTT.loop();
+//     if( LUX ) PIXEL_HUE = millis();
 //     else PIXEL_HUE = 0;
-//     displayHumi( TEMP_HUMI/* , RGB */ );
+//     displayHumi( TEMP_HUMI );
 //     delay(100);
 
 //   }
@@ -394,7 +415,7 @@ void setup(){
 //   TIME = getNtp();
 //   TEMP_HUMI = getAHT10();
 
-//   if(WiFi.status() != WL_CONNECTED) wifiConnect(); //setup();
+//   //if(WiFi.status() != WL_CONNECTED) wifiConnect();
 //   if(!MQTT.connected()) mqttConnect();
 //   else mqttSend(true);
 
@@ -402,63 +423,3 @@ void setup(){
 
 // }
 // //end loop
-
-
-
-unsigned int long TEMPO;
-void loop(){
-  delay(10);
-
-  TEMPO = millis();
-  limpaPixels();
-
-  while(millis() - TEMPO <= 5000){
-
-    MQTT.loop();
-    //timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();
-    else PIXEL_HUE = 0;
-    piscaPonto();
-    display( getNtp() );
-    delay(100);
-
-  }
-
-  TEMPO = millis();
-  limpaPixels();
-
-  while(millis() - TEMPO <= 5000){
-    
-    MQTT.loop();
-    //timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();
-    else PIXEL_HUE = 0;
-    displayTemp( getAHT10() );
-    delay(100);
-
-  }
-
-  TEMPO = millis();
-  limpaPixels();
-
-  while(millis() - TEMPO <= 5000){
-    
-    MQTT.loop();
-    //timeClient.update();
-    if( luxRead() ) PIXEL_HUE = millis();
-    else PIXEL_HUE = 0;
-    displayHumi( getAHT10() );
-    delay(100);
-
-  }
-
-  // TIME = getNtp();
-  // TEMP_HUMI = getAHT10();
-
-  if(WiFi.status() != WL_CONNECTED) wifiConnect();
-  if(!MQTT.connected()) mqttConnect();
-  else mqttSend(true);
-
-  ESP.wdtFeed();
-
-}
