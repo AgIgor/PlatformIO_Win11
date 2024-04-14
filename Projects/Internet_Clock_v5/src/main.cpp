@@ -29,8 +29,8 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define BRILHO_MAX    150
 #define BRILHO_MIN      1
 
-#define LUX_MAX         3
-#define LUX_MIN         2
+#define LUX_MAX         1
+#define LUX_MIN         1
 
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
@@ -276,7 +276,7 @@ void messageReceived(String &topic, String &payload) {
 
   //Serial.println("incoming: " + topic + " - " + payload);
   MQTT.publish( "/mqtt/internet_clock_v.5/RECEBIDO", payload , false, 0 );
-
+  delay(100);
   if(payload == "GET"){
     mqttSend(false);
   }
@@ -313,7 +313,6 @@ void setup(){
 }
 //end setup
 
-int TEMPO = 100;
 void loop(){
 
   for(byte i=0; i< 100 ;i++){
@@ -323,7 +322,7 @@ void loop(){
     else PIXEL_HUE = 0;
     piscaPonto();
     display( TIME );
-    delay( TEMPO );
+    delay( 50 );
 
   }
   limpaPixels();
@@ -334,7 +333,7 @@ void loop(){
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayTemp( TEMP_HUMI );
-    delay( TEMPO );
+    delay( 50 );
 
   }
   limpaPixels();
@@ -345,7 +344,7 @@ void loop(){
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayHumi( TEMP_HUMI );
-    delay( TEMPO );
+    delay( 50 );
 
   }
   limpaPixels();
