@@ -313,46 +313,50 @@ void setup(){
 }
 //end setup
 
+int COUNT = 50;
+int DLY = 100;
 void loop(){
 
-  for(byte i=0; i< 100 ;i++){
+  for(byte i=0; i< COUNT ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     piscaPonto();
     display( TIME );
-    delay( 50 );
+    delay( DLY );
 
   }
   limpaPixels();
 
-  for(byte i=0; i< 50 ;i++){
+  for(byte i=0; i< COUNT ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayTemp( TEMP_HUMI );
-    delay( 50 );
+    delay( DLY );
 
   }
   limpaPixels();
 
-  for(byte i=0; i< 50 ;i++){
+  for(byte i=0; i< COUNT ;i++){
     
     MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayHumi( TEMP_HUMI );
-    delay( 50 );
+    delay( DLY );
 
   }
   limpaPixels();
 
-  if(!MQTT.connected()) mqttConnect();
-  else mqttSend(true);
+  // if(!MQTT.connected()) mqttConnect();
+  // else mqttSend(true);
+  mqttSend(true);
 
-  ESP.wdtFeed();
+  //ESP.wdtFeed();
+  yield();
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
 
