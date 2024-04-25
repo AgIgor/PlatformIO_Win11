@@ -28,6 +28,7 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 
 #define BRILHO_MAX    150
 #define BRILHO_MIN      1
+#define WAIT          100
 
 #define LUX_MAX         1
 #define LUX_MIN         1
@@ -61,6 +62,19 @@ const byte displayConfig[13][7] = {{0,0,1,2,4,5,6},  //Digito 0
                                    {1,1,1,1,2,11,12}}; 
 
 //==========* Funções *==========//
+
+uint32_t Wheel(byte WheelPos) {
+  if (WheelPos < 85) {
+    return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } else if (WheelPos < 170) {
+    WheelPos -= 85;
+    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else {
+    WheelPos -= 170;
+    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+}
+
 
 void mqttSend(bool SYSTEM){
 
@@ -108,7 +122,7 @@ void piscaPonto(){
 
   if(BLK){
 
-    pixels.setPixelColor(14, pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));//pixels.Color(RGB[0], RGB[1], RGB[2]));;;
+    pixels.setPixelColor(14, pixels.ColorHSV(PIXEL_HUE));
     pixels.show();
 
   }else{
@@ -173,11 +187,24 @@ byte* getAHT10(){
 
 void displayTemp( byte* digitos ){
 
+  // for (uint16_t j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+  //   for (uint16_t i = 0; i < NUM_LEDS; i++) {
+  //     for (int ID = 0; ID < 7; ID++){
+  //       pixels.setPixelColor((displayConfig[11][ID]), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[10][ID]+7), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //     }
+  //   }
+  //   pixels.show();
+  //   delay(WAIT);
+  // }
+
   for (int ID = 0; ID < 7; ID++){
-    pixels.setPixelColor((displayConfig[11][ID]), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[11][ID]),             pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[10][ID]+7),           pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15),  pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22),  pixels.ColorHSV(PIXEL_HUE));
     pixels.show();
   }
 
@@ -185,13 +212,24 @@ void displayTemp( byte* digitos ){
 //end display temp
 
 void displayHumi( byte* digitos ){
+  // for (uint16_t j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+  //   for (uint16_t i = 0; i < NUM_LEDS; i++) {
+  //     for (int ID = 0; ID < 7; ID++){
+  //       pixels.setPixelColor((displayConfig[10][ID]+7), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[10][ID]+10-7), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[3]][ID]+15), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[2]][ID]+22), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //     }
+  //   }
+  //   pixels.show();
+  //   delay(WAIT);
+  // }
 
   for (int ID = 0; ID < 7; ID++){
-
-    pixels.setPixelColor((displayConfig[10][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[10][ID]+10-7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[3]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[2]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[10][ID]+7),           pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[10][ID]+10-7),        pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[3]][ID]+15),  pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[2]][ID]+22),  pixels.ColorHSV(PIXEL_HUE));
     pixels.show();
   }
 
@@ -200,16 +238,33 @@ void displayHumi( byte* digitos ){
 
 void display( byte* digitos ){
 
+  // for (uint16_t j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+  //   for (uint16_t i = 0; i < NUM_LEDS; i++) {
+  //     for (int ID = 0; ID < 7; ID++){
+  //       pixels.setPixelColor((displayConfig[digitos[3]][ID]), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[2]][ID]+7), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //       pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), Wheel(((i * 256 / NUM_LEDS) + j) & 255));//pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+  //     }
+  //   }
+  //   pixels.show();
+  //   delay(WAIT);
+  // }
+
   for (int ID = 0; ID < 7; ID++){
+    // pixels.setPixelColor((displayConfig[digitos[3]][ID]),    pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    // pixels.setPixelColor((displayConfig[digitos[2]][ID]+7),  pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    // pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    // pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    // pixels.show();
 
-    pixels.setPixelColor((displayConfig[digitos[3]][ID]), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[2]][ID]+7), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
-    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22), pixels.gamma32(pixels.ColorHSV(PIXEL_HUE)));
+    pixels.setPixelColor((displayConfig[digitos[3]][ID]),     pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[2]][ID]+7),   pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[1]][ID]+15),  pixels.ColorHSV(PIXEL_HUE));
+    pixels.setPixelColor((displayConfig[digitos[0]][ID]+22),  pixels.ColorHSV(PIXEL_HUE));
     pixels.show();
-
   }
-  
+
 }
 //end display
 
@@ -249,21 +304,26 @@ void wifiConnect(){
   
   WiFi.mode(WIFI_STA);
   WiFi.begin( WIFI_SSID , WIFI_PASS );
-  const byte loadingWifi[]={0,1,2,6,5,4};
+  const byte loadingWifi[]={0,1,8,16,23,24,28,27,20,12,5,4};
 
   while (WiFi.status() != WL_CONNECTED) {
-
-    
     if( luxRead() ) PIXEL_HUE = millis();//nextRainbowColor();
     else PIXEL_HUE = 0;
     
     pixels.clear();
-      for(byte l=0; l<6; l++){
-        pixels.setPixelColor( loadingWifi[l], pixels.Color(255, 0, 0) );
-        pixels.setPixelColor( loadingWifi[l-1], pixels.Color(0, 0, 0) );
-        pixels.show();
-        delay(100);
-      }
+    for(byte l=0; l<12; l++){
+      pixels.setPixelColor( loadingWifi[l], pixels.Color(255, 0, 0) );
+      pixels.setPixelColor( loadingWifi[l-1], pixels.Color(0, 0, 0) );
+      pixels.show();
+      delay(80);
+    }
+
+    // for(byte pixel=0; pixel<NUM_LEDS; pixel++){
+    //   pixels.setPixelColor( pixel, pixels.Color(255, 0, 0) );
+    //   pixels.setPixelColor( pixel-1, pixels.Color(0, 0, 0) );
+    //   pixels.show();
+    //   delay(100);
+    // }
 
   }
   pixels.clear();
@@ -308,55 +368,53 @@ void setup(){
     delay(100);
   }
 
-  ESP.wdtEnable( 3000 );
+  //ESP.wdtEnable( 3000 );
 
 }
 //end setup
 
-int COUNT = 50;
-int DLY = 100;
 void loop(){
 
-  for(byte i=0; i< COUNT ;i++){
+  for(byte i=0; i< 250 ;i++){
     
-    MQTT.loop();
+    //MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     piscaPonto();
     display( TIME );
-    delay( DLY );
+    delay( 50 );
 
   }
   limpaPixels();
 
-  for(byte i=0; i< COUNT ;i++){
+  for(byte i=0; i< 30 ;i++){
     
-    MQTT.loop();
+    //MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayTemp( TEMP_HUMI );
-    delay( DLY );
+    delay( 30 );
 
   }
   limpaPixels();
 
-  for(byte i=0; i< COUNT ;i++){
+  for(byte i=0; i< 30 ;i++){
     
-    MQTT.loop();
+    //MQTT.loop();
     if( luxRead() ) PIXEL_HUE = millis();
     else PIXEL_HUE = 0;
     displayHumi( TEMP_HUMI );
-    delay( DLY );
+    delay( 30 );
 
   }
   limpaPixels();
 
   // if(!MQTT.connected()) mqttConnect();
   // else mqttSend(true);
-  mqttSend(true);
+  //mqttSend(true);
 
   //ESP.wdtFeed();
-  yield();
+  //yield();
   TIME = getNtp();
   TEMP_HUMI = getAHT10();
 
