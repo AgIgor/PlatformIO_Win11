@@ -3,11 +3,9 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Encoder.h>
+#include <PID_v1.h>
 
 LiquidCrystal_I2C lcd(0x27,16,2);
-
-bool edit_mode = false;
-byte menu_opt;
 
 #define encoderA 2
 #define encoderB 3
@@ -15,25 +13,14 @@ byte menu_opt;
 
 Encoder myEncoder(encoderA, encoderB);
 
-boolean buttonState = false;
-boolean lastButtonState = false;
-boolean fineAdjustMode = false;
-
 byte encoderPassos = 4;
+bool edit_mode = false;
 float modes[] = {0.01,0.05, 0.10, 1.00};
 
 float corrente = 0.00;
 int value, oldValue;
-int contadorCliques = 1;
 
-int32_t frequency = 10000; //frequency (in Hz)
-
-#define hall_pin  A1
-#define leituras  100
-#define pinPWM    9
-
-double newSetpoint;
-bool err = false;
+// int32_t frequency = 10000; //frequency (in Hz)
 
 float Vzero = 2.42;//2.56
 float K = 0.01;//
@@ -42,24 +29,18 @@ float Vbase = 4.80;//4.88
 float Vin = 0;
 float I = 0;
 
-float kp = 0.3; //5.5
-float ki = 2.0; //5.2
-float kd = 3.5; //5.1
+int sensorPin = A1;
+int outputPin = 11;
 
-double setpoint = 0.0;   // Valor de corrente desejado (em Ampères)
-double maxSet = 10.0;
+int leituras = 50;
 
-double output = 0.0;     // Valor de saída do controlador (em PWM)
-double error = 0.0;      // Erro entre o setpoint e o input
-double last_error = 0.0; // Último erro calculado
-double integral = 0.0;   // Acumulador da integral do erro
-double derivative = 0.0; // Derivada do erro
+double Setpoint = 0;
+double Kp = 4;
+double Ki = 6.8;
+double Kd = 0.001;
 
-double output_min = 0.0;
-double output_max = 255.0;
-
-long delayMillis;
-#define DELAYPRINT 100
+double Input, Output;
+PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
 
 class Botao {
   private:
@@ -102,44 +83,20 @@ class Botao {
 };
 Botao Ok(encoderButton);
 
-// void setDuty_pin11(byte value){
-//   //  int duty;
-//   //  value = value/100;
-//   //  duty = (value * 256) - 1;
-//    OCR2A = value;
-// } //end setDuty_pin11
-
-// void setFrequency(char option){
-//   /*
-//   TABLE:
-  
-//       option  frequency
-        
-//         1      62.5  kHz
-//         2       7.81 kHz
-//         3       1.95 kHz
-//         4     976.56  Hz
-//         5     488.28  Hz
-//         6     244.14  Hz
-//         7      61.03  Hz   
-//   */
-//   TCCR2B = option;
-  
-// } //end setFrequency
-
-
 void setValor() {
-  setpoint = corrente;
+  Setpoint = corrente;
   edit_mode = false;
 }
+
 void rst(){
-  setpoint = 0;
-  corrente = 0;
-  output = 0;
+  Setpoint = -10;
 }
+
 void toggle_edit_mode(){
   edit_mode = !edit_mode;
 }
+
+/* 
 void pid_controller(){
 
   float soma = 0;
@@ -182,7 +139,7 @@ void pid_controller(){
     if(oldValue != value){
       oldValue = value;
       value < 0 ? value = 0 : NULL;
-      corrente = ((value/encoderPassos) * modes[contadorCliques] );
+      corrente = ((value/encoderPassos) * modes[1] );
       delay(5);
     }
 
@@ -208,6 +165,7 @@ void pid_controller(){
   }
 
 }
+*/
 
 void getSerial(){
   if (Serial.available() > 0) { // Verifica se há dados disponíveis no monitor serial
@@ -215,59 +173,116 @@ void getSerial(){
     input.trim(); // Remove espaços em branco do início e do fim da string
     int index = input.indexOf("=");
     if (input.startsWith("kp")) {
-      kp = input.substring(index + 1).toFloat();
+      Kp = input.substring(index + 1).toFloat();
     }
     else if (input.startsWith("ki")) {
-      ki = input.substring(index + 1).toFloat();
+      Ki = input.substring(index + 1).toFloat();
     }
     else if(input.startsWith("kd")){
-      kd = input.substring(index + 1).toFloat();
+      Kd = input.substring(index + 1).toFloat();
     }
     else if(input.startsWith("set")){
-      setpoint = input.substring(index + 1).toFloat();
-    }    
+      Setpoint = input.substring(index + 1).toFloat();
+    }
+    else if(input.startsWith("out")){
+      Output = input.substring(index + 1).toInt();
+    }
+    myPID.SetTunings(Kp,Ki,Kd);    
   }//end if serial available
-  delay(1);
-  Serial.print("kp= ");
-  Serial.print(kp);
-  Serial.print(" ki= ");
-  Serial.print(ki);
-  Serial.print(" kd= ");
-  Serial.println(kd);
+}
+
+void get_encoder(){
+  if(edit_mode){
+
+    Ok.press(setValor, rst);
+    lcd.setCursor(15, 0);
+    lcd.print("*");
+
+    value = myEncoder.read();
+    if(oldValue != value){
+      oldValue = value;
+      value < 0 ? value = 0 : NULL;
+      corrente = ((value/encoderPassos) * modes[1] );
+      //delay(5);
+    }
+
+  }
+  else{
+   
+    Ok.press(toggle_edit_mode, rst);
+    lcd.setCursor(15, 0);
+    lcd.print(" ");
+
+  }
+}
+
+void lcd_print(){
+  lcd.setCursor(0, 0);
+  lcd.print("I ");lcd.print(Input);lcd.print(" ");
+  lcd.print("S ");lcd.print(corrente);lcd.print(" ");
+  lcd.setCursor(0, 1);
+  lcd.print("PWM ");lcd.print(Output,0);lcd.print(" ");
 }
 
 void setup() {
-  // TCCR2B = TCCR2B & 0b11111000 | 0x02;
-  // TCCR2A = 0xA3;
-  // setFrequency(1);
-
   lcd.begin();
   lcd.backlight();
   lcd.setCursor(0,0);
   lcd.print("Hello, world!");
   pinMode(encoderButton, INPUT_PULLUP);
 
-  InitTimersSafe();
-  bool success = SetPinFrequencySafe(pinPWM, frequency);
-  if(!success)while(1){}
+  // InitTimersSafe();
+  // bool success = SetPinFrequencySafe(pinPWM, frequency);
+  // if(!success)while(1){}
 
   Serial.begin(115200);
-  pinMode(hall_pin, INPUT);
+  pinMode(sensorPin, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(pinPWM, OUTPUT);
+  pinMode(outputPin, OUTPUT);
 
-  Vin = analogRead(hall_pin);
-  lcd.clear();  
+  Vin = analogRead(sensorPin);
+  lcd.clear();
+
+  myPID.SetMode(AUTOMATIC);
+  myPID.SetOutputLimits(0, 255);
+
 }
 
 void loop() {
-  pid_controller();
-  getSerial();
 
-  // if(media < 0.03 && output > 10){
-  //   newSetpoint = setpoint;
-  //   setpoint = 0;
-  //   err = true;
-  // }  
+  float soma = 0;
+  for(int x = 0; x < leituras; x ++){
+    Vin = analogRead(sensorPin);
+    Vin = (Vin * Vbase) / 1023;
+    I = (Vin - Vzero)/(K*B);
+    if(I<0)I=0;
+    I = I * 0.01;
+    soma = soma + I;
+  }
+
+  Input = soma/leituras;
+  if(Input < 0.1 and Setpoint > 0 and Output > 100){
+    Setpoint = -10;
+  }
+  myPID.Compute();
+  analogWrite(outputPin, int(Output));  
+  
+  Serial.print("set= ");
+  Serial.print(Setpoint);
+  Serial.print(" - kP= ");
+  Serial.print(Kp);
+  Serial.print(" - Ki= ");
+  Serial.print(Ki);
+  Serial.print(" - Kd= ");
+  Serial.print(Kd);
+  Serial.print(" Input: ");
+  Serial.print(Input);
+  Serial.print(" - Output: ");
+  Serial.println(int(Output));
+
+  delay(1);
+  //getSerial();
+  lcd_print();
+  get_encoder();
 
 }//end loop
