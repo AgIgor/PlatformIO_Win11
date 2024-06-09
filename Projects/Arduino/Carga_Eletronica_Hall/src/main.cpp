@@ -218,10 +218,11 @@ void get_encoder(){
 
 void lcd_print(){
   lcd.setCursor(0, 0);
-  lcd.print("I ");lcd.print(Input);lcd.print(" ");
-  lcd.print("S ");lcd.print(corrente);lcd.print(" ");
+  lcd.print("I ");lcd.print( Input );lcd.print(" ");
+  lcd.print("S ");lcd.print( corrente );lcd.print(" ");
   lcd.setCursor(0, 1);
-  lcd.print("PWM ");lcd.print(Output,0);lcd.print(" ");
+  lcd.print("PWM ");lcd.print (Output,0 );lcd.print(" ");
+  lcd.print("E ");lcd.print( Setpoint - Input, 0 );lcd.print(" ");
 }
 
 void setup() {
@@ -261,24 +262,32 @@ void loop() {
   }
 
   Input = soma/leituras;
-  if(Input < 0.1 and Setpoint > 0 and Output > 100){
-    Setpoint = -10;
-  }
+  if(Input < 0.1 and Setpoint > 0 and Output > 100) Setpoint = -10;
   myPID.Compute();
   analogWrite(outputPin, int(Output));  
   
-  Serial.print("set= ");
-  Serial.print(Setpoint);
-  Serial.print(" - kP= ");
+  Serial.print("kP= ");
   Serial.print(Kp);
   Serial.print(" - Ki= ");
   Serial.print(Ki);
   Serial.print(" - Kd= ");
   Serial.print(Kd);
+  Serial.print(" - set= ");
+  Serial.print(Setpoint);
   Serial.print(" Input: ");
   Serial.print(Input);
+  Serial.print(" Err: ");
+  Serial.print( Setpoint - Input );
   Serial.print(" - Output: ");
   Serial.println(int(Output));
+
+  
+
+  // float Vin2 = (analogRead(A2) * Vbase) / 1023;
+  // float I2 = (Vin2 - Vzero)/(K*B);
+  // if(I<0) I2 = 0;
+  // I2 = I2 * 0.01;
+  // Serial.println(I2);
 
   delay(1);
   //getSerial();
