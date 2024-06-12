@@ -132,7 +132,9 @@ void startSoftAccessPoint(const char *ssid, const char *password, const IPAddres
 	#define WIFI_CHANNEL 6
 
 	// Set the WiFi mode to access point and station
+	esp_wifi_set_max_tx_power(78);
 	WiFi.mode(WIFI_MODE_AP);
+	
 
 	// Define the subnet mask for the WiFi network
 	const IPAddress subnetMask(255, 255, 255, 0);
@@ -335,10 +337,8 @@ void setup()
 	// } else {
 	// 	startSoftAccessPoint(ssid, password, localIP, gatewayIP);
 	// }
-		startSoftAccessPoint(ssid, password, localIP, gatewayIP);
-
+	startSoftAccessPoint(ssid, password, localIP, gatewayIP);
 	setUpDNSServer(dnsServer, localIP);
-
 	setUpWebserver(server, localIP);
 	server.begin();
 
