@@ -2,7 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 
-#include <ArduinoJson.h>
+// #include <ArduinoJson.h>
 
 #include <Adafruit_AHTX0.h>
 Adafruit_AHTX0 aht;
@@ -10,9 +10,9 @@ Adafruit_AHTX0 aht;
 #include <BH1750.h>
 BH1750 lightMeter;
 
-#include <MQTT.h>
-WiFiClient WIFI;
-MQTTClient MQTT;
+// #include <MQTT.h>
+// WiFiClient WIFI;
+// MQTTClient MQTT;
 
 #include <Adafruit_NeoPixel.h>
 #define NUM_LEDS 29
@@ -26,9 +26,10 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 
 //==========* Variaveis *==========//
 
-#define BRILHO_MAX    150
+#define BRILHO_MAX    255
 #define BRILHO_MIN      1
 #define WAIT          100
+#define CHANGE        30
 
 #define LUX_MAX         1
 #define LUX_MIN         1
@@ -36,15 +37,15 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 #define WIFI_SSID "VIVOFIBRA-79D0"
 #define WIFI_PASS "58331BB245"
 
-#define MQTT_USER ""
-#define MQTT_PASS ""
-#define MQTT_CLIENT "internet_clock#v.5"
-#define MQTT_ADDRESS "mqtt.eclipseprojects.io"
+// #define MQTT_USER ""
+// #define MQTT_PASS ""
+// #define MQTT_CLIENT "internet_clock#v.5"
+// #define MQTT_ADDRESS "mqtt.eclipseprojects.io"
 
 bool LUX;
 byte* TIME;
 byte* TEMP_HUMI;
-JsonDocument JSON;
+// JsonDocument JSON;
 unsigned long int PIXEL_HUE;
 
 const byte displayConfig[13][7] = {{0,0,1,2,4,5,6},  //Digito 0
@@ -76,15 +77,15 @@ const byte displayConfig[13][7] = {{0,0,1,2,4,5,6},  //Digito 0
 // }
 
 
-void mqttSend(bool SYSTEM){
+// void mqttSend(bool SYSTEM){
 
-  String S_JSON = "";
-  serializeJson(JSON, S_JSON);
-  if(SYSTEM) MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
-  else MQTT.publish( "/mqtt/internet_clock_v.5/RESPONSE", S_JSON , true, 0 );
+//   String S_JSON = "";
+//   serializeJson(JSON, S_JSON);
+//   if(SYSTEM) MQTT.publish( "/mqtt/internet_clock_v.5/SENSORS", S_JSON , true, 0 );
+//   else MQTT.publish( "/mqtt/internet_clock_v.5/RESPONSE", S_JSON , true, 0 );
 
-}
-//end mqttSend
+// }
+// //end mqttSend
 
 void limpaPixels(){
 
@@ -159,7 +160,7 @@ bool luxRead(){
     // RGB[1] = 0;
   }
 
-  JSON["BH1750"]["lux"] = lux;
+  // JSON["BH1750"]["lux"] = lux;
   return lux_flag;
 
 }
@@ -173,8 +174,8 @@ byte* getAHT10(){
   double tempFloat = temp.temperature;
   double humiFloat = humidity.relative_humidity;
 
-  JSON["AHT10"]["temp"] = round(tempFloat * 10) / 10.0;
-  JSON["AHT10"]["humi"] = round(humiFloat * 10) / 10.0;
+  // JSON["AHT10"]["temp"] = round(tempFloat * 10) / 10.0;
+  // JSON["AHT10"]["humi"] = round(humiFloat * 10) / 10.0;
   
   static byte digitos[4];
   digitos[0] = (byte)tempFloat / 10;
@@ -268,17 +269,17 @@ void display( byte* digitos ){
 }
 //end display
 
-void mqttConnect(){
+// void mqttConnect(){
 
-  MQTT.begin( MQTT_ADDRESS, WIFI );
-  if (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
-    return;
-  }
-  MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
-  MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
+//   MQTT.begin( MQTT_ADDRESS, WIFI );
+//   if (!MQTT.connect(MQTT_CLIENT, MQTT_USER, MQTT_PASS)) {
+//     return;
+//   }
+//   MQTT.publish( "/mqtt/internet_clock_v.5/BOOT", ESP.getResetReason() , false, 0 );
+//   MQTT.subscribe( "/mqtt/internet_clock_v.5/CMD" );
 
-}
-//end mqttConnect
+// }
+// //end mqttConnect
 
 byte* getNtp() {
 
@@ -294,7 +295,7 @@ byte* getNtp() {
 
   // JSON["NTP"]["hour"] = timeClient.getHours();
   // JSON["NTP"]["minute"] = timeClient.getMinutes();
-  JSON["NTP"]["clock"] = timeClient.getFormattedTime();
+  // JSON["NTP"]["clock"] = timeClient.getFormattedTime();
   return digitos;
 
 }
@@ -332,17 +333,17 @@ void wifiConnect(){
 }
 //end wifiConnect
 
-void messageReceived(String &topic, String &payload) {
+// void messageReceived(String &topic, String &payload) {
 
-  //Serial.println("incoming: " + topic + " - " + payload);
-  MQTT.publish( "/mqtt/internet_clock_v.5/RECEBIDO", payload , false, 0 );
-  delay(100);
-  if(payload == "GET"){
-    mqttSend(false);
-  }
+//   //Serial.println("incoming: " + topic + " - " + payload);
+//   // MQTT.publish( "/mqtt/internet_clock_v.5/RECEBIDO", payload , false, 0 );
+//   delay(100);
+//   // if(payload == "GET"){
+//   //   mqttSend(false);
+//   // }
 
-}
-//end message received
+// }
+// //end message received
 
 void setup(){
   delay(500);
@@ -357,8 +358,8 @@ void setup(){
   else PIXEL_HUE = 0;
 
   wifiConnect();
-  mqttConnect();
-  MQTT.onMessage(messageReceived);
+  // mqttConnect();
+  // MQTT.onMessage(messageReceived);
 
   timeClient.begin();
 
@@ -373,16 +374,19 @@ void setup(){
 }
 //end setup
 
+
+
 void loop(){
+  bool L = luxRead();
 
   for(byte i=0; i< 250 ;i++){
     
     //MQTT.loop();
-    if( luxRead() ) PIXEL_HUE = millis() % 65535;
+    if( L ) PIXEL_HUE = millis() % 65535;
     else PIXEL_HUE = 0;
     piscaPonto();
     display( TIME );
-    delay( 50 );
+    delay( CHANGE );
 
   }
   limpaPixels();
@@ -390,10 +394,10 @@ void loop(){
   for(byte i=0; i< 30 ;i++){
     
     //MQTT.loop();
-    if( luxRead() ) PIXEL_HUE = millis() % 65535;
+    if( L ) PIXEL_HUE = millis() % 65535;
     else PIXEL_HUE = 0;
     displayTemp( TEMP_HUMI );
-    delay( 30 );
+    delay( CHANGE );
 
   }
   limpaPixels();
@@ -401,10 +405,10 @@ void loop(){
   for(byte i=0; i< 30 ;i++){
     
     //MQTT.loop();
-    if( luxRead() ) PIXEL_HUE = millis() % 65535;
+    if( L ) PIXEL_HUE = millis() % 65535;
     else PIXEL_HUE = 0;
     displayHumi( TEMP_HUMI );
-    delay( 30 );
+    delay( CHANGE );
 
   }
   limpaPixels();
