@@ -26,7 +26,7 @@ NTPClient timeClient(ntpUDP, "south-america.pool.ntp.org", utcOffsetInSeconds,60
 
 //==========* Variaveis *==========//
 
-#define BRILHO_MAX    255
+#define BRILHO_MAX    200
 #define BRILHO_MIN      1
 #define WAIT          100
 #define CHANGE        30
@@ -171,7 +171,7 @@ byte* getAHT10(){
   sensors_event_t humidity, temp;
   aht.getEvent(&humidity, &temp);
 
-  double tempFloat = temp.temperature;
+  double tempFloat = temp.temperature - 6.0;
   double humiFloat = humidity.relative_humidity;
 
   JSON["AHT10"]["temp"] = round(tempFloat * 10) / 10.0;

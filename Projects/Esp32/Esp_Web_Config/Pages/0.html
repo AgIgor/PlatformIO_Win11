@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Tabela ESP32</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    tr:hover{
+        background-color: #f5f5f5;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    select {
+        width: 100%;
+        padding: 5px;
+    }
+</style>
+</head>
+
+<body>
+  <div id="tabela-container"></div>
+  <script>
+
+    const pinosESP32 = [
+      {"gpio":"GPIO0","estado":"0","funcoesEspecificas":"Boot Mode Selection (BOOT), Input, Output","notas":"Deve ser mantido em LOW para entrar no modo de bootloader.","funcaoSelecionavel":[{"value":"BOOT","text":"Boot Mode Selection (BOOT)"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO1","estado":"0","funcoesEspecificas":"TX0 (UART0 Transmit)","notas":"Saída de depuração padrão; usado durante upload de código.","funcaoSelecionavel":[{"value":"TX0","text":"TX0 (UART0 Transmit)"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO2","estado":"0","funcoesEspecificas":"Input, Output, LED_BUILTIN (em alguns modelos)","notas":"Conectado a LED em algumas placas.","funcaoSelecionavel":[{"value":"LED_BUILTIN","text":"LED_BUILTIN"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO3","estado":"0","funcoesEspecificas":"RX0 (UART0 Receive)","notas":"Entrada de depuração padrão; usado durante upload de código.","funcaoSelecionavel":[{"value":"RX0","text":"RX0 (UART0 Receive)"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO4","estado":"0","funcoesEspecificas":"PWM, I2C (SDA), ADC, DAC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"I2C (SDA)","text":"I2C (SDA)"},{"value":"ADC","text":"ADC"},{"value":"DAC","text":"DAC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO5","estado":"0","funcoesEspecificas":"PWM, I2C (SCL), ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"I2C (SCL)","text":"I2C (SCL)"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO6-11","estado":"0","funcoesEspecificas":"-","notas":"Reservados para comunicação com a memória flash (SPI Flash).","funcaoSelecionavel":[{"value":"-","text":"Reservado"}],"selectDisabled":true},
+      {"gpio":"GPIO12","estado":"0","funcoesEspecificas":"PWM, ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO13","estado":"0","funcoesEspecificas":"PWM, ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO14","estado":"0","funcoesEspecificas":"PWM, ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO15","estado":"0","funcoesEspecificas":"PWM, ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO16","estado":"0","funcoesEspecificas":"Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO17","estado":"0","funcoesEspecificas":"Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO18","estado":"0","funcoesEspecificas":"SPI (SCK), PWM, Input, Output","notas":"Multifunção; frequentemente usado para SPI.","funcaoSelecionavel":[{"value":"SPI (SCK)","text":"SPI (SCK)"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO19","estado":"0","funcoesEspecificas":"SPI (MISO), PWM, Input, Output","notas":"Multifunção; frequentemente usado para SPI.","funcaoSelecionavel":[{"value":"SPI (MISO)","text":"SPI (MISO)"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO21","estado":"0","funcoesEspecificas":"I2C (SDA), PWM, Input, Output","notas":"Multifunção; frequentemente usado para I2C.","funcaoSelecionavel":[{"value":"I2C (SDA)","text":"I2C (SDA)"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO22","estado":"0","funcoesEspecificas":"I2C (SCL), PWM, Input, Output","notas":"Multifunção; frequentemente usado para I2C.","funcaoSelecionavel":[{"value":"I2C (SCL)","text":"I2C (SCL)"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO23","estado":"0","funcoesEspecificas":"SPI (MOSI), PWM, Input, Output","notas":"Multifunção; frequentemente usado para SPI.","funcaoSelecionavel":[{"value":"SPI (MOSI)","text":"SPI (MOSI)"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO25","estado":"0","funcoesEspecificas":"DAC1, PWM, ADC, Input, Output","notas":"Multifunção; pode ser usado como DAC.","funcaoSelecionavel":[{"value":"DAC1","text":"DAC1"},{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO26","estado":"0","funcoesEspecificas":"DAC2, PWM, ADC, Input, Output","notas":"Multifunção; pode ser usado como DAC.","funcaoSelecionavel":[{"value":"DAC2","text":"DAC2"},{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO27","estado":"0","funcoesEspecificas":"PWM, ADC, Input, Output","notas":"Multifunção.","funcaoSelecionavel":[{"value":"PWM","text":"PWM"},{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO32","estado":"0","funcoesEspecificas":"ADC, Touch, PWM, Input, Output","notas":"Multifunção; suporta detecção de toque capacitivo.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Touch","text":"Touch"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO33","estado":"0","funcoesEspecificas":"ADC, Touch, PWM, Input, Output","notas":"Multifunção; suporta detecção de toque capacitivo.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Touch","text":"Touch"},{"value":"PWM","text":"PWM"},{"value":"Input","text":"Input"},{"value":"Output","text":"Output"}],"selectDisabled":false},
+      {"gpio":"GPIO34","estado":"0","funcoesEspecificas":"ADC, Input","notas":"Apenas entrada analógica.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"}],"selectDisabled":false},
+      {"gpio":"GPIO35","estado":"0","funcoesEspecificas":"ADC, Input","notas":"Apenas entrada analógica.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"}],"selectDisabled":false},
+      {"gpio":"GPIO36","estado":"0","funcoesEspecificas":"ADC, Input (VP)","notas":"Apenas entrada analógica; entrada do ADC1.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"}],"selectDisabled":false},
+      {"gpio":"GPIO39","estado":"0","funcoesEspecificas":"ADC, Input (VN)","notas":"Apenas entrada analógica; entrada do ADC1.","funcaoSelecionavel":[{"value":"ADC","text":"ADC"},{"value":"Input","text":"Input"}],"selectDisabled":false}
+    ];
+
+    
+
+    window.onload = function(){
+      const tabela = document.createElement("table");
+      tabela.innerHTML = `
+        <thead>
+          <tr>
+            <th>GPIO</th>
+            <th>Estado</th>
+            <th>Funções Específicas</th>
+            <th>Notas</th>
+            <th>Selecione a Função</th>
+            <th>Input/Output</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      `;
+
+      const tbody = tabela.querySelector("tbody");
+
+      pinosESP32.forEach(pino => {
+        // console.log(pino.selectDisabled);
+        
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${pino.gpio}</td>
+          <td>${pino.estado}</td>
+          <td>${pino.funcoesEspecificas}</td>
+          <td>${pino.notas}</td>
+          <td>
+          <select id="funcao-${pino.gpio}" ${pino.selectDisabled ? "disabled":""}>
+            ${pino.funcaoSelecionavel.map(f => `<option value="${f.value}">${f.text}</option>`).join("")}
+          </select>
+          </td>
+          <td>
+            ${pino.io ? `<select id="io-${pino.gpio}">
+            <option value="input">Input</option>
+            <option value="output">Output</option>
+            </select>` : "N/A"}
+          </td>
+          `;
+          
+        });
+        
+        document.getElementById("tabela-container").appendChild(tabela);
+        
+        const collection = Object.entries(document.getElementsByTagName("select"));
+        
+        collection.forEach(element => {
+          element[1].addEventListener("change", function() {
+
+            const pin = element[1].parentNode.parentNode.cells[0].textContent;
+            const newFunc = element[1].value;
+            const estd = element[1].parentNode.parentNode.cells[1].textContent;
+
+            console.log(`Alterando função do pino ${pin} para ${newFunc}`);
+            
+          });
+          
+        });
+
+  }//end window load
+  </script>
+  
+</body>
+
+</html>

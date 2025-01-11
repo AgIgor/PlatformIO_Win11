@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Controle de Pinos ESP32</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        tr:hover{
+            background-color: #f5f5f5;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        select {
+            width: 100%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Controle de Pinos ESP32</h1>
+    <table id="pinTable">
+        <thead>
+            <tr>
+                <th>Pino</th>
+                <th>Função</th>
+                <th>Modo</th>
+                <th>Valor/Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+
+        const pins = [
+            { name: "GPIO0", functions: ["Digital"] },
+            { name: "GPIO1", functions: ["Digital In", "Digital Out", "Serial TX"] },
+            { name: "GPIO2", functions: ["Digital In", "Digital Out"] },
+            // ... Defina todos os pinos e suas funções aqui
+            { name: "GPIO36", functions: ["Analog In"] },
+            { name: "GPIO39", functions: ["Analog In"] }
+        ];
+
+        const pinTable = document.getElementById("pinTable").getElementsByTagName('tbody')[0];
+        // const websocket = new WebSocket("ws://SEU_IP_ESP32:81/"); // Substitua pelo IP do seu ESP32
+
+        // websocket.onopen = () => {
+        //     console.log("Conectado ao Websocket");
+        // };
+
+        // websocket.onmessage = (event) => {
+        //     // Processar mensagens recebidas do ESP32 (ex: leituras analógicas/digitais)
+        //     const data = JSON.parse(event.data);
+        //     // Atualizar a interface com os valores recebidos
+        //     for (const pinData of data.pins){
+        //         const row = document.getElementById(pinData.name);
+        //         if (row){
+        //             const valueCell = row.cells[3];
+        //             if (valueCell.firstChild.type == "checkbox"){
+        //                 valueCell.firstChild.checked = pinData.value == 1;
+        //             } else if (valueCell.firstChild.type == "number"){
+        //                 valueCell.firstChild.value = pinData.value;
+        //             }
+        //         }
+        //     }
+        // };
+
+        pins.forEach(pin => {
+            const row = pinTable.insertRow();
+            row.id = pin.name;
+            const nameCell = row.insertCell();
+            const functionCell = row.insertCell();
+            const modeCell = row.insertCell();
+            const valueCell = row.insertCell();
+
+            nameCell.textContent = pin.name;
+
+            const functionSelect = document.createElement("select");
+            pin.functions.forEach(func => {
+                const option = document.createElement("option");
+                option.value = func;
+                option.text = func;
+                functionSelect.appendChild(option);
+            });
+            functionCell.appendChild(functionSelect);
+
+            const modeSelect = document.createElement("select");
+            modeSelect.innerHTML = "<option value='input'>Entrada</option><option value='output'>Saída</option>";
+            modeCell.appendChild(modeSelect);
+
+            functionSelect.addEventListener("change", updateValueCell);
+            modeSelect.addEventListener("change", updateValueCell);
+
+            function updateValueCell(){
+                valueCell.innerHTML = "";
+                const selectedFunction = functionSelect.value;
+                const selectedMode = modeSelect.value;
+                if (selectedMode === "output" && selectedFunction.startsWith("Digital")) {
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.addEventListener("change", () => {
+                        //websocket.send(JSON.stringify({ pin: pin.name, value: checkbox.checked ? 1 : 0, mode: "digitalWrite" }));
+                        console.log(JSON.stringify({ pin: pin.name, value: checkbox.checked ? 1 : 0, mode: "digitalWrite" }));
+                        
+                    });
+                    valueCell.appendChild(checkbox);
+                } else if (selectedMode === "output" && selectedFunction.startsWith("Analog")) {
+                    const numberInput = document.createElement("input");
+                    numberInput.type = "number";
+                    numberInput.addEventListener("change", () => {
+                        //websocket.send(JSON.stringify({ pin: pin.name, value: numberInput.value, mode: "analogWrite" }));
+                        console.log(JSON.stringify({ pin: pin.name, value: numberInput.value, mode: "analogWrite" }));
+                        
+                    });
+                    valueCell.appendChild(numberInput);
+                } else if (selectedMode === "input"){
+                    if(selectedFunction.startsWith("Digital")){
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.disabled = true;
+                        valueCell.appendChild(checkbox);
+                    } else if (selectedFunction.startsWith("Analog")){
+                        const numberInput = document.createElement("input");
+                        numberInput.type = "number";
+                        numberInput.disabled = true;
+                        valueCell.appendChild(numberInput);
+                    }
+                }
+            }
+            updateValueCell();
+        }); 
+    </script>
+</body>
+</html>

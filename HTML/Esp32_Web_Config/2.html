@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinagem ESP32 DEVKIT V1 DOIT (36 pinos)</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .observacao {
+            font-style: italic;
+            font-size: smaller;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pinagem do ESP32 DEVKIT V1 DOIT (36 pinos)</h1>
+
+    <p class="observacao">Observações importantes: O ESP32 opera com 3.3V. <strong>Não aplique 5V diretamente aos pinos</strong>. Nem todos os pinos são criados iguais. Alguns têm funções específicas e não devem ser usados para outros propósitos.</p>
+
+    <h2>Pinos de Alimentação</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pino</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Vin</td>
+                <td>Entrada de tensão (5V)</td>
+            </tr>
+            <tr>
+                <td>GND</td>
+                <td>Terra (Ground)</td>
+            </tr>
+            <tr>
+                <td>3V3</td>
+                <td>Saída de 3.3V regulada</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Pinos GPIO (Entrada/Saída de Propósito Geral)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pino</th>
+                <th>Função Principal</th>
+                <th>Funções Alternativas</th>
+                <th>Função Selecionada</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>GPIO0</td>
+                <td>GPIO0</td>
+                <td></td>
+                <td><select><option>GPIO0</option></select></td>
+                <td>Usado para boot mode. Manter em LOW durante o boot para flash.</td>
+            </tr>
+            <tr>
+                <td>GPIO1</td>
+                <td>TX0 (UART0 Transmit)</td>
+                <td></td>
+                <td><select><option>TX0</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO2</td>
+                <td>GPIO2</td>
+                <td>ADC1_CH2</td>
+                <td><select><option>GPIO2</option><option>ADC1_CH2</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO3</td>
+                <td>RX0 (UART0 Receive)</td>
+                <td></td>
+                <td><select><option>RX0</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO4</td>
+                <td>GPIO4</td>
+                <td></td>
+                <td><select><option>GPIO4</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO5</td>
+                <td>GPIO5</td>
+                <td></td>
+                <td><select><option>GPIO5</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO12</td>
+                <td>GPIO12</td>
+                <td></td>
+                <td><select><option>GPIO12</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO13</td>
+                <td>GPIO13</td>
+                <td></td>
+                <td><select><option>GPIO13</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO14</td>
+                <td>GPIO14</td>
+                <td></td>
+                <td><select><option>GPIO14</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO15</td>
+                <td>GPIO15</td>
+                <td></td>
+                <td><select><option>GPIO15</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO16</td>
+                <td>TX2 (UART2 Transmit)</td>
+                <td></td>
+                <td><select><option>TX2</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO17</td>
+                <td>RX2 (UART2 Receive)</td>
+                <td></td>
+                <td><select><option>RX2</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO18</td>
+                <td>GPIO18</td>
+                <td></td>
+                <td><select><option>GPIO18</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO19</td>
+                <td>GPIO19</td>
+                <td></td>
+                <td><select><option>GPIO19</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO21</td>
+                <td>GPIO21</td>
+                <td></td>
+                <td><select><option>GPIO21</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO22</td>
+                <td>GPIO22</td>
+                <td></td>
+                <td><select><option>GPIO22</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO23</td>
+                <td>GPIO23</td>
+                <td></td>
+                <td><select><option>GPIO23</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO25</td>
+                <td>GPIO25</td>
+                <td>DAC1</td>
+                <td><select><option>GPIO25</option><option>DAC1</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO26</td>
+                <td>GPIO26</td>
+                <td>DAC2</td>
+                <td><select><option>GPIO26</option><option>DAC2</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO27</td>
+                <td>GPIO27</td>
+                <td></td>
+                <td><select><option>GPIO27</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO32</td>
+                <td>GPIO32</td>
+                <td></td>
+                <td><select><option>GPIO32</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO33</td>
+                <td>GPIO33</td>
+                <td></td>
+                <td><select><option>GPIO33</option></select></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>GPIO34</td>
+                <td>GPIO34</td>
+                <td>ADC1_CH6</td>
+                <td><select><option>GPIO34</option><option>ADC1_CH6</option></select></td>
+                <td>Apenas entrada</td>
+            </tr>
+            <tr>
+                <td>GPIO35</td>
+                <td>GPIO35</td>
+                <td>ADC1_CH7</td>
+                <td><select><option>GPIO35</option><option>ADC1_CH7</option></select></td>
+                <td>Apenas entrada</td>
+            </tr>
+            <tr>
+                <td>GPIO36</td>
+                <td>GPIO36</td>
+                <td>ADC1_CH0</td>
+                <td><select><option>GPIO36</option><option>ADC1_CH0</option></select></td>
+                <td>Apenas entrada</td>
+            </tr>
+            <tr>
+                <td>GPIO39</td>
+                <td>GPIO39</td>
+                <td>ADC1_CH3</td>
+                <td><select><option>GPIO39</option><option>ADC1_CH3</option></select></td>
+                <td>Apenas entrada</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Outros Pinos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Pino</th>
+                <th>Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>EN</td>
+                <td>Chip Enable. Mantido em HIGH para o ESP32 funcionar.</td>
+            </tr>
+            <tr>
+                <td>VP</td>
+                <td>Pino positivo para medição de tensão da bateria (se aplicável).</td>
+            </tr>
+            <tr>
+                <td>VN</td>
+                <td>Pino negativo para medição de tensão da bateria (se aplicável).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Pinos a Evitar</h2>
+    <p>Os seguintes pinos são usados internamente e devem ser evitados para uso geral: GPIO6, GPIO7, GPIO8, GPIO9, GPIO10, GPIO11.</p>
+
+</body>
+</html>

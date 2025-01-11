@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv='refresh' content='none'/>
+    <title>Layout ESP32</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            position: relative; /* Importante para o posicionamento absoluto das linhas */
+        }
+
+        .coluna {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .coluna-central {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .esp32-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .pino {
+            margin-bottom: 20px;
+            position: relative; /* Para posicionar a linha */
+        }
+
+        /* Estilo dos selects */
+        select {
+          appearance: none; /* Remove a aparência padrão do sistema */
+          padding: 8px 16px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          background-color: #fff;
+          font-size: 14px;
+          cursor: pointer;
+          width: 100%; /* Largura total da coluna */
+          box-sizing: border-box;
+          margin-top: 5px;
+        }
+        select:focus{
+          outline: none;
+          border-color: #007bff;
+          box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+        }
+        select::-ms-expand { /* Para o Internet Explorer */
+            display: none;
+        }
+
+        /* Linhas conectando os selects aos pinos */
+        /* .pino::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px; /* Comprimento da linha */
+            height: 2px;
+            background-color: #007bff;
+            left: calc(100% + 5px); /* Ajusta a posição da linha à direita do select */
+        } */
+        .coluna:first-child .pino::after{
+            left: auto;
+            right: calc(100% + 5px);
+        }
+        .coluna:first-child .pino{
+            text-align: right;
+        }
+
+        /*Posicionamento das linhas*/
+        .container{
+            margin-top: 50px;
+        }
+        .coluna-central{
+            margin: 0px 50px;
+        }
+        .coluna-central img{
+            max-width: 400px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Simulação de Pinos ESP32</h1>
+
+    <div class="container">
+       <div class="coluna">
+            <h2>Pinos Esquerda</h2>
+            <div class="pino">
+                <label for="pino1">Pino 1:</label>
+                <select id="pino1">
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                </select>
+            </div>
+             <div class="pino">
+                <label for="pino2">Pino 2:</label>
+                <select id="pino2">
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                </select>
+            </div>
+            </div>
+
+        <div class="coluna coluna-central">
+            <img src="ESP32-DevKit-V1-2.png" alt="ESP32 DevKit" class="esp32-image">
+        </div>
+
+        <div class="coluna">
+            <h2>Pinos Direita</h2>
+            <div class="pino">
+                <label for="pino34">Pino 34:</label>
+                <select id="pino34">
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                </select>
+            </div>
+            <div class="pino">
+                <label for="pino35">Pino 35:</label>
+                <select id="pino35">
+                    <option value="entrada">Entrada</option>
+                    <option value="saida">Saída</option>
+                </select>
+            </div>
+            </div>
+    </div>
+
+</body>
+</html>

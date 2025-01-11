@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulador de CLP</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ddd; /* Desligado */
+            display: inline-block;
+        }
+        .indicator.on {
+            background-color: #0f0; /* Ligado */
+            box-shadow: 0 0 5px #0f0; /* Efeito de brilho */
+        }
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+        }
+
+        .switch input { 
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 34px;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+        }
+
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Simulador de CLP</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Entrada</th>
+                <th>Estado</th>
+                <th>Saída</th>
+                <th>Estado (Relé)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Entrada 1</td>
+                <td><span class="indicator" id="in1"></span></td>
+                <td>Saída 1</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" id="out1">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Entrada 2</td>
+                <td><span class="indicator" id="in2"></span></td>
+                <td>Saída 2</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" id="out2">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Entrada 3</td>
+                <td><span class="indicator" id="in3"></span></td>
+                <td>Saída 3</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" id="out3">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>Entrada 4</td>
+                <td><span class="indicator" id="in4"></span></td>
+                <td>Saída 4</td>
+                <td>
+                    <label class="switch">
+                        <input type="checkbox" id="out4">
+                        <span class="slider"></span>
+                    </label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Simulação de atualização das entradas (substitua por lógica real)
+        setInterval(() => {
+            // document.getElementById("in1").classList.toggle("on");
+            // document.getElementById("in3").classList.toggle("on");
+
+            for (let i = 1; i <= 4; i++) {
+                const isOn = Math.random() > 0.5; // Gera um estado aleatório
+                document.getElementById(`in${i}`).className = isOn ? "indicator on" : "indicator";
+            }
+
+        }, 1000);
+
+        // Funções para enviar o estado das saídas para o ESP (substitua por AJAX ou Websockets)
+        const outputs = ["out1", "out2", "out3", "out4"];
+        outputs.forEach(output => {
+            document.getElementById(output).addEventListener("change", (event) => {
+                const state = event.target.checked ? 1 : 0;
+                console.log(`Saída ${output.slice(-1)}: ${state}`); // Simula o envio para o ESP
+                // Aqui você implementaria a lógica para enviar o dado para o ESP via AJAX ou Websockets
+            });
+        });
+
+    </script>
+
+</body>
+</html>

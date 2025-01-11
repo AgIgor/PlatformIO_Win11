@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Cam Images Over MQTT</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.0.0-beta.3/mqtt.min.js"></script>
+<script>
+ 
+const topic="xedge32/espcam/USA/92629";
+const broker="broker.hivemq.com";
+ 
+window.addEventListener("load", (event) => {
+    let img = document.getElementById("image");
+    let msg = document.getElementById("msg");
+    let frameCounter=0;
+    const options = {
+        clean: true,
+        connectTimeout: 4000,
+        port: 8884 // Secure websocket port
+    };
+    const client = mqtt.connect("mqtts://"+broker+"/mqtt",options);
+ 
+    client.on('connect', function () {
+        msg.textContent="Connected; Waiting for images...";
+        client.subscribe(topic);
+    });
+     
+    client.on("message", (topic, message) => {
+        const blob = new Blob([message], { type: 'image/jpeg' });
+        img.src = URL.createObjectURL(blob);
+        frameCounter++;
+        msg.textContent = `Frames: ${frameCounter}`;
+    });
+});
+</script>
+</head>
+<body>
+    <h2>Cam Images Over MQTT</h2>
+   <div id="image-container">
+    <img id="image"/>
+  </div>
+    <p id="msg">Connecting...</p>
+</body>
+</html>

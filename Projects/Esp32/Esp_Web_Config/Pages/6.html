@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinos do ESP32 DEVKIT V1 DOIT</title>
+    <!-- <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border-collapse: collapse; /*define a separação entre as bordar*/
+            padding: 10px;
+            text-align: left;
+            border: 1px solid rgb(160 160 160);
+            cursor: pointer;
+        }
+        tr:hover{
+            background-color: #f5f5f5;
+        }
+        th{
+            background-color: lightgray;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        select {
+            width: 100%;
+        }
+
+    </style> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            /* display: none; */
+        }
+        tr:hover{
+            background-color: #f5f5f5;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        select {
+            width: 100%;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pinos do ESP32 DEVKIT V1 DOIT de 36 pinos</h1>
+    <span id="saida"></span>
+
+    <table id="tabela">
+        <thead>
+            <tr>
+                <th>GPIO</th>
+                <th>Estado</th>
+                <th>Funções Específicas</th>
+                <th>Notas</th>
+                <th>Selecione a Função</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>GPIO0</td>
+                <td>0</td>                
+                <td>Boot Mode Selection (BOOT), Input, Output</td>
+                <td>Deve ser mantido em LOW para entrar no modo de bootloader.</td>
+                <td>
+                    <select>
+                        <option value="BOOT">Boot Mode Selection (BOOT)</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO1</td>
+                <td>0</td>
+                <td>TX0 (UART0 Transmit)</td>
+                <td>Saída de depuração padrão; usado durante upload de código.</td>
+                <td>
+                    <select>
+                        <option value="TX0">TX0 (UART0 Transmit)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO2</td>
+                <td>0</td>
+                <td>Input, Output, LED_BUILTIN (em alguns modelos)</td>
+                <td>Conectado a LED em algumas placas.</td>
+                <td>
+                    <select>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                        <option value="LED_BUILTIN">LED_BUILTIN</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO3</td>
+                <td>0</td>
+                <td>RX0 (UART0 Receive)</td>
+                <td>Entrada de depuração padrão; usado durante upload de código.</td>
+                <td>
+                    <select>
+                        <option value="RX0">RX0 (UART0 Receive)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO4</td>
+                <td>0</td>
+                <td>PWM, I2C (SDA), ADC, DAC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="I2C (SDA)">I2C (SDA)</option>
+                        <option value="ADC">ADC</option>
+                        <option value="DAC">DAC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO5</td>
+                <td>0</td>
+                <td>PWM, I2C (SCL), ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="I2C (SCL)">I2C (SCL)</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO6-11</td>
+                <td>0</td>
+                <td>-</td>
+                <td>Reservados para comunicação com a memória flash (SPI Flash).</td>
+                <td>
+                    <select disabled>
+                        <option value="-">Reservado</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO12</td>
+                <td>0</td>
+                <td>PWM, ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO13</td>
+                <td>0</td>
+                <td>PWM, ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO14</td>
+                <td>0</td>
+                <td>PWM, ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO15</td>
+                <td>0</td>
+                <td>PWM, ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO16</td>
+                <td>0</td>
+                <td>Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO17</td>
+                <td>0</td>
+                <td>Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO18</td>
+                <td>0</td>
+                <td>SPI (SCK), PWM, Input, Output</td>
+                <td>Multifunção; frequentemente usado para SPI.</td>
+                <td>
+                    <select>
+                        <option value="SPI (SCK)">SPI (SCK)</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO19</td>
+                <td>0</td>
+                <td>SPI (MISO), PWM, Input, Output</td>
+                <td>Multifunção; frequentemente usado para SPI.</td>
+                <td>
+                    <select>
+                        <option value="SPI (MISO)">SPI (MISO)</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO21</td>
+                <td>0</td>
+                <td>I2C (SDA), PWM, Input, Output</td>
+                <td>Multifunção; frequentemente usado para I2C.</td>
+                <td>
+                    <select>
+                        <option value="I2C (SDA)">I2C (SDA)</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO22</td>
+                <td>0</td>
+                <td>I2C (SCL), PWM, Input, Output</td>
+                <td>Multifunção; frequentemente usado para I2C.</td>
+                <td>
+                    <select>
+                        <option value="I2C (SCL)">I2C (SCL)</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO23</td>
+                <td>0</td>
+                <td>SPI (MOSI), PWM, Input, Output</td>
+                <td>Multifunção; frequentemente usado para SPI.</td>
+                <td>
+                    <select>
+                        <option value="SPI (MOSI)">SPI (MOSI)</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO25</td>
+                <td>0</td>
+                <td>DAC1, PWM, ADC, Input, Output</td>
+                <td>Multifunção; pode ser usado como DAC.</td>
+                <td>
+                    <select>
+                        <option value="DAC1">DAC1</option>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO26</td>
+                <td>0</td>
+                <td>DAC2, PWM, ADC, Input, Output</td>
+                <td>Multifunção; pode ser usado como DAC.</td>
+                <td>
+                    <select>
+                        <option value="DAC2">DAC2</option>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO27</td>
+                <td>0</td>
+                <td>PWM, ADC, Input, Output</td>
+                <td>Multifunção.</td>
+                <td>
+                    <select>
+                        <option value="PWM">PWM</option>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO32</td>
+                <td>0</td>
+                <td>ADC, Touch, PWM, Input, Output</td>
+                <td>Multifunção; suporta detecção de toque capacitivo.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Touch">Touch</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO33</td>
+                <td>0</td>
+                <td>ADC, Touch, PWM, Input, Output</td>
+                <td>Multifunção; suporta detecção de toque capacitivo.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Touch">Touch</option>
+                        <option value="PWM">PWM</option>
+                        <option value="Input">Input</option>
+                        <option value="Output">Output</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO34</td>
+                <td>0</td>
+                <td>ADC, Input</td>
+                <td>Apenas entrada analógica.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO35</td>
+                <td>0</td>
+                <td>ADC, Input</td>
+                <td>Apenas entrada analógica.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO36</td>
+                <td>0</td>
+                <td>ADC, Input (VP)</td>
+                <td>Apenas entrada analógica; entrada do ADC1.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>GPIO39</td>
+                <td>0</td>
+                <td>ADC, Input (VN)</td>
+                <td>Apenas entrada analógica; entrada do ADC1.</td>
+                <td>
+                    <select>
+                        <option value="ADC">ADC</option>
+                        <option value="Input">Input</option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+<script>
+
+    const collection = Object.entries(document.getElementsByTagName("select"));
+    collection.forEach(element => {
+        // console.log(element[1]);
+        element[1].parentNode.parentNode.cells[1].textContent = 255;
+        
+        element[1].addEventListener("change", function() {    
+                    
+            // console.log(element[1].value);
+            // console.log(element[1].parentNode.parentNode.cells[1].textContent);
+            const func = element[1].parentNode.parentNode.cells[2].textContent;
+            const pin = element[1].parentNode.parentNode.cells[0].textContent;
+            const newFunc = element[1].value;
+            const estd = element[1].parentNode.parentNode.cells[1].textContent;
+            
+            console.log(`Alterando função do pino ${pin} para ${newFunc} (${func}), estado ${estd}`);
+
+        });
+        
+    });       
+    </script>
+    <!-- <script>
+        const tabela = document.getElementById('tabela');
+        const linhas = tabela.querySelectorAll('tbody tr');
+
+        const dados = [];
+
+        linhas.forEach(linha => {
+        const celulas = linha.querySelectorAll('td');
+        const linhaDados = {};
+
+        linhaDados.gpio = celulas[0].textContent.trim();
+        linhaDados.estado = celulas[1].textContent.trim();
+        linhaDados.funcoesEspecificas = celulas[2].textContent.trim();
+        linhaDados.notas = celulas[3].textContent.trim();
+
+        // Extrai as opções do select
+        const select = celulas[4].querySelector('select');
+        if (select) {
+            linhaDados.funcaoSelecionavel = [];
+            const options = select.querySelectorAll('option');
+            options.forEach(option => {
+                linhaDados.funcaoSelecionavel.push({
+                    value: option.value,
+                    text: option.textContent.trim()
+                });
+            });
+            if(select.disabled){
+                linhaDados.selectDisabled = true;
+            } else {
+                linhaDados.selectDisabled = false;
+            }
+        }
+
+        dados.push(linhaDados);
+        });
+        dados.forEach(element => {
+            saida.innerText += JSON.stringify(element)+",\n"
+        });
+        console.log(JSON.stringify(dados, null, 2)); // Imprime o array formatado no console
+    </script> -->
+    </html>
