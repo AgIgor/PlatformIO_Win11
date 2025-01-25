@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Tailwind</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.2/cdn.min.js" defer></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+        <a href="#" class="text-xl font-bold">Minha Loja</a>
+        <div>
+            <a href="#store" class="px-4">Loja</a>
+            <a href="#cart" class="px-4">Carrinho</a>
+            <a href="#account" class="px-4">Minha Conta</a>
+        </div>
+    </nav>
+    
+    <!-- Landing Page -->
+    <section class="text-center py-20 bg-blue-500 text-white">
+        <h1 class="text-4xl font-bold">Bem-vindo à Minha Loja</h1>
+        <p class="mt-4">Encontre os melhores produtos para você.</p>
+        <a href="#store" class="mt-6 bg-white text-blue-500 px-6 py-3 inline-block rounded-lg">Ver Produtos</a>
+    </section>
+    
+    <!-- Store with Carousel -->
+    <section id="store" class="p-10">
+        <div x-data="{ active: 0, products: [
+            {name: 'Produto 1', price: 'R$ 99,90', img: 'https://via.placeholder.com/200'},
+            {name: 'Produto 2', price: 'R$ 149,90', img: 'https://via.placeholder.com/200'},
+            {name: 'Produto 3', price: 'R$ 199,90', img: 'https://via.placeholder.com/200'}
+        ] }">
+            <div class="overflow-hidden relative w-full">
+                <div class="flex transition-transform duration-500" :style="'transform: translateX(-' + active * 100 + '%)'">
+                    <template x-for="(product, index) in products" :key="index">
+                        <div class="w-full flex-shrink-0 p-4">
+                            <div class="bg-white p-4 shadow rounded-lg text-center">
+                                <img :src="product.img" class="w-full rounded-lg">
+                                <h2 class="text-lg font-bold mt-2" x-text="product.name"></h2>
+                                <span class="block mt-2 font-bold" x-text="product.price"></span>
+                                <button class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Comprar</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-2">
+                <template x-for="(product, index) in products" :key="index">
+                    <button @click="active = index" class="w-4 h-4 rounded-full" :class="active === index ? 'bg-blue-500' : 'bg-gray-300'"></button>
+                </template>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Product Page -->
+    <section id="product" class="p-10 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+            <img src="https://via.placeholder.com/400" class="w-full rounded">
+            <h2 class="text-2xl font-bold mt-4">Produto 1</h2>
+            <p class="mt-2 text-gray-700">Detalhes do produto.</p>
+            <span class="block mt-4 font-bold">R$ 99,90</span>
+            <button class="bg-green-500 text-white px-6 py-2 rounded mt-4">Adicionar ao Carrinho</button>
+        </div>
+    </section>
+    
+    <!-- Cart -->
+    <section id="cart" class="p-10 hidden">
+        <h2 class="text-xl font-bold">Carrinho de Compras</h2>
+        <p class="text-gray-700">Seu carrinho está vazio.</p>
+    </section>
+    
+    <!-- My Account -->
+    <section id="account" class="p-10 hidden">
+        <h2 class="text-xl font-bold">Minha Conta</h2>
+        <p class="text-gray-700">Gerencie seus pedidos e informações pessoais.</p>
+    </section>
+    
+    <!-- Checkout -->
+    <section id="checkout" class="p-10 hidden">
+        <h2 class="text-xl font-bold">Finalizar Compra</h2>
+        <p class="text-gray-700">Preencha seus dados para concluir a compra.</p>
+    </section>
+</body>
+</html>

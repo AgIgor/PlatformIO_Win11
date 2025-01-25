@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração ESP32</title>
+    <script>
+        function loadConfig() {
+            fetch('/config')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("ssid").value = data.ssid;
+                document.getElementById("password").value = data.password;
+                document.getElementById("mqtt_server").value = data.mqtt_server;
+                document.getElementById("mqtt_port").value = data.mqtt_port;
+                document.getElementById("mqtt_topic").value = data.mqtt_topic;
+            });
+        }
+
+        function saveConfig() {
+            let formData = new FormData(document.getElementById("configForm"));
+            fetch('/save', { method: 'POST', body: formData })
+            .then(response => response.text())
+            .then(alert);
+        }
+    </script>
+</head>
+<body onload="loadConfig()">
+    <h1>Configuração ESP32</h1>
+    <form id="configForm">
+        SSID: <input type="text" id="ssid" name="ssid"><br>
+        Senha: <input type="text" id="password" name="password"><br>
+        Broker MQTT: <input type="text" id="mqtt_server" name="mqtt_server"><br>
+        Porta: <input type="number" id="mqtt_port" name="mqtt_port"><br>
+        Tópico: <input type="text" id="mqtt_topic" name="mqtt_topic"><br>
+        <button type="button" onclick="saveConfig()">Salvar</button>
+    </form>
+</body>
+</html>
